@@ -72,6 +72,10 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexVendorThumbnailMode            = 0x7F000001,
 #define EXYNOS_INDEX_CONFIG_VIDEO_INTRAPERIOD "OMX.SEC.index.VideoIntraPeriod"
     OMX_IndexConfigVideoIntraPeriod         = 0x7F000002,
+#ifdef USE_S3D_SUPPORT
+#define EXYNOS_INDEX_PARAM_GET_S3D "OMX.SEC.index.S3DMode"
+    OMX_IndexVendorS3DMode                  = 0x7F000003,
+#endif
 
     /* for Android Native Window */
 #define EXYNOS_INDEX_PARAM_ENABLE_ANB "OMX.google.android.index.enableAndroidNativeBuffers"
@@ -159,6 +163,19 @@ typedef struct _EXYNOS_OMX_VIDEO_PROFILELEVEL
     OMX_S32  profile;
     OMX_S32  level;
 } EXYNOS_OMX_VIDEO_PROFILELEVEL;
+
+#ifdef USE_S3D_SUPPORT
+typedef enum _EXYNOS_OMX_FPARGMT_TYPE
+{
+    OMX_SEC_FPARGMT_CHECKERBRD_INTERL = 0x00,
+    OMX_SEC_FPARGMT_COLUMN_INTERL     = 0x01,
+    OMX_SEC_FPARGMT_ROW_INTERL        = 0x02,
+    OMX_SEC_FPARGMT_SIDE_BY_SIDE      = 0x03,
+    OMX_SEC_FPARGMT_TOP_BOTTOM        = 0x04,
+    OMX_SEC_FPARGMT_TEMPORAL_INTERL   = 0x05,
+    OMX_SEC_FPARGMT_NONE              = 0x0A
+} EXYNOS_OMX_FPARGMT_TYPE;
+#endif
 
 #ifdef USE_KHRONOS_OMX_HEADER
 #define OMX_VIDEO_CodingVPX     0x09    /**< Google VPX, formerly known as On2 VP8 */

@@ -40,6 +40,9 @@ typedef struct _EXYNOS_MFC_H264DEC_HANDLE
     OMX_BOOL                   bConfiguredMFCSrc;
     OMX_BOOL                   bConfiguredMFCDst;
     OMX_U32                    maxDPBNum;
+#ifdef USE_S3D_SUPPORT
+    EXYNOS_OMX_FPARGMT_TYPE    S3DFPArgmtType;
+#endif
 
     ExynosVideoColorFormatType MFCOutputColorType;
     ExynosVideoDecOps         *pDecOps;

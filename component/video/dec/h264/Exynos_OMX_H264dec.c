@@ -288,6 +288,9 @@ OMX_ERRORTYPE H264CodecOpen(EXYNOS_H264DEC_HANDLE *pH264Dec)
     /* check mandatory functions for decoder ops */
     if ((pDecOps->Init == NULL) || (pDecOps->Finalize == NULL) ||
         (pDecOps->Get_ActualBufferCount == NULL) || (pDecOps->Set_FrameTag == NULL) ||
+#ifdef USE_S3D_SUPPORT
+        (pDecOps->Enable_SEIParsing == NULL) || (pDecOps->Get_FramePackingInfo == NULL) ||
+#endif
         (pDecOps->Get_FrameTag == NULL)) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Mandatory functions must be supplied");
         ret = OMX_ErrorInsufficientResources;
@@ -312,6 +315,15 @@ OMX_ERRORTYPE H264CodecOpen(EXYNOS_H264DEC_HANDLE *pH264Dec)
         ret = OMX_ErrorInsufficientResources;
         goto EXIT;
     }
+
+#ifdef USE_S3D_SUPPORT
+    /* S3D: Enable SEI parsing to check Frame Packing */
+    if (pDecOps->Enable_SEIParsing(pH264Dec->hMFCH264Handle.hMFCHandle) != VIDEO_ERROR_NONE) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Enable SEI Parsing");
+        ret = OMX_ErrorInsufficientResources;
+        goto EXIT;
+    }
+#endif
 
     ret = OMX_ErrorNone;
 
@@ -582,6 +594,51 @@ EXIT:
 
     return ret;
 }
+
+#ifdef USE_S3D_SUPPORT
+OMX_BOOL H264CodecCheckFramePacking(OMX_COMPONENTTYPE *pOMXComponent)
+{
+    EXYNOS_OMX_BASECOMPONENT      *pExynosComponent  = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+    EXYNOS_H264DEC_HANDLE         *pH264Dec          = (EXYNOS_H264DEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
+    ExynosVideoDecOps             *pDecOps           = pH264Dec->hMFCH264Handle.pDecOps;
+    ExynosVideoFramePacking        framePacking;
+    void                          *hMFCHandle        = pH264Dec->hMFCH264Handle.hMFCHandle;
+    OMX_BOOL                       ret               = OMX_FALSE;
+
+    /* Get Frame packing information*/
+    if (pDecOps->Get_FramePackingInfo(pH264Dec->hMFCH264Handle.hMFCHandle, &framePacking) != VIDEO_ERROR_NONE) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Get Frame Packing Information");
+        ret = OMX_FALSE;
+        goto EXIT;
+    }
+
+    if (framePacking.available) {
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "arrangement ID: 0x%08x", framePacking.arrangement_id);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "arrangement_type: %d", framePacking.arrangement_type);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "content_interpretation_type: %d", framePacking.content_interpretation_type);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "current_frame_is_frame0_flag: %d", framePacking.current_frame_is_frame0_flag);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "spatial_flipping_flag: %d", framePacking.spatial_flipping_flag);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "fr0X:%d fr0Y:%d fr0X:%d fr0Y:%d", framePacking.frame0_grid_pos_x,
+            framePacking.frame0_grid_pos_y, framePacking.frame1_grid_pos_x, framePacking.frame1_grid_pos_y);
+
+        pH264Dec->hMFCH264Handle.S3DFPArgmtType = (EXYNOS_OMX_FPARGMT_TYPE) framePacking.arrangement_type;
+        /** Send Port Settings changed call back - output color format change */
+       (*(pExynosComponent->pCallbacks->EventHandler))
+              (pOMXComponent,
+               pExynosComponent->callbackData,
+               OMX_EventPortSettingsChanged, /* The command was completed */
+               OMX_DirOutput, /* This is the port index */
+               0,
+               NULL);
+
+        Exynos_OSAL_SleepMillisec(0);
+        ret = OMX_TRUE;
+    }
+
+EXIT:
+    return ret;
+}
+#endif
 
 OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA *pSrcInputData)
 {
@@ -1296,6 +1353,18 @@ OMX_ERRORTYPE Exynos_H264Dec_GetConfig(
         pDstRectType->nWidth = pSrcRectType->nWidth;
     }
         break;
+#ifdef USE_S3D_SUPPORT
+    case OMX_IndexVendorS3DMode:
+    {
+        EXYNOS_H264DEC_HANDLE  *pH264Dec = NULL;
+        OMX_U32                *pS3DMode = NULL;
+        pH264Dec = (EXYNOS_H264DEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
+
+        pS3DMode = (OMX_U32 *)pComponentConfigStructure;
+        *pS3DMode = (OMX_U32) pH264Dec->hMFCH264Handle.S3DFPArgmtType;
+    }
+        break;
+#endif
     default:
         ret = Exynos_OMX_VideoDecodeGetConfig(hComponent, nIndex, pComponentConfigStructure);
         break;
@@ -1391,7 +1460,14 @@ OMX_ERRORTYPE Exynos_H264Dec_GetExtensionIndex(
         EXYNOS_H264DEC_HANDLE *pH264Dec = (EXYNOS_H264DEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
         *pIndexType = OMX_IndexVendorThumbnailMode;
         ret = OMX_ErrorNone;
-    } else {
+    }
+#ifdef USE_S3D_SUPPORT
+    else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_GET_S3D) == 0) {
+        *pIndexType = OMX_IndexVendorS3DMode;
+        ret = OMX_ErrorNone;
+    }
+#endif
+    else {
         ret = Exynos_OMX_VideoDecodeGetExtensionIndex(hComponent, cParameterName, pIndexType);
     }
 
@@ -1868,6 +1944,15 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
         break;
     }
 
+#ifdef USE_S3D_SUPPORT
+    /* Check Whether frame packing information is available */
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY &&
+        pVideoDec->bThumbnailMode == OMX_FALSE &&
+        pH264Dec->hMFCH264Handle.S3DFPArgmtType == OMX_SEC_FPARGMT_NONE) {
+        H264CodecCheckFramePacking(pOMXComponent);
+    }
+#endif
+
     indexTimestamp = pDecOps->Get_FrameTag(hMFCHandle);
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "out indexTimestamp: %d", indexTimestamp);
     if ((indexTimestamp < 0) || (indexTimestamp >= MAX_TIMESTAMP)) {
@@ -2125,6 +2210,9 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(OMX_HANDLETYPE hComponent
         Exynos_OSAL_Strcpy(pExynosComponent->componentName, EXYNOS_OMX_COMPONENT_H264_DEC);
 
     pVideoDec->bDRMPlayerMode = bDRMPlayerMode;
+#ifdef USE_S3D_SUPPORT
+    pH264Dec->hMFCH264Handle.S3DFPArgmtType = OMX_SEC_FPARGMT_NONE;
+#endif
 
     /* Set componentVersion */
     pExynosComponent->componentVersion.s.nVersionMajor = VERSIONMAJOR_NUMBER;
