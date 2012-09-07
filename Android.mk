@@ -44,3 +44,7 @@ ifeq ($(BOARD_USE_ALP_AUDIO), true)
 include $(EXYNOS_OMX_COMPONENT)/audio/dec/Android.mk
 include $(EXYNOS_OMX_COMPONENT)/audio/dec/mp3/Android.mk
 endif
+
+ifeq ($(BOARD_USE_WMA_CODEC), true)
+include $(EXYNOS_OMX_COMPONENT)/audio/dec/wma/Android.mk
+endif
