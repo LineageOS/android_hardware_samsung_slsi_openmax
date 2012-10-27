@@ -13,10 +13,6 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/omx
 
 LOCAL_CFLAGS :=
 
-ifeq ($(BOARD_NONBLOCK_MODE_PROCESS), true)
-LOCAL_CFLAGS += -DNONBLOCK_MODE_PROCESS
-endif
-
 ifeq ($(BOARD_USE_ANB), true)
 LOCAL_CFLAGS += -DUSE_ANB
 endif
@@ -28,18 +24,15 @@ LOCAL_STATIC_LIBRARIES := libExynosOMX_Vdec libExynosOMX_OSAL libExynosOMX_Basec
 LOCAL_SHARED_LIBRARIES := libc libdl libcutils libutils libui \
 	libExynosOMX_Resourcemanager libcsc libexynosv4l2 libion_exynos libexynosgscaler
 
-ifeq ($(BOARD_USES_MFC_FPS),true)
-LOCAL_CFLAGS += -DCONFIG_MFC_FPS
-endif
-
 LOCAL_C_INCLUDES := $(EXYNOS_OMX_INC)/khronos \
 	$(EXYNOS_OMX_INC)/exynos \
 	$(EXYNOS_OMX_TOP)/osal \
 	$(EXYNOS_OMX_TOP)/core \
 	$(EXYNOS_OMX_COMPONENT)/common \
 	$(EXYNOS_OMX_COMPONENT)/video/dec \
-	hardware/samsung_slsi/exynos5/include \
-	hardware/samsung_slsi/exynos5/libcsc \
-	hardware/samsung_slsi/exynos5/exynos_omx/codecs/exynos_codecs/video/exynos5/mfc_v4l2/include
+	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
+	$(TOP)/hardware/samsung_slsi/exynos/include \
+	$(TOP)/hardware/samsung_slsi/exynos/libcsc \
+	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include
 
 include $(BUILD_SHARED_LIBRARY)

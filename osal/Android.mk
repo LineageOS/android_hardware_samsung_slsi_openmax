@@ -21,11 +21,11 @@ LOCAL_MODULE := libExynosOMX_OSAL
 
 LOCAL_CFLAGS :=
 
-ifeq ($(BOARD_USE_S3D_SUPPORT), true)
-LOCAL_CFLAGS += -DS3D_SUPPORT
+ifeq ($(BOARD_USE_ANB_OUTBUF_SHARE), true)
+LOCAL_CFLAGS += -DUSE_ANB_OUTBUF_SHARE
 endif
 
-LOCAL_STATIC_LIBRARIES := liblog libcutils
+LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
 LOCAL_C_INCLUDES := $(EXYNOS_OMX_INC)/khronos \
 	$(EXYNOS_OMX_INC)/exynos \
@@ -33,11 +33,11 @@ LOCAL_C_INCLUDES := $(EXYNOS_OMX_INC)/khronos \
 	$(EXYNOS_OMX_COMPONENT)/common \
 	$(EXYNOS_OMX_COMPONENT)/video/dec \
 	$(EXYNOS_OMX_COMPONENT)/video/enc \
-	$(EXYNOS_OMX_TOP)/video/dec \
-	$(EXYNOS_OMX_TOP)/video/enc \
-	hardware/samsung_slsi/exynos5/include \
+	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
+	$(TOP)/hardware/samsung_slsi/exynos/include \
 	frameworks/native/include/media/hardware \
 	frameworks/native/include/media/openmax \
-	hardware/samsung_slsi/exynos5/exynos_omx/codecs/exynos_codecs/video/exynos5/mfc_v4l2/include
+	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include \
+	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/include
 
 include $(BUILD_STATIC_LIBRARY)

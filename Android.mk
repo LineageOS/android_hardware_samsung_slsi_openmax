@@ -1,14 +1,20 @@
 LOCAL_PATH := $(call my-dir)
-BOARD_USE_ANB := true
 
 include $(CLEAR_VARS)
 
 include device/samsung/$(TARGET_DEVICE)/BoardConfig.mk
 
+BOARD_USE_ANB := true
+
 EXYNOS_OMX_TOP := $(LOCAL_PATH)
 
-EXYNOS_OMX_INC := $(EXYNOS_OMX_TOP)/include/
+EXYNOS_OMX_INC := $(EXYNOS_OMX_TOP)/include
 EXYNOS_OMX_COMPONENT := $(EXYNOS_OMX_TOP)/component
+
+EXYNOS_VIDEO_CODEC := \
+	hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/libcodec/video
+EXYNOS_AUDIO_CODEC := \
+	hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/libcodec/audio
 
 include $(EXYNOS_OMX_TOP)/osal/Android.mk
 include $(EXYNOS_OMX_TOP)/core/Android.mk
