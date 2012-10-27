@@ -6,6 +6,13 @@ include device/samsung/$(TARGET_DEVICE)/BoardConfig.mk
 
 BOARD_USE_ANB := true
 
+# Set to false to use Android's OMX header files
+BOARD_USE_KHRONOS_OMX_HEADER := false
+
+ifeq ($(BOARD_USE_KHRONOS_OMX_HEADER), false)
+ANDROID_MEDIA_INC := $(TOP)/frameworks/native/include/media
+endif
+
 EXYNOS_OMX_TOP := $(LOCAL_PATH)
 
 EXYNOS_OMX_INC := $(EXYNOS_OMX_TOP)/include

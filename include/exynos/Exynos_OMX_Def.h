@@ -127,8 +127,10 @@ typedef enum _EXYNOS_OMX_COLOR_FORMATTYPE {
 
     /* to copy a encoded data for drm component using gsc or fimc */
     OMX_SEC_COLOR_FormatEncodedData                 = OMX_COLOR_FormatYCbYCr,
+#ifdef USE_KHRONOS_OMX_HEADER
     /* for Android SurfaceMediaSource*/
     OMX_COLOR_FormatAndroidOpaque                   = 0x7F000789
+#endif
 }EXYNOS_OMX_COLOR_FORMATTYPE;
 
 typedef enum _EXYNOS_OMX_SUPPORTFORMAT_TYPE
@@ -158,7 +160,9 @@ typedef struct _EXYNOS_OMX_VIDEO_PROFILELEVEL
     OMX_S32  level;
 } EXYNOS_OMX_VIDEO_PROFILELEVEL;
 
+#ifdef USE_KHRONOS_OMX_HEADER
 #define OMX_VIDEO_CodingVPX     0x09    /**< Google VPX, formerly known as On2 VP8 */
+#endif
 
 #ifndef __OMX_EXPORTS
 #define __OMX_EXPORTS

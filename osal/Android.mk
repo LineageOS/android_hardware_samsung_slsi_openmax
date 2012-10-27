@@ -27,7 +27,7 @@ endif
 
 LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
-LOCAL_C_INCLUDES := $(EXYNOS_OMX_INC)/khronos \
+LOCAL_C_INCLUDES := \
 	$(EXYNOS_OMX_INC)/exynos \
 	$(EXYNOS_OMX_TOP)/osal \
 	$(EXYNOS_OMX_COMPONENT)/common \
@@ -35,9 +35,15 @@ LOCAL_C_INCLUDES := $(EXYNOS_OMX_INC)/khronos \
 	$(EXYNOS_OMX_COMPONENT)/video/enc \
 	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
 	$(TOP)/hardware/samsung_slsi/exynos/include \
-	frameworks/native/include/media/hardware \
-	frameworks/native/include/media/openmax \
 	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include \
 	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/include
+
+ifeq ($(BOARD_USE_KHRONOS_OMX_HEADER), true)
+LOCAL_CFLAGS += -DUSE_KHRONOS_OMX_HEADER
+LOCAL_C_INCLUDES += $(EXYNOS_OMX_INC)/khronos
+else
+LOCAL_C_INCLUDES += $(ANDROID_MEDIA_INC)/hardware
+LOCAL_C_INCLUDES += $(ANDROID_MEDIA_INC)/openmax
+endif
 
 include $(BUILD_STATIC_LIBRARY)
