@@ -3,6 +3,8 @@ BOARD_USE_ANB := true
 
 include $(CLEAR_VARS)
 
+include device/samsung/$(TARGET_DEVICE)/BoardConfig.mk
+
 EXYNOS_OMX_TOP := $(LOCAL_PATH)
 
 EXYNOS_OMX_INC := $(EXYNOS_OMX_TOP)/include/
