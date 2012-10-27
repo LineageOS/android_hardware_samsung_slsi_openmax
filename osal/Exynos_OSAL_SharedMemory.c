@@ -72,9 +72,9 @@ OMX_HANDLETYPE Exynos_OSAL_SharedMemory_Open()
     if (pHandle == NULL)
         goto EXIT;
 
-    IONClient = (OMX_HANDLETYPE)ion_client_create();
-    if (IONClient <= 0) {
-        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "ion_client_create Error: %d", IONClient);
+    IONClient = ion_client_create();
+    if (IONClient < 0) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "ion_client_create is failed: %d", IONClient);
         Exynos_OSAL_Free((void *)pHandle);
         pHandle = NULL;
         goto EXIT;
