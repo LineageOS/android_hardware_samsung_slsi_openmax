@@ -17,7 +17,6 @@ LOCAL_C_INCLUDES := \
 	$(EXYNOS_OMX_COMPONENT)/video/dec \
 	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
 	$(TOP)/hardware/samsung_slsi/exynos/include \
-	$(TOP)/hardware/samsung_slsi/exynos/libcsc \
 	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include
 
 LOCAL_STATIC_LIBRARIES := libExynosVideoApi
