@@ -196,7 +196,7 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
 
     if ((pVideoDec->bDRMPlayerMode == OMX_TRUE) && (nPortIndex == INPUT_PORT_INDEX)) {
         mem_type = SECURE_MEMORY;
-    } else if (pExynosPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
         mem_type = NORMAL_MEMORY;
     } else {
         mem_type = SYSTEM_MEMORY;
@@ -459,7 +459,7 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
     }
 
     if (pExynosComponent->bMultiThreadProcess == OMX_TRUE) {
-        if (pExynosPort->bufferProcessType == BUFFER_SHARE) {
+        if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
             if (pExynosPort->processData.bufferHeader != NULL) {
                 if (portIndex == INPUT_PORT_INDEX) {
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
@@ -539,7 +539,7 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 n
     pExynosPort = &pExynosComponent->pExynosPort[nPortIndex];
     Exynos_OMX_GetFlushBuffer(pExynosPort, flushPortBuffer);
 
-    if ((pExynosComponent->pExynosPort[nPortIndex].bufferProcessType & BUFFER_COPY) == BUFFER_COPY)
+    if (pExynosComponent->pExynosPort[nPortIndex].bufferProcessType & BUFFER_COPY)
         Exynos_OSAL_SemaphorePost(pExynosPort->codecSemID);
     Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
 
@@ -548,7 +548,7 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 n
     pVideoDec->exynos_codec_stop(pOMXComponent, nPortIndex);
     Exynos_OSAL_MutexLock(flushPortBuffer[1]->bufferMutex);
     ret = Exynos_OMX_FlushPort(pOMXComponent, nPortIndex);
-    if ((pExynosComponent->pExynosPort[nPortIndex].bufferProcessType & BUFFER_COPY) == BUFFER_COPY)
+    if (pExynosComponent->pExynosPort[nPortIndex].bufferProcessType & BUFFER_COPY)
         pVideoDec->exynos_codec_enqueueAllBuffer(pOMXComponent, nPortIndex);
     Exynos_ResetCodecData(&pExynosPort->processData);
 
@@ -598,9 +598,9 @@ OMX_ERRORTYPE Exynos_InputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent)
 
     FunctionIn();
 
-    if ((exynosOMXInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (exynosOMXInputPort->bufferProcessType & BUFFER_COPY) {
         dataBuffer = &(exynosOMXInputPort->way.port2WayDataBuffer.inputDataBuffer);
-    } else if (exynosOMXInputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (exynosOMXInputPort->bufferProcessType & BUFFER_SHARE) {
         dataBuffer = &(exynosOMXInputPort->way.port2WayDataBuffer.outputDataBuffer);
     }
 
@@ -838,9 +838,9 @@ OMX_ERRORTYPE Exynos_OutputBufferGetQueue(EXYNOS_OMX_BASECOMPONENT *pExynosCompo
 
     FunctionIn();
 
-    if ((pExynosPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosPort->bufferProcessType & BUFFER_COPY) {
         outputUseBuffer = &(pExynosPort->way.port2WayDataBuffer.outputDataBuffer);
-    } else if (pExynosPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
         outputUseBuffer = &(pExynosPort->way.port2WayDataBuffer.inputDataBuffer);
     }
 
@@ -871,9 +871,9 @@ OMX_ERRORTYPE Exynos_OutputBufferGetQueue(EXYNOS_OMX_BASECOMPONENT *pExynosCompo
             /* dataBuffer->nFlags             = dataBuffer->bufferHeader->nFlags; */
             /* dataBuffer->nTimeStamp         = dataBuffer->bufferHeader->nTimeStamp; */
 /*
-            if (pExynosPort->bufferProcessType == BUFFER_SHARE)
+            if (pExynosPort->bufferProcessType & BUFFER_SHARE)
                 outputUseBuffer->pPrivate      = outputUseBuffer->bufferHeader->pOutputPortPrivate;
-            else if ((pExynosPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+            else if (pExynosPort->bufferProcessType & BUFFER_COPY) {
                 pExynosPort->processData.dataBuffer = outputUseBuffer->bufferHeader->pBuffer;
                 pExynosPort->processData.allocSize  = outputUseBuffer->bufferHeader->nAllocLen;
             }
@@ -1312,7 +1312,7 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetParameter(
                 break;
             }
 
-            if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+            if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
                 pExynosOutputPort->portDefinition.nBufferSize =
                     calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight) +
                     calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight >> 1);

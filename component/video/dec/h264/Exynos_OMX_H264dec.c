@@ -683,11 +683,11 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
     bufferConf.eCompressionFormat = VIDEO_CODING_AVC;
     pInbufOps->Set_Shareable(hMFCHandle);
-    if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+    if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
         bufferConf.nSizeImage = pExynosInputPort->portDefinition.format.video.nFrameWidth
                                 * pExynosInputPort->portDefinition.format.video.nFrameHeight * 3 / 2;
         inputBufferNumber = MAX_VIDEO_INPUTBUFFER_NUM;
-    } else if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    } else if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
         bufferConf.nSizeImage = DEFAULT_MFC_INPUT_BUFFER_SIZE;
         inputBufferNumber = MFC_INPUT_BUFFER_NUM_MAX;
     }
@@ -712,7 +712,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
         goto EXIT;
     }
 
-    if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
         /* Register input buffer */
         for (i = 0; i < MFC_INPUT_BUFFER_NUM_MAX; i++) {
             ExynosVideoPlane plane;
@@ -725,7 +725,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
                 goto EXIT;
             }
         }
-    } else if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
         /* Register input buffer */
         for (i = 0; i < pExynosInputPort->portDefinition.nBufferCountActual; i++) {
             ExynosVideoPlane plane;
@@ -792,7 +792,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
     pExynosOutputPort->cropRectangle.nWidth = pH264Dec->hMFCH264Handle.codecOutbufConf.cropRect.nWidth;
     pExynosOutputPort->cropRectangle.nHeight = pH264Dec->hMFCH264Handle.codecOutbufConf.cropRect.nHeight;
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         if ((pExynosInputPort->portDefinition.format.video.nFrameWidth != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth) ||
             (pExynosInputPort->portDefinition.format.video.nFrameHeight != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight)) {
             pExynosInputPort->portDefinition.format.video.nFrameWidth = pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth;
@@ -812,7 +812,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
                  0,
                  NULL);
         }
-    } else if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         if ((pExynosInputPort->portDefinition.format.video.nFrameWidth != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth) ||
             (pExynosInputPort->portDefinition.format.video.nFrameHeight != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight) ||
             (pExynosOutputPort->portDefinition.nBufferCountActual != pH264Dec->hMFCH264Handle.maxDPBNum)) {
@@ -887,7 +887,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     /* get dpb count */
     nOutbufs = pH264Dec->hMFCH264Handle.maxDPBNum;
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         /* should be done before prepare output buffer */
         if (pOutbufOps->Enable_Cacheable(hMFCHandle) != VIDEO_ERROR_NONE) {
             ret = OMX_ErrorInsufficientResources;
@@ -912,7 +912,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     nAllocLen[1] = calc_plane(pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth,
                         pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight >> 1);
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         MEMORY_TYPE memoryType;
         if (pVideoDec->bDRMPlayerMode == OMX_TRUE)
             memoryType = SECURE_MEMORY;
@@ -950,7 +950,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
             pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)pVideoDec->pMFCDecOutputBuffer[i]->pVirAddr,
                             (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
-    } else if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         /* Register output buffer */
         /*************/
         /*    TBD    */
@@ -988,7 +988,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
         goto EXIT;
     }
 
-    if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         H264CodecStop(pOMXComponent, OUTPUT_PORT_INDEX);
     }
     pH264Dec->hMFCH264Handle.bConfiguredMFCDst = OMX_TRUE;
@@ -1540,7 +1540,7 @@ OMX_ERRORTYPE Exynos_H264Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pInbufOps  = pH264Dec->hMFCH264Handle.pInbufOps;
     pOutbufOps = pH264Dec->hMFCH264Handle.pOutbufOps;
 
-    if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
         Exynos_OSAL_SemaphoreCreate(&pExynosInputPort->codecSemID);
         Exynos_OSAL_QueueCreate(&pExynosInputPort->codecBufferQ, MAX_QUEUE_ELEMENTS);
 
@@ -1565,17 +1565,17 @@ OMX_ERRORTYPE Exynos_H264Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
 
             Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, pVideoDec->pMFCDecInputBuffer[i]);
         }
-    } else if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
         /*************/
         /*    TBD    */
         /*************/
         /* Does not require any actions. */
     }
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         Exynos_OSAL_SemaphoreCreate(&pExynosOutputPort->codecSemID);
         Exynos_OSAL_QueueCreate(&pExynosOutputPort->codecBufferQ, MAX_QUEUE_ELEMENTS);
-    } else if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         /*************/
         /*    TBD    */
         /*************/
@@ -1648,7 +1648,7 @@ OMX_ERRORTYPE Exynos_H264Dec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
     pH264Dec->hSourceStartEvent = NULL;
     pH264Dec->bSourceStart = OMX_FALSE;
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         for (i = 0; i < MFC_OUTPUT_BUFFER_NUM_MAX; i++) {
             if (pVideoDec->pMFCDecOutputBuffer[i] != NULL) {
                 for (plane = 0; plane < MFC_OUTPUT_BUFFER_PLANE; plane++) {
@@ -1663,14 +1663,14 @@ OMX_ERRORTYPE Exynos_H264Dec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
 
         Exynos_OSAL_QueueTerminate(&pExynosOutputPort->codecBufferQ);
         Exynos_OSAL_SemaphoreTerminate(pExynosOutputPort->codecSemID);
-    } else if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         /*************/
         /*    TBD    */
         /*************/
         /* Does not require any actions. */
     }
 
-    if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
         for (i = 0; i < MFC_INPUT_BUFFER_NUM_MAX; i++) {
             if (pVideoDec->pMFCDecInputBuffer[i] != NULL) {
                 for (plane = 0; plane < MFC_INPUT_BUFFER_PLANE; plane++) {
@@ -1684,7 +1684,7 @@ OMX_ERRORTYPE Exynos_H264Dec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
 
         Exynos_OSAL_QueueTerminate(&pExynosInputPort->codecBufferQ);
         Exynos_OSAL_SemaphoreTerminate(pExynosInputPort->codecSemID);
-    } else if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+    } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
         /*************/
         /*    TBD    */
         /*************/
@@ -1796,7 +1796,7 @@ OMX_ERRORTYPE Exynos_H264Dec_SrcOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
         pSrcOutputData->buffer.singlePlaneBuffer.fd = pVideoBuffer->planes[0].fd;
         pSrcOutputData->allocSize  = pVideoBuffer->planes[0].allocSize;
 
-        if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+        if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
             int i = 0;
             while (pSrcOutputData->buffer.singlePlaneBuffer.dataBuffer != pVideoDec->pMFCDecInputBuffer[i]->pVirAddr[0]) {
                 if (i >= MFC_INPUT_BUFFER_NUM_MAX) {
@@ -2045,7 +2045,7 @@ OMX_ERRORTYPE Exynos_H264Dec_srcOutputBufferProcess(OMX_COMPONENTTYPE *pOMXCompo
         goto EXIT;
     }
 
-    if ((pExynosInputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
         if (OMX_FALSE == Exynos_Check_BufferProcess_State(pExynosComponent, INPUT_PORT_INDEX)) {
             ret = OMX_ErrorNone;
             goto EXIT;
@@ -2087,7 +2087,7 @@ OMX_ERRORTYPE Exynos_H264Dec_dstInputBufferProcess(OMX_COMPONENTTYPE *pOMXCompon
         ret = OMX_ErrorNone;
         goto EXIT;
     }
-    if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         if ((pH264Dec->bDestinationStart == OMX_FALSE) &&
            (!CHECK_PORT_BEING_FLUSHED(pExynosOutputPort))) {
             Exynos_OSAL_SignalWait(pH264Dec->hDestinationStartEvent, DEF_MAX_WAIT_TIME);
@@ -2127,7 +2127,7 @@ OMX_ERRORTYPE Exynos_H264Dec_dstOutputBufferProcess(OMX_COMPONENTTYPE *pOMXCompo
         goto EXIT;
     }
 
-    if ((pExynosOutputPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         if ((pH264Dec->bDestinationStart == OMX_FALSE) &&
            (!CHECK_PORT_BEING_FLUSHED(pExynosOutputPort))) {
             Exynos_OSAL_SignalWait(pH264Dec->hDestinationStartEvent, DEF_MAX_WAIT_TIME);
