@@ -650,6 +650,11 @@ OMX_ERRORTYPE Mpeg4CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U
 
     FunctionIn();
 
+    if ((nPortIndex != INPUT_PORT_INDEX) && (nPortIndex != OUTPUT_PORT_INDEX)) {
+        ret = OMX_ErrorBadPortIndex;
+        goto EXIT;
+    }
+
     if ((nPortIndex == INPUT_PORT_INDEX) &&
         (pMpeg4Dec->bSourceStart == OMX_TRUE)) {
         Exynos_CodecBufferReset(pExynosComponent, INPUT_PORT_INDEX);
@@ -676,9 +681,6 @@ OMX_ERRORTYPE Mpeg4CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U
             Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR)pBuffer);
         }
         pOutbufOps->Clear_Queue(hMFCHandle);
-    } else {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
     }
 
 EXIT:

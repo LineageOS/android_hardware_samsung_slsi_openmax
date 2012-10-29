@@ -558,6 +558,11 @@ OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U3
 
     FunctionIn();
 
+    if ((nPortIndex != INPUT_PORT_INDEX) && (nPortIndex != OUTPUT_PORT_INDEX)) {
+        ret = OMX_ErrorBadPortIndex;
+        goto EXIT;
+    }
+
     if ((nPortIndex == INPUT_PORT_INDEX) &&
         (pH264Dec->bSourceStart == OMX_TRUE)) {
         Exynos_CodecBufferReset(pExynosComponent, INPUT_PORT_INDEX);
@@ -584,9 +589,6 @@ OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U3
             Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR)pBuffer);
         }
         pOutbufOps->Clear_Queue(hMFCHandle);
-    } else {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
     }
 
 EXIT:
