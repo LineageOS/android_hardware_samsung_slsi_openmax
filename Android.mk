@@ -31,6 +31,8 @@ include $(EXYNOS_OMX_COMPONENT)/video/dec/Android.mk
 include $(EXYNOS_OMX_COMPONENT)/video/dec/h264/Android.mk
 include $(EXYNOS_OMX_COMPONENT)/video/dec/mpeg4/Android.mk
 include $(EXYNOS_OMX_COMPONENT)/video/dec/vp8/Android.mk
+include $(EXYNOS_OMX_COMPONENT)/video/dec/mpeg2/Android.mk
+include $(EXYNOS_OMX_COMPONENT)/video/dec/vc1/Android.mk
 
 include $(EXYNOS_OMX_COMPONENT)/video/enc/Android.mk
 include $(EXYNOS_OMX_COMPONENT)/video/enc/h264/Android.mk
