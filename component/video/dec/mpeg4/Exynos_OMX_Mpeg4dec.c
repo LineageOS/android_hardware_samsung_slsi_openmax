@@ -1929,7 +1929,7 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
     EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     ExynosVideoDecOps       *pDecOps    = pMpeg4Dec->hMFCMpeg4Handle.pDecOps;
     ExynosVideoDecBufferOps *pOutbufOps = pMpeg4Dec->hMFCMpeg4Handle.pOutbufOps;
-    ExynosVideoBuffer       *pVideoBuffer;
+    ExynosVideoBuffer       *pVideoBuffer = NULL;
     ExynosVideoFrameStatusType displayStatus = VIDEO_FRAME_STATUS_UNKNOWN;
     ExynosVideoGeometry *bufferGeometry;
     DECODE_CODEC_EXTRA_BUFFERINFO *pBufferInfo = NULL;
@@ -1955,18 +1955,10 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
             (displayStatus == VIDEO_FRAME_STATUS_DISPLAY_ONLY) ||
             (displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL) ||
             (CHECK_PORT_BEING_FLUSHED(pExynosOutputPort))) {
-            if (pVideoBuffer != NULL) {
-                ret = OMX_ErrorNone;
-                break;
-            } else {
-                ret = OMX_ErrorUndefined;
-                break;
-            }
+            ret = OMX_ErrorNone;
+            break;
         }
     }
-
-    if (ret != OMX_ErrorNone)
-        goto EXIT;
 
     pMpeg4Dec->hMFCMpeg4Handle.outputIndexTimestamp++;
     pMpeg4Dec->hMFCMpeg4Handle.outputIndexTimestamp %= MAX_TIMESTAMP;

@@ -1521,7 +1521,7 @@ OMX_ERRORTYPE Exynos_VP8Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     ExynosVideoDecOps       *pDecOps    = pVp8Dec->hMFCVp8Handle.pDecOps;
     ExynosVideoDecBufferOps *pOutbufOps = pVp8Dec->hMFCVp8Handle.pOutbufOps;
-    ExynosVideoBuffer       *pVideoBuffer;
+    ExynosVideoBuffer       *pVideoBuffer = NULL;
     ExynosVideoFrameStatusType displayStatus = VIDEO_FRAME_STATUS_UNKNOWN;
     ExynosVideoGeometry *bufferGeometry;
     DECODE_CODEC_EXTRA_BUFFERINFO *pBufferInfo = NULL;
@@ -1547,18 +1547,10 @@ OMX_ERRORTYPE Exynos_VP8Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
             (displayStatus == VIDEO_FRAME_STATUS_DISPLAY_ONLY) ||
             (displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL) ||
             (CHECK_PORT_BEING_FLUSHED(pExynosOutputPort))) {
-            if (pVideoBuffer != NULL) {
-                ret = OMX_ErrorNone;
-                break;
-            } else {
-                ret = OMX_ErrorUndefined;
-                break;
-            }
+            ret = OMX_ErrorNone;
+            break;
         }
     }
-
-    if (ret != OMX_ErrorNone)
-        goto EXIT;
 
     pVp8Dec->hMFCVp8Handle.outputIndexTimestamp++;
     pVp8Dec->hMFCVp8Handle.outputIndexTimestamp %= MAX_TIMESTAMP;
