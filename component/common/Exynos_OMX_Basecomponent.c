@@ -308,6 +308,11 @@ OMX_ERRORTYPE Exynos_OMX_ComponentStateSet(OMX_COMPONENTTYPE *pOMXComponent, OMX
                 } else {
                     if (CHECK_PORT_ENABLED(pExynosPort)) {
                         Exynos_OSAL_SemaphoreWait(pExynosPort->unloadedResource);
+                        while (Exynos_OSAL_GetElemNum(&pExynosPort->bufferQ) > 0) {
+                            message = (EXYNOS_OMX_MESSAGE *)Exynos_OSAL_Dequeue(&pExynosPort->bufferQ);
+                            if (message != NULL)
+                                Exynos_OSAL_Free(message);
+                        }
                         pExynosPort->portDefinition.bPopulated = OMX_FALSE;
                     }
                 }
