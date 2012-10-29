@@ -224,7 +224,13 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
             OMX_U32 stride;
             int imageSize;
 
-            Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, planes);
+            ret = Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, planes);
+            if (ret != OMX_ErrorNone) {
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: Exynos_OSAL_LockANBHandle() failed", __FUNCTION__);
+                ret = OMX_FALSE;
+                goto EXIT;
+            }
+
             imageSize = nFrameWidth * nFrameHeight * 3; /* RGB888 */
 
 #ifdef USE_DMA_BUF
@@ -415,7 +421,9 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "exynos_checkInputFrame : OMX_TRUE");
 
             if (((srcInputData->allocSize) - (srcInputData->dataLen)) >= copySize) {
-                Exynos_CSC_InputData(pOMXComponent, srcInputData);
+                ret = Exynos_CSC_InputData(pOMXComponent, srcInputData);
+                if (ret == OMX_FALSE)
+                    goto EXIT;
 
                 inputUseBuffer->dataLen -= copySize;
                 inputUseBuffer->remainDataLen -= copySize;
