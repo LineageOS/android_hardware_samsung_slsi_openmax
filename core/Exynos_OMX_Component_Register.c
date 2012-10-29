@@ -42,7 +42,6 @@
 
 #undef  EXYNOS_LOG_TAG
 #define EXYNOS_LOG_TAG    "EXYNOS_COMP_REGS"
-#define EXYNOS_LOG_OFF
 #include "Exynos_OSAL_Log.h"
 
 OMX_ERRORTYPE Exynos_OMX_Component_Register(EXYNOS_OMX_COMPONENT_REGLIST **compList, OMX_U32 *compNum)
@@ -74,13 +73,12 @@ OMX_ERRORTYPE Exynos_OMX_Component_Register(EXYNOS_OMX_COMPONENT_REGLIST **compL
 
     while ((d = readdir(dir)) != NULL) {
         OMX_HANDLETYPE soHandle;
-        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s", d->d_name);
 
         if (Exynos_OSAL_Strncmp(d->d_name, "libOMX.Exynos.", Exynos_OSAL_Strlen("libOMX.Exynos.")) == 0) {
             Exynos_OSAL_Memset(libName, 0, MAX_OMX_COMPONENT_LIBNAME_SIZE);
             Exynos_OSAL_Strcpy(libName, EXYNOS_OMX_INSTALL_PATH);
             Exynos_OSAL_Strcat(libName, d->d_name);
-            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "Path & libName : %s", libName);
+            Exynos_OSAL_Log(EXYNOS_LOG_INFO, "Loading the library: %s", d->d_name);
             if ((soHandle = Exynos_OSAL_dlopen(libName, RTLD_NOW)) != NULL) {
                 Exynos_OSAL_dlerror();    /* clear error*/
                 if ((Exynos_OMX_COMPONENT_Library_Register = Exynos_OSAL_dlsym(soHandle, "Exynos_OMX_COMPONENT_Library_Register")) != NULL) {
