@@ -17,6 +17,10 @@ ifeq ($(BOARD_USE_ANB), true)
 LOCAL_CFLAGS += -DUSE_ANB
 endif
 
+ifeq ($(BOARD_USE_DMA_BUF), true)
+LOCAL_CFLAGS += -DUSE_DMA_BUF
+endif
+
 ifeq ($(BOARD_USE_S3D_SUPPORT), true)
 LOCAL_CFLAGS += -DUSE_S3D_SUPPORT
 endif

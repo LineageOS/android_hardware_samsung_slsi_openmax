@@ -25,6 +25,10 @@ ifeq ($(BOARD_USE_ANB_OUTBUF_SHARE), true)
 LOCAL_CFLAGS += -DUSE_ANB_OUTBUF_SHARE
 endif
 
+ifeq ($(BOARD_USE_DMA_BUF), true)
+LOCAL_CFLAGS += -DUSE_DMA_BUF
+endif
+
 LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
 LOCAL_C_INCLUDES := \

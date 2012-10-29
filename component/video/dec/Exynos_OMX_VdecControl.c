@@ -1522,9 +1522,11 @@ OMX_ERRORTYPE Exynos_Shared_ANBBufferToData(EXYNOS_OMX_DATABUFFER *pUseBuffer, E
     if (nPlane == TWO_PLANE) {
         /* Case of Shared Buffer, Only support two PlaneBuffer */
         pData->buffer.multiPlaneBuffer.dataBuffer[0] = planes[0].addr;
-        pData->buffer.multiPlaneBuffer.fd[0] = planes[0].fd;
         pData->buffer.multiPlaneBuffer.dataBuffer[1] = planes[1].addr;
+#ifdef USE_DMA_BUF
+        pData->buffer.multiPlaneBuffer.fd[0] = planes[0].fd;
         pData->buffer.multiPlaneBuffer.fd[1] = planes[1].fd;
+#endif
     } else {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Can not support plane");
         ret = OMX_ErrorNotImplemented;

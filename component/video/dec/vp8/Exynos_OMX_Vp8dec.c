@@ -225,7 +225,11 @@ OMX_ERRORTYPE VP8CodecOpen(EXYNOS_VP8DEC_HANDLE *pVp8Dec)
     }
 
     /* alloc context, open, querycap */
+#ifdef USE_DMA_BUF
     pVp8Dec->hMFCVp8Handle.hMFCHandle = pVp8Dec->hMFCVp8Handle.pDecOps->Init(V4L2_MEMORY_DMABUF);
+#else
+    pVp8Dec->hMFCVp8Handle.hMFCHandle = pVp8Dec->hMFCVp8Handle.pDecOps->Init(V4L2_MEMORY_USERPTR);
+#endif
     if (pVp8Dec->hMFCVp8Handle.hMFCHandle == NULL) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to allocate context buffer");
         ret = OMX_ErrorInsufficientResources;

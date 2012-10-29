@@ -17,6 +17,10 @@ ifeq ($(BOARD_USE_METADATABUFFERTYPE), true)
 LOCAL_CFLAGS += -DUSE_METADATABUFFERTYPE
 endif
 
+ifeq ($(BOARD_USE_DMA_BUF), true)
+LOCAL_CFLAGS += -DUSE_DMA_BUF
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Venc libExynosOMX_OSAL libExynosOMX_Basecomponent \

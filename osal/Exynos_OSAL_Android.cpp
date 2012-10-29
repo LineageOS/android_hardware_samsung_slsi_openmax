@@ -37,7 +37,9 @@
 #include <hardware/hardware.h>
 #include <media/hardware/OMXPluginBase.h>
 #include <media/hardware/MetadataBufferType.h>
+#ifdef USE_DMA_BUF
 #include <gralloc_priv.h>
+#endif
 
 #include "Exynos_OSAL_Semaphore.h"
 #include "Exynos_OMX_Baseport.h"
@@ -74,7 +76,9 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     OMX_ERRORTYPE ret = OMX_ErrorNone;
     GraphicBufferMapper &mapper = GraphicBufferMapper::get();
     buffer_handle_t bufferHandle = (buffer_handle_t) handle;
+#ifdef USE_DMA_BUF
     private_handle_t *priv_hnd = (private_handle_t *) bufferHandle;
+#endif
     Rect bounds(width, height);
     ExynosVideoPlane *vplanes = (ExynosVideoPlane *) planes;
     void *vaddr[MAX_BUFFER_PLANE];
@@ -100,14 +104,16 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
         goto EXIT;
     }
 
+#ifdef USE_DMA_BUF
     vplanes[0].fd = priv_hnd->fd;
     vplanes[0].offset = 0;
-    vplanes[0].addr = vaddr[0];
     vplanes[1].fd = priv_hnd->fd1;
     vplanes[1].offset = 0;
-    vplanes[1].addr = vaddr[1];
     vplanes[2].fd = priv_hnd->fd2;
     vplanes[2].offset = 0;
+#endif
+    vplanes[0].addr = vaddr[0];
+    vplanes[1].addr = vaddr[1];
     vplanes[2].addr = vaddr[2];
 
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: buffer locked: 0x%x", __func__, *vaddr);
@@ -250,16 +256,18 @@ OMX_ERRORTYPE useAndroidNativeBuffer(
             Exynos_OSAL_LockANB(temp_bufferHeader->pBuffer, width, height,
                                 pExynosPort->portDefinition.format.video.eColorFormat,
                                 &stride, planes);
+#ifdef USE_DMA_BUF
             pExynosPort->extendBufferHeader[i].buf_fd[0] = planes[0].fd;
-            pExynosPort->extendBufferHeader[i].pYUVBuf[0] = planes[0].addr;
             pExynosPort->extendBufferHeader[i].buf_fd[1] = planes[1].fd;
-            pExynosPort->extendBufferHeader[i].pYUVBuf[1] = planes[1].addr;
             pExynosPort->extendBufferHeader[i].buf_fd[2] = planes[2].fd;
+#endif
+            pExynosPort->extendBufferHeader[i].pYUVBuf[0] = planes[0].addr;
+            pExynosPort->extendBufferHeader[i].pYUVBuf[1] = planes[1].addr;
             pExynosPort->extendBufferHeader[i].pYUVBuf[2] = planes[2].addr;
             Exynos_OSAL_UnlockANB(temp_bufferHeader->pBuffer);
-            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "useAndroidNativeBuffer: buf %d pYUVBuf[0]:0x%x (fd:%d), pYUVBuf[1]:0x%x (fd:%d)",
-                            i, pExynosPort->extendBufferHeader[i].pYUVBuf[0], planes[0].fd,
-                            pExynosPort->extendBufferHeader[i].pYUVBuf[1], planes[1].fd);
+            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "useAndroidNativeBuffer: buf %d pYUVBuf[0]:0x%x , pYUVBuf[1]:0x%x ",
+                            i, pExynosPort->extendBufferHeader[i].pYUVBuf[0],
+                            pExynosPort->extendBufferHeader[i].pYUVBuf[1]);
 
             pExynosPort->assignedBufferNum++;
             if (pExynosPort->assignedBufferNum == pExynosPort->portDefinition.nBufferCountActual) {

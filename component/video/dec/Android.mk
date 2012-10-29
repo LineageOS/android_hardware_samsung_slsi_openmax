@@ -33,4 +33,8 @@ LOCAL_STATIC_LIBRARIES += libExynosOMX_OSAL libcsc_helper
 LOCAL_CFLAGS += -DUSE_ANB
 endif
 
+ifeq ($(BOARD_USE_DMA_BUF), true)
+LOCAL_CFLAGS += -DUSE_DMA_BUF
+endif
+
 include $(BUILD_STATIC_LIBRARY)

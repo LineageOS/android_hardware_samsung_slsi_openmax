@@ -227,21 +227,25 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
             Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, planes);
             imageSize = nFrameWidth * nFrameHeight * 3; /* RGB888 */
 
+#ifdef USE_DMA_BUF
             if (csc_method == CSC_METHOD_HW)
                 pSrcBuf[0]  = (unsigned char *)planes[0].fd;
             else
-                pSrcBuf[0] = planes[0].addr;
+#endif
+            pSrcBuf[0] = planes[0].addr;
             pSrcBuf[1]  = NULL;
             pSrcBuf[2]  = NULL;
         }
     } else
 #endif
     {
+#ifdef USE_DMA_BUF
         if (csc_method == CSC_METHOD_HW) {
             pSrcBuf[0]  = Exynos_OSAL_SharedMemory_VirtToION(pVideoEnc->hSharedMemory, checkInputStream);
             pSrcBuf[1]  = NULL;
             pSrcBuf[2]  = NULL;
         }
+#endif
 
         switch (eColorFormat) {
         case OMX_COLOR_FormatYUV420Planar:
@@ -367,6 +371,7 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 } else {
                     /* kMetadataBufferTypeCameraSource */
                     Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)inputUseBuffer->bufferHeader->pBuffer, ppBuf);
+#ifdef USE_DMA_BUF
                     srcInputData->buffer.multiPlaneBuffer.fd[0] = ppBuf[0];
                     srcInputData->buffer.multiPlaneBuffer.fd[1] = ppBuf[1];
                     allocSize[0] = nFrameWidth * nFrameHeight;
@@ -383,7 +388,13 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                     /* input buffers are 2 plane. */
                     srcInputData->buffer.multiPlaneBuffer.dataBuffer[2] = NULL;
                     srcInputData->buffer.multiPlaneBuffer.fd[2] = -1;
-                    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s:%d YAddr: 0x%x CbCrAddr: 0x%x", __FUNCTION__, __LINE__, (unsigned int)ppBuf[0], (unsigned int)ppBuf[0]);
+#else
+                    for (plane = 0; plane < MFC_INPUT_BUFFER_PLANE; plane++) {
+                        srcInputData->buffer.multiPlaneBuffer.dataBuffer[plane] = ppBuf[plane];
+                    }
+                    srcInputData->buffer.multiPlaneBuffer.dataBuffer[2] = NULL;
+#endif
+                    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s:%d YAddr: 0x%x CbCrAddr: 0x%x", __FUNCTION__, __LINE__, (unsigned int)ppBuf[0], (unsigned int)ppBuf[1]);
                 }
             }
 #endif

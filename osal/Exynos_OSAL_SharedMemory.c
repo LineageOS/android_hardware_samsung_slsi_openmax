@@ -271,6 +271,7 @@ EXIT:
     return;
 }
 
+#ifdef USE_DMA_BUF
 OMX_PTR Exynos_OSAL_SharedMemory_Map(OMX_HANDLETYPE handle, OMX_U32 size, unsigned int ionfd)
 {
     EXYNOS_SHARED_MEMORY  *pHandle = (EXYNOS_SHARED_MEMORY *)handle;
@@ -381,6 +382,7 @@ void Exynos_OSAL_SharedMemory_Unmap(OMX_HANDLETYPE handle, unsigned int ionfd)
 EXIT:
     return;
 }
+#endif
 
 int Exynos_OSAL_SharedMemory_VirtToION(OMX_HANDLETYPE handle, OMX_PTR pBuffer)
 {

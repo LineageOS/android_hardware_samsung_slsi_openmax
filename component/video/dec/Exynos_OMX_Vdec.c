@@ -238,11 +238,13 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     pYUVBuf[2]  = (unsigned char *)pOutputBuf + imageSize + imageSize / 4;
 
     csc_get_method(pVideoDec->csc_handle, &csc_method);
+#ifdef USE_DMA_BUF
     if (csc_method == CSC_METHOD_HW) {
         pSrcBuf[0] = dstOutputData->buffer.multiPlaneBuffer.fd[0];
         pSrcBuf[1] = dstOutputData->buffer.multiPlaneBuffer.fd[1];
         pSrcBuf[2] = dstOutputData->buffer.multiPlaneBuffer.fd[2];
     }
+#endif
 
 #ifdef USE_ANB
     if (exynosOutputPort->bIsANBEnabled == OMX_TRUE) {
@@ -252,23 +254,26 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
         width = stride;
         outputUseBuffer->dataLen = sizeof(void *);
 
-        if (csc_method == CSC_METHOD_SW) {
-            pYUVBuf[0]  = (unsigned char *)planes[0].addr;
-            pYUVBuf[1]  = (unsigned char *)planes[1].addr;
-            pYUVBuf[2]  = (unsigned char *)planes[2].addr;
-        } else {
+        pYUVBuf[0]  = (unsigned char *)planes[0].addr;
+        pYUVBuf[1]  = (unsigned char *)planes[1].addr;
+        pYUVBuf[2]  = (unsigned char *)planes[2].addr;
+#ifdef USE_DMA_BUF
+        if (csc_method == CSC_METHOD_HW) {
             pYUVBuf[0]  = (unsigned char *)planes[0].fd;
             pYUVBuf[1]  = (unsigned char *)planes[1].fd;
             pYUVBuf[2]  = (unsigned char *)planes[2].fd;
         }
+#endif
     }
 #endif
+#ifdef USE_DMA_BUF
     if ((exynosOutputPort->bIsANBEnabled == OMX_FALSE) &&
         (csc_method == CSC_METHOD_HW)) {
         pYUVBuf[0] = Exynos_OSAL_SharedMemory_VirtToION(pVideoDec->hSharedMemory, pOutputBuf);
         pYUVBuf[1] = NULL;
         pYUVBuf[2] = NULL;
     }
+#endif
 
     if (pVideoDec->csc_set_format == OMX_FALSE) {
         csc_set_src_format(
