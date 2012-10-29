@@ -1113,11 +1113,6 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetParameter(
                 break;
             case supportFormat_2:
                 portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12TPhysicalAddress;
-                portFormat->xFramerate         = portDefinition->format.video.xFramerate;
-                break;
-            case supportFormat_3:
-                portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
                 portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
                 portFormat->xFramerate         = portDefinition->format.video.xFramerate;
                 break;
@@ -1298,7 +1293,6 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetParameter(
             switch (pExynosOutputPort->portDefinition.format.video.eColorFormat) {
             case OMX_COLOR_FormatYUV420Planar:
             case OMX_COLOR_FormatYUV420SemiPlanar:
-            case OMX_SEC_COLOR_FormatNV12TPhysicalAddress:
                 pExynosOutputPort->portDefinition.nBufferSize = (width * height * 3) / 2;
                 break;
             case OMX_SEC_COLOR_FormatNV12Tiled:

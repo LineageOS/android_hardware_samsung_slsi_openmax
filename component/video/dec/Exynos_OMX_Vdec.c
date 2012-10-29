@@ -90,7 +90,6 @@ inline void Exynos_UpdateFrameSize(OMX_COMPONENTTYPE *pOMXComponent)
         switch(exynosOutputPort->portDefinition.format.video.eColorFormat) {
         case OMX_COLOR_FormatYUV420Planar:
         case OMX_COLOR_FormatYUV420SemiPlanar:
-        case OMX_SEC_COLOR_FormatNV12TPhysicalAddress:
             if (width && height)
                 exynosOutputPort->portDefinition.nBufferSize = (width * height * 3) / 2;
             break;

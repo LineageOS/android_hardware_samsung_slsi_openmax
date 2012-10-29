@@ -607,9 +607,6 @@ OMX_COLOR_FORMATTYPE Exynos_OSAL_Hal2OMXPixelFormat(
     case HAL_PIXEL_FORMAT_YCbCr_420_SP:
         omx_format = OMX_COLOR_FormatYUV420SemiPlanar;
         break;
-    case HAL_PIXEL_FORMAT_CUSTOM_YCbCr_420_SP_TILED:
-        omx_format = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12TPhysicalAddress;
-        break;
     case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
         omx_format = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
         break;
@@ -636,9 +633,6 @@ unsigned int Exynos_OSAL_OMX2HalPixelFormat(
         break;
     case OMX_COLOR_FormatYUV420SemiPlanar:
         hal_format = HAL_PIXEL_FORMAT_YCbCr_420_SP;
-        break;
-    case OMX_SEC_COLOR_FormatNV12TPhysicalAddress:
-        hal_format = HAL_PIXEL_FORMAT_CUSTOM_YCbCr_420_SP_TILED;
         break;
     case OMX_SEC_COLOR_FormatNV12Tiled:
         hal_format = HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED;
