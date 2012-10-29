@@ -1762,6 +1762,7 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
     EXYNOS_OMX_BASEPORT *pExynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     OMX_U32  oneFrameSize = pSrcInputData->dataLen;
+    OMX_BOOL bInStartCode = OMX_FALSE;
     ExynosVideoDecOps       *pDecOps    = pMpeg4Dec->hMFCMpeg4Handle.pDecOps;
     ExynosVideoDecBufferOps *pInbufOps  = pMpeg4Dec->hMFCMpeg4Handle.pInbufOps;
     ExynosVideoDecBufferOps *pOutbufOps = pMpeg4Dec->hMFCMpeg4Handle.pOutbufOps;
@@ -1778,7 +1779,7 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
         ret = Mpeg4CodecDstSetup(pOMXComponent);
     }
 
-    if ((Check_Stream_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize, pMpeg4Dec->hMFCMpeg4Handle.codecType) == OMX_TRUE) ||
+    if (((bInStartCode = Check_Stream_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize, pMpeg4Dec->hMFCMpeg4Handle.codecType)) == OMX_TRUE) ||
         ((pSrcInputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         pExynosComponent->timeStamp[pMpeg4Dec->hMFCMpeg4Handle.indexTimestamp] = pSrcInputData->timeStamp;
         pExynosComponent->nFlags[pMpeg4Dec->hMFCMpeg4Handle.indexTimestamp] = pSrcInputData->nFlags;
@@ -1807,6 +1808,9 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
             Exynos_OSAL_SignalSet(pMpeg4Dec->hDestinationStartEvent);
             Exynos_OSAL_SleepMillisec(0);
         }
+    } else if (bInStartCode == OMX_FALSE) {
+        ret = OMX_ErrorCorruptedFrame;
+        goto EXIT;
     }
 
     ret = OMX_ErrorNone;
@@ -2055,7 +2059,9 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_srcInputBufferProcess(OMX_COMPONENTTYPE *pOMXCompo
     }
 
     ret = Exynos_Mpeg4Dec_SrcIn(pOMXComponent, pSrcInputData);
-    if ((ret != OMX_ErrorNone) && (ret != OMX_ErrorInputDataDecodeYet)) {
+    if ((ret != OMX_ErrorNone) &&
+        (ret != OMX_ErrorInputDataDecodeYet) &&
+        (ret != OMX_ErrorCorruptedFrame)) {
         pExynosComponent->pCallbacks->EventHandler((OMX_HANDLETYPE)pOMXComponent,
                                                 pExynosComponent->callbackData,
                                                 OMX_EventError, ret, 0, NULL);

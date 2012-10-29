@@ -101,7 +101,8 @@ typedef enum _EXYNOS_OMX_ERRORTYPE
     OMX_ErrorCodecDecode        = (OMX_S32) 0x90000005,
     OMX_ErrorCodecEncode        = (OMX_S32) 0x90000006,
     OMX_ErrorCodecFlush         = (OMX_S32) 0x90000007,
-    OMX_ErrorOutputBufferUseYet = (OMX_S32) 0x90000008
+    OMX_ErrorOutputBufferUseYet = (OMX_S32) 0x90000008,
+    OMX_ErrorCorruptedFrame     = (OMX_S32) 0x90000009
 } EXYNOS_OMX_ERRORTYPE;
 
 typedef enum _EXYNOS_OMX_COMMANDTYPE

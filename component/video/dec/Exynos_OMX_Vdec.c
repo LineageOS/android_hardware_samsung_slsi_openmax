@@ -610,6 +610,19 @@ OMX_ERRORTYPE Exynos_OMX_SrcInputBufferProcess(OMX_HANDLETYPE hComponent)
             }
 
             ret = pVideoDec->exynos_codec_srcInputProcess(pOMXComponent, pSrcInputData);
+            if (ret == OMX_ErrorCorruptedFrame) {
+                if (exynosInputPort->bufferProcessType & BUFFER_COPY) {
+                    OMX_PTR codecBuffer;
+                    codecBuffer = pSrcInputData->pPrivate;
+                    if (codecBuffer != NULL)
+                        Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, codecBuffer);
+                }
+
+                if (exynosInputPort->bufferProcessType & BUFFER_SHARE) {
+                    Exynos_OMX_InputBufferReturn(pOMXComponent, pSrcInputData->bufferHeader);
+                }
+            }
+
             if (ret != OMX_ErrorInputDataDecodeYet) {
                 Exynos_ResetCodecData(pSrcInputData);
             }

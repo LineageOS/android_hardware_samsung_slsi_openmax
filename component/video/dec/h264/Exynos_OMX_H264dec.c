@@ -1707,6 +1707,7 @@ OMX_ERRORTYPE Exynos_H264Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     EXYNOS_OMX_BASEPORT *pExynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     OMX_U32  oneFrameSize = pSrcInputData->dataLen;
+    OMX_BOOL bInStartCode = OMX_FALSE;
     ExynosVideoDecOps       *pDecOps    = pH264Dec->hMFCH264Handle.pDecOps;
     ExynosVideoDecBufferOps *pInbufOps  = pH264Dec->hMFCH264Handle.pInbufOps;
     ExynosVideoDecBufferOps *pOutbufOps = pH264Dec->hMFCH264Handle.pOutbufOps;
@@ -1724,7 +1725,7 @@ OMX_ERRORTYPE Exynos_H264Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     }
 
     if (((pVideoDec->bDRMPlayerMode == OMX_TRUE) ||
-            (Check_H264_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize) == OMX_TRUE)) ||
+            ((bInStartCode = Check_H264_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize)) == OMX_TRUE)) ||
         ((pSrcInputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         pExynosComponent->timeStamp[pH264Dec->hMFCH264Handle.indexTimestamp] = pSrcInputData->timeStamp;
         pExynosComponent->nFlags[pH264Dec->hMFCH264Handle.indexTimestamp] = pSrcInputData->nFlags;
@@ -1753,6 +1754,9 @@ OMX_ERRORTYPE Exynos_H264Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
             Exynos_OSAL_SignalSet(pH264Dec->hDestinationStartEvent);
             Exynos_OSAL_SleepMillisec(0);
         }
+    } else if (bInStartCode == OMX_FALSE) {
+        ret = OMX_ErrorCorruptedFrame;
+        goto EXIT;
     }
 
     ret = OMX_ErrorNone;
@@ -2010,7 +2014,9 @@ OMX_ERRORTYPE Exynos_H264Dec_srcInputBufferProcess(OMX_COMPONENTTYPE *pOMXCompon
     }
 
     ret = Exynos_H264Dec_SrcIn(pOMXComponent, pSrcInputData);
-    if ((ret != OMX_ErrorNone) && (ret != OMX_ErrorInputDataDecodeYet)) {
+    if ((ret != OMX_ErrorNone) &&
+        (ret != OMX_ErrorInputDataDecodeYet) &&
+        (ret != OMX_ErrorCorruptedFrame)) {
         pExynosComponent->pCallbacks->EventHandler((OMX_HANDLETYPE)pOMXComponent,
                                                 pExynosComponent->callbackData,
                                                 OMX_EventError, ret, 0, NULL);

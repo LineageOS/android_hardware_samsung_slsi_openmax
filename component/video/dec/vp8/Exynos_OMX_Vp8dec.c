@@ -1354,6 +1354,7 @@ OMX_ERRORTYPE Exynos_VP8Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_D
     EXYNOS_OMX_BASEPORT *pExynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     OMX_U32  oneFrameSize = pSrcInputData->dataLen;
+    OMX_BOOL bInStartCode = OMX_FALSE;
     ExynosVideoDecOps       *pDecOps    = pVp8Dec->hMFCVp8Handle.pDecOps;
     ExynosVideoDecBufferOps *pInbufOps  = pVp8Dec->hMFCVp8Handle.pInbufOps;
     ExynosVideoDecBufferOps *pOutbufOps = pVp8Dec->hMFCVp8Handle.pOutbufOps;
@@ -1370,7 +1371,7 @@ OMX_ERRORTYPE Exynos_VP8Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_D
         ret = VP8CodecDstSetup(pOMXComponent);
     }
 
-    if ((Check_VP8_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize) == OMX_TRUE) ||
+    if (((bInStartCode = Check_VP8_StartCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize)) == OMX_TRUE) ||
         ((pSrcInputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         pExynosComponent->timeStamp[pVp8Dec->hMFCVp8Handle.indexTimestamp] = pSrcInputData->timeStamp;
         pExynosComponent->nFlags[pVp8Dec->hMFCVp8Handle.indexTimestamp] = pSrcInputData->nFlags;
@@ -1399,6 +1400,9 @@ OMX_ERRORTYPE Exynos_VP8Dec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_D
             Exynos_OSAL_SignalSet(pVp8Dec->hDestinationStartEvent);
             Exynos_OSAL_SleepMillisec(0);
         }
+    } else if (bInStartCode == OMX_FALSE) {
+        ret = OMX_ErrorCorruptedFrame;
+        goto EXIT;
     }
 
     ret = OMX_ErrorNone;
@@ -1647,7 +1651,9 @@ OMX_ERRORTYPE Exynos_VP8Dec_srcInputBufferProcess(OMX_COMPONENTTYPE *pOMXCompone
     }
 
     ret = Exynos_VP8Dec_SrcIn(pOMXComponent, pSrcInputData);
-    if ((ret != OMX_ErrorNone) && (ret != OMX_ErrorInputDataDecodeYet)) {
+    if ((ret != OMX_ErrorNone) &&
+        (ret != OMX_ErrorInputDataDecodeYet) &&
+        (ret != OMX_ErrorCorruptedFrame)) {
         pExynosComponent->pCallbacks->EventHandler((OMX_HANDLETYPE)pOMXComponent,
                                                 pExynosComponent->callbackData,
                                                 OMX_EventError, ret, 0, NULL);
