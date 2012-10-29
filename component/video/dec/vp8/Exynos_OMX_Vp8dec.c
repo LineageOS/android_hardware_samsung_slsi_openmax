@@ -1182,7 +1182,7 @@ OMX_ERRORTYPE Exynos_VP8Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pExynosComponent->bUseFlagEOF = OMX_TRUE;
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
 
-    /* H.264 Codec Open */
+    /* VP8 Codec Open */
     ret = VP8CodecOpen(pVp8Dec);
     if (ret != OMX_ErrorNone) {
         goto EXIT;

@@ -38,11 +38,13 @@
 #include "Exynos_OSAL_Semaphore.h"
 #include "Exynos_OSAL_Mutex.h"
 #include "Exynos_OSAL_ETC.h"
-#include "csc.h"
 
 #ifdef USE_ANB
 #include "Exynos_OSAL_Android.h"
 #endif
+
+#include "ExynosVideoApi.h"
+#include "csc.h"
 
 #undef  EXYNOS_LOG_TAG
 #define EXYNOS_LOG_TAG    "EXYNOS_VIDEO_DEC"
@@ -199,13 +201,13 @@ void Exynos_Wait_ProcessPause(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_U3
 
 OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA *dstOutputData)
 {
-    OMX_BOOL                   ret = OMX_FALSE;
-    EXYNOS_OMX_BASECOMPONENT  *pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
-    EXYNOS_OMX_VIDEODEC_COMPONENT *pVideoDec = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
-    EXYNOS_OMX_BASEPORT       *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
-    EXYNOS_OMX_DATABUFFER     *outputUseBuffer = &exynosOutputPort->way.port2WayDataBuffer.outputDataBuffer;
-    OMX_U32                    copySize = 0;
-    DECODE_CODEC_EXTRA_BUFFERINFO *pBufferInfo = NULL;
+    OMX_BOOL                       ret              = OMX_FALSE;
+    EXYNOS_OMX_BASECOMPONENT      *pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+    EXYNOS_OMX_VIDEODEC_COMPONENT *pVideoDec        = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
+    EXYNOS_OMX_BASEPORT           *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
+    EXYNOS_OMX_DATABUFFER         *outputUseBuffer  = &exynosOutputPort->way.port2WayDataBuffer.outputDataBuffer;
+    OMX_U32                        copySize         = 0;
+    DECODE_CODEC_EXTRA_BUFFERINFO *pBufferInfo      = NULL;
 
     FunctionIn();
 
@@ -624,7 +626,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_VIDEODEC_COMPONENT *pVideoDec = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
     EXYNOS_OMX_BASEPORT      *exynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *srcOutputUseBuffer = &exynosInputPort->way.port2WayDataBuffer.outputDataBuffer;
-    EXYNOS_OMX_DATA           srcOutputData; 
+    EXYNOS_OMX_DATA           srcOutputData;
 
     FunctionIn();
 
@@ -677,7 +679,7 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_BASEPORT      *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *dstInputUseBuffer = &exynosOutputPort->way.port2WayDataBuffer.inputDataBuffer;
     EXYNOS_OMX_DATA           dstInputData;
-    
+
     FunctionIn();
 
     while (!pVideoDec->bExitBufferProcessThread) {
@@ -757,7 +759,7 @@ OMX_ERRORTYPE Exynos_OMX_DstOutputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_BASEPORT      *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *dstOutputUseBuffer = &exynosOutputPort->way.port2WayDataBuffer.outputDataBuffer;
     EXYNOS_OMX_DATA          *pDstOutputData = &exynosOutputPort->processData;
-    
+
     FunctionIn();
 
     while (!pVideoDec->bExitBufferProcessThread) {

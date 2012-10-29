@@ -174,7 +174,6 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
     }
 
     IONBuffer = ion_alloc((ion_client)pHandle->hIONHandle, size, 0, mask, flag);
-
     if (IONBuffer <= 0) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "ion_alloc Error: %d", IONBuffer);
         Exynos_OSAL_Free((OMX_PTR)pElement);

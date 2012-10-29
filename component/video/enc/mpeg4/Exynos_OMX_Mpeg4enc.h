@@ -31,6 +31,8 @@
 #include "OMX_Component.h"
 #include "OMX_Video.h"
 
+#include "ExynosVideoApi.h"
+
 typedef enum _CODEC_TYPE
 {
     CODEC_TYPE_H263,

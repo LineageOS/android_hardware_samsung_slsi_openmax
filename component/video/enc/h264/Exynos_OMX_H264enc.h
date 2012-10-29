@@ -31,6 +31,8 @@
 #include "OMX_Component.h"
 #include "OMX_Video.h"
 
+#include "ExynosVideoApi.h"
+
 typedef struct _EXTRA_DATA
 {
     OMX_PTR pHeaderSPS;

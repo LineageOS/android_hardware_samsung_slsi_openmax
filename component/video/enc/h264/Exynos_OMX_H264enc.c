@@ -38,7 +38,6 @@
 #include "Exynos_OSAL_Android.h"
 #include "library_register.h"
 #include "Exynos_OMX_H264enc.h"
-#include "ExynosVideoApi.h"
 #include "Exynos_OSAL_SharedMemory.h"
 #include "Exynos_OSAL_Event.h"
 
@@ -683,7 +682,7 @@ EXIT:
     return ret;
 }
 
-OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U32 nPortIndex)
+OMX_ERRORTYPE H264CodecEnqueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U32 nPortIndex)
 {
     OMX_ERRORTYPE                  ret = OMX_ErrorNone;
     EXYNOS_OMX_BASECOMPONENT      *pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
@@ -709,7 +708,7 @@ OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U3
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]);
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[1]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[1]);
 
-            Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
+            Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
         }
 
         pInbufOps->Clear_Queue(hMFCHandle);
@@ -722,7 +721,7 @@ OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U3
 
         for (i = 0; i < MFC_OUTPUT_BUFFER_NUM_MAX; i++) {
             pOutbufOps->Get_Buffer(hMFCHandle, i, &pBuffer);
-            Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR)pBuffer);
+            Exynos_CodecBufferEnqueue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR)pBuffer);
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncOutputBuffer[%d]: 0x%x", i, pVideoEnc->pMFCEncOutputBuffer[i]);
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]);
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[1]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[1]);
@@ -790,7 +789,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
 
     /* input buffer info: only 3 config values needed */
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
-    bufferConf.eColorFormat = pEncParam->commonParam.FrameMap;//VIDEO_COLORFORMAT_NV12;
+    bufferConf.eColorFormat = pEncParam->commonParam.FrameMap;
     bufferConf.nFrameWidth = pExynosInputPort->portDefinition.format.video.nFrameWidth;
     bufferConf.nFrameHeight = pExynosInputPort->portDefinition.format.video.nFrameHeight;
     pInbufOps->Set_Shareable(hMFCHandle);
@@ -1589,11 +1588,11 @@ OMX_ERRORTYPE Exynos_H264Enc_Init(OMX_COMPONENTTYPE *pOMXComponent)
                 pVideoEnc->pMFCEncInputBuffer[i]->fd[2] = -1;
                 pVideoEnc->pMFCEncInputBuffer[i]->bufferSize[2] = 0;
 
-                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "pVideoEnc->pMFCEncInputBuffer[%d]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]);
-                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]);
-                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[1]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[1]);
+                Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]);
+                Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]);
+                Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[1]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[1]);
 
-                Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
+                Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
             }
         } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
             /*************/
@@ -1767,8 +1766,8 @@ OMX_ERRORTYPE Exynos_H264Enc_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
 
 #ifdef USE_METADATABUFFERTYPE
         nAllocLen[0] = ALIGN_TO_16B(pExynosInputPort->portDefinition.format.video.nFrameWidth) *
-                            ALIGN_TO_16B(pExynosInputPort->portDefinition.format.video.nFrameHeight);
-        nAllocLen[1] = ALIGN(nAllocLen[0]/2,256);
+                       ALIGN_TO_16B(pExynosInputPort->portDefinition.format.video.nFrameHeight);
+        nAllocLen[1] = ALIGN(nAllocLen[0] / 2,256);
 
         if ((pExynosInputPort->bStoreMetaData == OMX_TRUE) &&
             (pExynosInputPort->bufferProcessType & BUFFER_SHARE)) {
@@ -2163,7 +2162,9 @@ EXIT:
     return ret;
 }
 
-OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(OMX_HANDLETYPE hComponent, OMX_STRING componentName)
+OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(
+    OMX_HANDLETYPE hComponent,
+    OMX_STRING     componentName)
 {
     OMX_ERRORTYPE                  ret              = OMX_ErrorNone;
     OMX_COMPONENTTYPE             *pOMXComponent    = NULL;
@@ -2286,7 +2287,7 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(OMX_HANDLETYPE hComponent
     pVideoEnc->exynos_codec_start         = &H264CodecStart;
     pVideoEnc->exynos_codec_stop          = &H264CodecStop;
     pVideoEnc->exynos_codec_bufferProcessRun = &H264CodecOutputBufferProcessRun;
-    pVideoEnc->exynos_codec_enqueueAllBuffer = &H264CodecEnQueueAllBuffer;
+    pVideoEnc->exynos_codec_enqueueAllBuffer = &H264CodecEnqueueAllBuffer;
 
     pVideoEnc->exynos_checkInputFrame        = NULL;
     pVideoEnc->exynos_codec_getCodecInputPrivateData  = &GetCodecInputPrivateData;

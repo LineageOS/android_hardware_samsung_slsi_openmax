@@ -76,14 +76,14 @@ typedef void* CODEC_EXTRA_BUFFERINFO;
 typedef struct _EXYNOS_OMX_SINGLEPLANE_DATA
 {
     OMX_PTR dataBuffer;
-    int fd;
+    int     fd;
 } EXYNOS_OMX_SINGLEPLANE_DATA;
 
 typedef struct _EXYNOS_OMX_MULTIPLANE_DATA
 {
     OMX_U32 validPlaneNum;
     OMX_PTR dataBuffer[MAX_BUFFER_PLANE];
-    int fd[MAX_BUFFER_PLANE];
+    int     fd[MAX_BUFFER_PLANE];
 } EXYNOS_OMX_MULTIPLANE_DATA;
 
 typedef struct _EXYNOS_OMX_DATA
@@ -100,7 +100,7 @@ typedef struct _EXYNOS_OMX_DATA
     OMX_TICKS timeStamp;
     OMX_PTR   pPrivate;
     CODEC_EXTRA_BUFFERINFO extInfo;
-    
+
     /* For Share Buffer */
     OMX_BUFFERHEADERTYPE* bufferHeader;
 } EXYNOS_OMX_DATA;

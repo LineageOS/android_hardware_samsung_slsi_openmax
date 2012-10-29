@@ -48,6 +48,8 @@
 #include "Exynos_OSAL_Android.h"
 #include "exynos_format.h"
 
+#include "ExynosVideoApi.h"
+
 #undef  EXYNOS_LOG_TAG
 #define EXYNOS_LOG_TAG    "Exynos_OSAL_Android"
 #define EXYNOS_LOG_OFF
@@ -398,7 +400,6 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
         ret = OMX_ErrorBadParameter;
         goto EXIT;
     }
-
 
     switch (nIndex) {
     case OMX_IndexParamEnableAndroidBuffers:

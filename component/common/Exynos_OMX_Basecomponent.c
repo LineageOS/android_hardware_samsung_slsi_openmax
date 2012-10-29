@@ -297,7 +297,7 @@ OMX_ERRORTYPE Exynos_OMX_ComponentStateSet(OMX_COMPONENTTYPE *pOMXComponent, OMX
                 pExynosPort = (pExynosComponent->pExynosPort + i);
                 if (CHECK_PORT_TUNNELED(pExynosPort) && CHECK_PORT_BUFFER_SUPPLIER(pExynosPort)) {
                     while (Exynos_OSAL_GetElemNum(&pExynosPort->bufferQ) > 0) {
-                        message = (EXYNOS_OMX_MESSAGE*)Exynos_OSAL_Dequeue(&pExynosPort->bufferQ);
+                        message = (EXYNOS_OMX_MESSAGE *)Exynos_OSAL_Dequeue(&pExynosPort->bufferQ);
                         if (message != NULL)
                             Exynos_OSAL_Free(message);
                     }

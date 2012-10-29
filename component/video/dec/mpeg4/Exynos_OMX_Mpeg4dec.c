@@ -1590,7 +1590,7 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pExynosComponent->bUseFlagEOF = OMX_TRUE;
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
 
-    /* H.264 Codec Open */
+    /* Mpeg4 Codec Open */
     ret = Mpeg4CodecOpen(pMpeg4Dec);
     if (ret != OMX_ErrorNone) {
         goto EXIT;

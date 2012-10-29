@@ -52,17 +52,17 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
     OMX_IN OMX_PTR                   pAppPrivate,
     OMX_IN OMX_U32                   nSizeBytes);
 OMX_ERRORTYPE Exynos_OMX_FreeBuffer(
-    OMX_IN OMX_HANDLETYPE hComponent,
-    OMX_IN OMX_U32        nPortIndex,
+    OMX_IN OMX_HANDLETYPE        hComponent,
+    OMX_IN OMX_U32               nPortIndex,
     OMX_IN OMX_BUFFERHEADERTYPE *pBufferHdr);
 OMX_ERRORTYPE Exynos_OMX_AllocateTunnelBuffer(
     EXYNOS_OMX_BASEPORT *pOMXBasePort,
-    OMX_U32           nPortIndex);
+    OMX_U32              nPortIndex);
 OMX_ERRORTYPE Exynos_OMX_FreeTunnelBuffer(
     EXYNOS_OMX_BASEPORT *pOMXBasePort,
-    OMX_U32           nPortIndex);
+    OMX_U32              nPortIndex);
 OMX_ERRORTYPE Exynos_OMX_ComponentTunnelRequest(
-    OMX_IN  OMX_HANDLETYPE hComp,
+    OMX_IN OMX_HANDLETYPE  hComp,
     OMX_IN OMX_U32         nPort,
     OMX_IN OMX_HANDLETYPE  hTunneledComp,
     OMX_IN OMX_U32         nTunneledPort,
@@ -70,28 +70,28 @@ OMX_ERRORTYPE Exynos_OMX_ComponentTunnelRequest(
 OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetParameter(
     OMX_IN OMX_HANDLETYPE hComponent,
     OMX_IN OMX_INDEXTYPE  nParamIndex,
-    OMX_INOUT OMX_PTR     ComponentParameterStructure);
+    OMX_INOUT OMX_PTR     pComponentParameterStructure);
 OMX_ERRORTYPE Exynos_OMX_VideoEncodeSetParameter(
     OMX_IN OMX_HANDLETYPE hComponent,
     OMX_IN OMX_INDEXTYPE  nIndex,
-    OMX_IN OMX_PTR        ComponentParameterStructure);
+    OMX_IN OMX_PTR        pComponentParameterStructure);
 OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetConfig(
-    OMX_HANDLETYPE hComponent,
-    OMX_INDEXTYPE nIndex,
-    OMX_PTR pComponentConfigStructure);
+    OMX_HANDLETYPE  hComponent,
+    OMX_INDEXTYPE   nIndex,
+    OMX_PTR         pComponentConfigStructure);
 OMX_ERRORTYPE Exynos_OMX_VideoEncodeSetConfig(
-    OMX_HANDLETYPE hComponent,
-    OMX_INDEXTYPE nIndex,
-    OMX_PTR pComponentConfigStructure);
+    OMX_HANDLETYPE  hComponent,
+    OMX_INDEXTYPE   nIndex,
+    OMX_PTR         pComponentConfigStructure);
 OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetExtensionIndex(
     OMX_IN OMX_HANDLETYPE  hComponent,
-    OMX_IN OMX_STRING      cParameterName,
+    OMX_IN OMX_STRING      szParameterName,
     OMX_OUT OMX_INDEXTYPE *pIndexType);
 OMX_ERRORTYPE Exynos_InputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent);
 OMX_ERRORTYPE Exynos_OutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent);
 OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 nPortIndex, OMX_BOOL bEvent);
-OMX_ERRORTYPE Exynos_FlushInputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *dataBuffer);
-OMX_ERRORTYPE Exynos_FlushOutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *dataBuffer);
+OMX_ERRORTYPE Exynos_FlushInputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
+OMX_ERRORTYPE Exynos_FlushOutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
 #ifdef __cplusplus
 }
 #endif

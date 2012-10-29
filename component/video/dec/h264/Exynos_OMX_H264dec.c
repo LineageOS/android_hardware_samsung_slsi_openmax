@@ -350,7 +350,7 @@ EXIT:
 
 OMX_ERRORTYPE H264CodecClose(EXYNOS_H264DEC_HANDLE *pH264Dec)
 {
-    OMX_ERRORTYPE            ret = OMX_ErrorNone;
+    OMX_ERRORTYPE            ret        = OMX_ErrorNone;
     void                    *hMFCHandle = NULL;
     ExynosVideoDecOps       *pDecOps    = NULL;
     ExynosVideoDecBufferOps *pInbufOps  = NULL;
@@ -649,7 +649,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
     void                          *hMFCHandle = pH264Dec->hMFCH264Handle.hMFCHandle;
     EXYNOS_OMX_BASEPORT           *pExynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_BASEPORT           *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
-    OMX_U32                     oneFrameSize = pSrcInputData->dataLen;
+    OMX_U32                        oneFrameSize = pSrcInputData->dataLen;
 
     ExynosVideoDecOps       *pDecOps    = pH264Dec->hMFCH264Handle.pDecOps;
     ExynosVideoDecBufferOps *pInbufOps  = pH264Dec->hMFCH264Handle.pInbufOps;
@@ -729,11 +729,10 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
         /* Register input buffer */
         for (i = 0; i < pExynosInputPort->portDefinition.nBufferCountActual; i++) {
             ExynosVideoPlane plane;
-            if (pVideoDec->bDRMPlayerMode == OMX_FALSE) {
-                plane.addr = pExynosInputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer;
+            if (pVideoDec->bDRMPlayerMode == OMX_TRUE) {
+                plane.addr = Exynos_OSAL_SharedMemory_IONToVirt(pVideoDec->hSharedMemory, pExynosInputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
             } else {
-                plane.addr = Exynos_OSAL_SharedMemory_IONToVirt(pVideoDec->hSharedMemory,
-                                               pExynosInputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
+                plane.addr = pExynosInputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer;
             }
             plane.allocSize = pExynosInputPort->extendBufferHeader[i].OMXBufferHeader->nAllocLen;
             plane.fd = pExynosInputPort->extendBufferHeader[i].buf_fd[0];

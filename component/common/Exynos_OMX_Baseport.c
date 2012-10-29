@@ -652,7 +652,7 @@ OMX_ERRORTYPE Exynos_OMX_Port_Constructor(OMX_HANDLETYPE hComponent)
     /* Output Port */
     pExynosOutputPort = &pExynosPort[OUTPUT_PORT_INDEX];
 
-    Exynos_OSAL_QueueCreate(&pExynosOutputPort->bufferQ, MAX_QUEUE_ELEMENTS); /* For in case of "Output Buffer Share", MAX ELEMENTS(DPB + EDPB) */ 
+    Exynos_OSAL_QueueCreate(&pExynosOutputPort->bufferQ, MAX_QUEUE_ELEMENTS); /* For in case of "Output Buffer Share", MAX ELEMENTS(DPB + EDPB) */
 
     pExynosOutputPort->extendBufferHeader = Exynos_OSAL_Malloc(sizeof(EXYNOS_OMX_BUFFERHEADERTYPE) * MAX_BUFFER_NUM);
     if (pExynosOutputPort->extendBufferHeader == NULL) {
@@ -774,8 +774,8 @@ EXIT:
 
 OMX_ERRORTYPE Exynos_OMX_Port_Destructor(OMX_HANDLETYPE hComponent)
 {
-    OMX_ERRORTYPE             ret = OMX_ErrorNone;
-    OMX_COMPONENTTYPE        *pOMXComponent = NULL;
+    OMX_ERRORTYPE          ret = OMX_ErrorNone;
+    OMX_COMPONENTTYPE     *pOMXComponent = NULL;
     EXYNOS_OMX_BASECOMPONENT *pExynosComponent = NULL;
     EXYNOS_OMX_BASEPORT      *pExynosPort = NULL;
 

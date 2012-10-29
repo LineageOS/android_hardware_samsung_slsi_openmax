@@ -37,12 +37,12 @@
 #include "Exynos_OSAL_Mutex.h"
 #include "Exynos_OSAL_ETC.h"
 #include "Exynos_OSAL_SharedMemory.h"
-#include "Exynos_OSAL_Queue.h"
-#include "csc.h"
 
 #ifdef USE_ANB
 #include "Exynos_OSAL_Android.h"
 #endif
+
+#include "ExynosVideoApi.h"
 
 #undef  EXYNOS_LOG_TAG
 #define EXYNOS_LOG_TAG    "EXYNOS_VIDEO_DECCONTROL"
@@ -1141,8 +1141,8 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetParameter(
     case OMX_IndexParamPortDefinition:
     {
         OMX_PARAM_PORTDEFINITIONTYPE *portDefinition = (OMX_PARAM_PORTDEFINITIONTYPE *)ComponentParameterStructure;
-        OMX_U32                       portIndex = portDefinition->nPortIndex;
-        EXYNOS_OMX_BASEPORT             *pExynosPort;
+        OMX_U32                       portIndex      = portDefinition->nPortIndex;
+        EXYNOS_OMX_BASEPORT          *pExynosPort;
 
         ret = Exynos_OMX_GetParameter(hComponent, nParamIndex, ComponentParameterStructure);
         if (ret != OMX_ErrorNone) {
@@ -1241,8 +1241,8 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetParameter(
     case OMX_IndexParamPortDefinition:
     {
         OMX_PARAM_PORTDEFINITIONTYPE *pPortDefinition = (OMX_PARAM_PORTDEFINITIONTYPE *)ComponentParameterStructure;
-        OMX_U32                       portIndex = pPortDefinition->nPortIndex;
-        EXYNOS_OMX_BASEPORT             *pExynosPort;
+        OMX_U32                       portIndex       = pPortDefinition->nPortIndex;
+        EXYNOS_OMX_BASEPORT          *pExynosPort;
         OMX_U32 width, height, size;
         OMX_U32 realWidth, realHeight;
 

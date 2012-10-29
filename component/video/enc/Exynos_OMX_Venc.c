@@ -38,10 +38,10 @@
 #include "Exynos_OSAL_SharedMemory.h"
 #include "Exynos_OSAL_Mutex.h"
 #include "Exynos_OSAL_ETC.h"
+#include "ExynosVideoApi.h"
 #include "csc.h"
 
 #ifdef USE_STOREMETADATA
-#include <system/window.h>
 #include "Exynos_OSAL_Android.h"
 #endif
 
@@ -340,6 +340,7 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 OMX_PTR ppBuf[MAX_BUFFER_PLANE];
                 OMX_PTR allocSize[MAX_BUFFER_PLANE];
                 int     plane = 0;
+
                 if (eColorFormat == OMX_COLOR_FormatAndroidOpaque) {
                     Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)inputUseBuffer->bufferHeader->pBuffer, ppBuf);
                     ExynosVideoPlane planes[MAX_BUFFER_PLANE];
@@ -593,7 +594,7 @@ OMX_ERRORTYPE Exynos_OMX_ExtensionSetup(OMX_HANDLETYPE hComponent)
                     Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]);
                     Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "pVideoEnc->pMFCEncInputBuffer[%d]->pVirAddr[1]: 0x%x", i, pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[1]);
 
-                    Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
+                    Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
                 }
             } else if (exynosInputPort->bufferProcessType == BUFFER_SHARE) {
                 /*************/
@@ -643,7 +644,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcInputBufferProcess(OMX_HANDLETYPE hComponent)
                 if (exynosInputPort->bufferProcessType & BUFFER_COPY) {
                     OMX_PTR codecBuffer;
                     if ((pSrcInputData->buffer.multiPlaneBuffer.dataBuffer[0] == NULL) || (pSrcInputData->pPrivate == NULL)) {
-                        Exynos_CodecBufferDeQueue(pExynosComponent, INPUT_PORT_INDEX, &codecBuffer);
+                        Exynos_CodecBufferDequeue(pExynosComponent, INPUT_PORT_INDEX, &codecBuffer);
                         if (codecBuffer != NULL) {
                             Exynos_Input_CodecBufferToData(pExynosComponent, codecBuffer, pSrcInputData);
                         }
@@ -700,7 +701,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_VIDEOENC_COMPONENT *pVideoEnc = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
     EXYNOS_OMX_BASEPORT      *exynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *srcOutputUseBuffer = &exynosInputPort->way.port2WayDataBuffer.outputDataBuffer;
-    EXYNOS_OMX_DATA           srcOutputData; 
+    EXYNOS_OMX_DATA           srcOutputData;
 
     FunctionIn();
 
@@ -725,7 +726,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
                     OMX_PTR codecBuffer;
                     codecBuffer = srcOutputData.pPrivate;
                     if (codecBuffer != NULL)
-                        Exynos_CodecBufferEnQueue(pExynosComponent, INPUT_PORT_INDEX, codecBuffer);
+                        Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, codecBuffer);
                 }
                 if (exynosInputPort->bufferProcessType & BUFFER_SHARE) {
                     Exynos_Shared_DataToBuffer(&srcOutputData, srcOutputUseBuffer);
@@ -753,7 +754,7 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_BASEPORT      *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *dstInputUseBuffer = &exynosOutputPort->way.port2WayDataBuffer.inputDataBuffer;
     EXYNOS_OMX_DATA           dstInputData;
-    
+
     FunctionIn();
 
     while (!pVideoEnc->bExitBufferProcessThread) {
@@ -772,7 +773,7 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
             Exynos_OSAL_MutexLock(dstInputUseBuffer->bufferMutex);
             if (exynosOutputPort->bufferProcessType & BUFFER_COPY) {
                 OMX_PTR codecBuffer;
-                ret = Exynos_CodecBufferDeQueue(pExynosComponent, OUTPUT_PORT_INDEX, &codecBuffer);
+                ret = Exynos_CodecBufferDequeue(pExynosComponent, OUTPUT_PORT_INDEX, &codecBuffer);
                 if (ret != OMX_ErrorNone) {
                     Exynos_OSAL_MutexUnlock(dstInputUseBuffer->bufferMutex);
                     break;
@@ -820,7 +821,7 @@ OMX_ERRORTYPE Exynos_OMX_DstOutputBufferProcess(OMX_HANDLETYPE hComponent)
     EXYNOS_OMX_BASEPORT      *exynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
     EXYNOS_OMX_DATABUFFER    *dstOutputUseBuffer = &exynosOutputPort->way.port2WayDataBuffer.outputDataBuffer;
     EXYNOS_OMX_DATA          *pDstOutputData = &exynosOutputPort->processData;
-    
+
     FunctionIn();
 
     while (!pVideoEnc->bExitBufferProcessThread) {
@@ -859,7 +860,7 @@ OMX_ERRORTYPE Exynos_OMX_DstOutputBufferProcess(OMX_HANDLETYPE hComponent)
                 OMX_PTR codecBuffer;
                 codecBuffer = pDstOutputData->pPrivate;
                 if (codecBuffer != NULL) {
-                    Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, codecBuffer);
+                    Exynos_CodecBufferEnqueue(pExynosComponent, OUTPUT_PORT_INDEX, codecBuffer);
                     pDstOutputData->pPrivate = NULL;
                 }
             }

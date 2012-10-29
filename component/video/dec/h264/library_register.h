@@ -37,8 +37,8 @@
 #define MAX_COMPONENT_ROLE_NUM  1
 
 /* H.264 */
-#define EXYNOS_OMX_COMPONENT_H264_DEC "OMX.Exynos.AVC.Decoder"
-#define EXYNOS_OMX_COMPONENT_H264_DRM_DEC "OMX.Exynos.AVC.Decoder.secure"
+#define EXYNOS_OMX_COMPONENT_H264_DEC      "OMX.Exynos.AVC.Decoder"
+#define EXYNOS_OMX_COMPONENT_H264_DRM_DEC  "OMX.Exynos.AVC.Decoder.secure"
 #define EXYNOS_OMX_COMPONENT_H264_DEC_ROLE "video_decoder.avc"
 
 
