@@ -130,7 +130,7 @@ int calc_plane(int width, int height);
 inline void Exynos_UpdateFrameSize(OMX_COMPONENTTYPE *pOMXComponent);
 OMX_BOOL Exynos_Check_BufferProcess_State(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_U32 nPortIndex);
 OMX_ERRORTYPE Exynos_Input_CodecBufferToData(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_PTR codecBuffer, EXYNOS_OMX_DATA *pData);
-OMX_ERRORTYPE Exynos_Output_CodecBufferToData(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_PTR codecBuffer, EXYNOS_OMX_DATA *pData);
+OMX_ERRORTYPE Exynos_Output_CodecBufferToData(CODEC_DEC_BUFFER *pCodecBuffer, EXYNOS_OMX_DATA *pData);
 
 OMX_ERRORTYPE Exynos_OMX_SrcInputBufferProcess(OMX_HANDLETYPE hComponent);
 OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent);

@@ -488,16 +488,13 @@ OMX_ERRORTYPE VP8CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U32
         pInbufOps->Clear_Queue(hMFCHandle);
     } else if ((nPortIndex == OUTPUT_PORT_INDEX) &&
                (pVp8Dec->bDestinationStart == OMX_TRUE)) {
-        OMX_U32 dataLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
-        ExynosVideoBuffer *pBuffer = NULL;
-
         Exynos_CodecBufferReset(pExynosComponent, OUTPUT_PORT_INDEX);
 
-        nOutbufs = pDecOps->Get_ActualBufferCount(hMFCHandle);
-        nOutbufs += EXTRA_DPB_NUM;
-        for (i = 0; i < nOutbufs; i++) {
-            pOutbufOps->Get_Buffer(hMFCHandle, i, &pBuffer);
-            Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR)pBuffer);
+        for (i = 0; i < pVp8Dec->hMFCVp8Handle.maxDPBNum; i++) {
+            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoDec->pMFCDecOutputBuffer[%d]: 0x%x", i, pVideoDec->pMFCDecOutputBuffer[i]);
+            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "pVideoDec->pMFCDecOutputBuffer[%d]->pVirAddr[0]: 0x%x", i, pVideoDec->pMFCDecOutputBuffer[i]->pVirAddr[0]);
+
+            Exynos_CodecBufferEnQueue(pExynosComponent, OUTPUT_PORT_INDEX, pVideoDec->pMFCDecOutputBuffer[i]);
         }
         pOutbufOps->Clear_Queue(hMFCHandle);
     }
@@ -1574,6 +1571,24 @@ OMX_ERRORTYPE Exynos_VP8Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     }
     pDstOutputData->usedDataLen = 0;
     pDstOutputData->pPrivate = pVideoBuffer;
+    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
+        int i = 0;
+        pDstOutputData->pPrivate = NULL;
+        for (i = 0; i < MFC_OUTPUT_BUFFER_NUM_MAX; i++) {
+            if (pDstOutputData->buffer.multiPlaneBuffer.dataBuffer[0] ==
+                pVideoDec->pMFCDecOutputBuffer[i]->pVirAddr[0]) {
+                pDstOutputData->pPrivate = pVideoDec->pMFCDecOutputBuffer[i];
+                break;
+            }
+        }
+
+        if (pDstOutputData->pPrivate == NULL) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Can not find buffer");
+            ret = (OMX_ERRORTYPE)OMX_ErrorCodecDecode;
+            goto EXIT;
+        }
+    }
+
     /* For Share Buffer */
     pDstOutputData->bufferHeader = (OMX_BUFFERHEADERTYPE *)pVideoBuffer->pPrivate;
 
