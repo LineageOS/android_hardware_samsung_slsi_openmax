@@ -117,23 +117,21 @@ OMX_ERRORTYPE Exynos_Input_CodecBufferToData(EXYNOS_OMX_BASECOMPONENT *pExynosCo
     return ret;
 }
 
-OMX_ERRORTYPE Exynos_Output_CodecBufferToData(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_PTR codecBuffer, EXYNOS_OMX_DATA *pData)
+OMX_ERRORTYPE Exynos_Output_CodecBufferToData(
+    CODEC_ENC_BUFFER    *pCodecBuffer,
+    EXYNOS_OMX_DATA     *pData)
 {
     OMX_ERRORTYPE                  ret = OMX_ErrorNone;
-    EXYNOS_OMX_VIDEOENC_COMPONENT *pVideoEnc = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
-    OMX_PTR pSrcBuf;
-    OMX_U32 allocSize;
 
-    pVideoEnc->exynos_codec_getCodecOutputPrivateData(codecBuffer, &pSrcBuf, &allocSize);
-    pData->buffer.singlePlaneBuffer.dataBuffer = pSrcBuf;
-    pData->allocSize     = allocSize;
+    pData->buffer.singlePlaneBuffer.dataBuffer = pCodecBuffer->pVirAddr[0];
+    pData->allocSize     = pCodecBuffer->bufferSize[0];
     pData->dataLen       = 0;
     pData->usedDataLen   = 0;
     pData->remainDataLen = 0;
 
     pData->nFlags        = 0;
     pData->timeStamp     = 0;
-    pData->pPrivate      = codecBuffer;
+    pData->pPrivate      = pCodecBuffer;
     pData->bufferHeader  = NULL;
 
     return ret;
@@ -793,13 +791,13 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
 
             Exynos_OSAL_MutexLock(dstInputUseBuffer->bufferMutex);
             if (exynosOutputPort->bufferProcessType & BUFFER_COPY) {
-                OMX_PTR codecBuffer;
-                ret = Exynos_CodecBufferDequeue(pExynosComponent, OUTPUT_PORT_INDEX, &codecBuffer);
+                CODEC_ENC_BUFFER *pCodecBuffer = NULL;
+                ret = Exynos_CodecBufferDequeue(pExynosComponent, OUTPUT_PORT_INDEX, (OMX_PTR *)&pCodecBuffer);
                 if (ret != OMX_ErrorNone) {
                     Exynos_OSAL_MutexUnlock(dstInputUseBuffer->bufferMutex);
                     break;
                 }
-                Exynos_Output_CodecBufferToData(pExynosComponent, codecBuffer, &dstInputData);
+                Exynos_Output_CodecBufferToData(pCodecBuffer, &dstInputData);
             }
 
             if (exynosOutputPort->bufferProcessType & BUFFER_SHARE) {
@@ -878,10 +876,8 @@ OMX_ERRORTYPE Exynos_OMX_DstOutputBufferProcess(OMX_HANDLETYPE hComponent)
             }
 
             if (exynosOutputPort->bufferProcessType & BUFFER_COPY) {
-                OMX_PTR codecBuffer;
-                codecBuffer = pDstOutputData->pPrivate;
-                if (codecBuffer != NULL) {
-                    Exynos_CodecBufferEnqueue(pExynosComponent, OUTPUT_PORT_INDEX, codecBuffer);
+                if (pDstOutputData->pPrivate != NULL) {
+                    Exynos_CodecBufferEnqueue(pExynosComponent, OUTPUT_PORT_INDEX, pDstOutputData->pPrivate);
                     pDstOutputData->pPrivate = NULL;
                 }
             }
