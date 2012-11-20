@@ -1566,7 +1566,15 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeSetParameter(
 #ifdef USE_STOREMETADATA
     case OMX_IndexParamStoreMetaDataBuffer:
     {
+        EXYNOS_OMX_VIDEOENC_COMPONENT *pVideoEnc = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
+        if (pVideoEnc == NULL) {
+            ret = OMX_ErrorBadParameter;
+            goto EXIT;
+        }
+
         ret = Exynos_OSAL_SetANBParameter(hComponent, nParamIndex, pComponentParameterStructure);
+        if (ret == OMX_ErrorNone)
+            pVideoEnc->bFirstInput = OMX_TRUE;
     }
         break;
 #endif
