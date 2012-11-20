@@ -30,7 +30,10 @@ LOCAL_ARM_MODE := arm
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Vdec libExynosOMX_OSAL libExynosOMX_Basecomponent \
 	libswconverter libExynosVideoApi
 LOCAL_SHARED_LIBRARIES := libc libdl libcutils libutils libui \
-	libExynosOMX_Resourcemanager libcsc libexynosv4l2 libion_exynos libexynosgscaler
+	libExynosOMX_Resourcemanager libcsc libexynosv4l2 libion_exynos
+ifeq ($(TARGET_BOARD_PLATFORM),exynos5)
+LOCAL_SHARED_LIBRARIES += libexynosgscaler
+endif
 
 LOCAL_C_INCLUDES := \
 	$(EXYNOS_OMX_INC)/exynos \
