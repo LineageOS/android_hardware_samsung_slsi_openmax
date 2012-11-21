@@ -434,9 +434,13 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
             ret = OMX_ErrorBadPortIndex;
             goto EXIT;
         }
+
+        pExynosPort->bIsANBEnabled = pANBParams->enable;
+
 #ifdef USE_ANB_OUTBUF_SHARE
          /* ANB and DPB Buffer Sharing */
         if ((portIndex == OUTPUT_PORT_INDEX) &&
+            (pExynosPort->bIsANBEnabled == OMX_TRUE) &&
             ((pExynosPort->bufferProcessType & BUFFER_ANBSHARE) == BUFFER_ANBSHARE)) {
             pExynosPort->bufferProcessType = BUFFER_SHARE;
             pExynosPort->portDefinition.format.video.eColorFormat = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
@@ -449,7 +453,6 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
             pExynosPort->portDefinition.format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
         }
 #endif
-        pExynosPort->bIsANBEnabled = pANBParams->enable;
     }
         break;
 
