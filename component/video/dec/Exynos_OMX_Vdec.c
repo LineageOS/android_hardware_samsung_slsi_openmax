@@ -395,7 +395,7 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 ret = OMX_FALSE;
             }
 
-            Exynos_InputBufferReturn(pOMXComponent);
+            Exynos_InputBufferReturn(pOMXComponent, inputUseBuffer);
         }
 
         if ((srcInputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) {
@@ -513,7 +513,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                     if ((outputUseBuffer->remainDataLen > 0) ||
                         ((outputUseBuffer->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) ||
                         (CHECK_PORT_BEING_FLUSHED(exynosOutputPort))) {
-                        Exynos_OutputBufferReturn(pOMXComponent);
+                        Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
                     }
                 } else {
                     Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "csc_convert Error");
@@ -527,7 +527,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 outputUseBuffer->remainDataLen = 0;
                 outputUseBuffer->nFlags = dstOutputData->nFlags;
                 outputUseBuffer->timeStamp = dstOutputData->timeStamp;
-                Exynos_OutputBufferReturn(pOMXComponent);
+                Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
             } else {
                 Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "output buffer is smaller than decoded data size Out Length");
                 pExynosComponent->pCallbacks->EventHandler((OMX_HANDLETYPE)pOMXComponent,
@@ -539,7 +539,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
             if ((outputUseBuffer->remainDataLen > 0) ||
                 ((outputUseBuffer->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) ||
                 (CHECK_PORT_BEING_FLUSHED(exynosOutputPort)))
-                Exynos_OutputBufferReturn(pOMXComponent);
+                Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
         }
     } else {
         ret = OMX_FALSE;
@@ -680,7 +680,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
                 }
                 if (exynosInputPort->bufferProcessType & BUFFER_SHARE) {
                     Exynos_Shared_DataToBuffer(&srcOutputData, srcOutputUseBuffer);
-                    Exynos_InputBufferReturn(pOMXComponent);
+                    Exynos_InputBufferReturn(pOMXComponent, srcOutputUseBuffer);
                 }
                 Exynos_ResetCodecData(&srcOutputData);
             }
