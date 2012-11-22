@@ -45,7 +45,6 @@
 #include "Exynos_OMX_Baseport.h"
 #include "Exynos_OMX_Basecomponent.h"
 #include "Exynos_OMX_Macros.h"
-#include "Exynos_OMX_Vdec.h"
 #include "Exynos_OSAL_Android.h"
 #include "exynos_format.h"
 
@@ -411,7 +410,6 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
     switch (nIndex) {
     case OMX_IndexParamEnableAndroidBuffers:
     {
-        EXYNOS_OMX_VIDEODEC_COMPONENT *pVideoDec = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
         EnableAndroidNativeBuffersParams *pANBParams = (EnableAndroidNativeBuffersParams *) ComponentParameterStructure;
         OMX_U32 portIndex = pANBParams->nPortIndex;
         EXYNOS_OMX_BASEPORT *pExynosPort = NULL;
@@ -458,7 +456,6 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
 
     case OMX_IndexParamUseAndroidNativeBuffer:
     {
-        EXYNOS_OMX_VIDEODEC_COMPONENT *pVideoDec = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
         UseAndroidNativeBufferParams *pANBParams = (UseAndroidNativeBufferParams *) ComponentParameterStructure;
         OMX_U32 portIndex = pANBParams->nPortIndex;
         EXYNOS_OMX_BASEPORT *pExynosPort = NULL;
