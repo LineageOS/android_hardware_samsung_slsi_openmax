@@ -464,6 +464,10 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
                 if (portIndex == INPUT_PORT_INDEX) {
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
                 } else if (portIndex == OUTPUT_PORT_INDEX) {
+#ifdef USE_ANB
+                    if (pExynosPort->bIsANBEnabled == OMX_TRUE)
+                        Exynos_OSAL_UnlockANB(pExynosPort->processData.bufferHeader->pBuffer);
+#endif
                     Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
                 }
             }
@@ -473,6 +477,10 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
             for (i = 0; i < maxBufferNum; i++) {
                 if (pExynosPort->extendBufferHeader[i].bBufferInOMX == OMX_TRUE) {
                     if (portIndex == OUTPUT_PORT_INDEX) {
+#ifdef USE_ANB
+                        if (pExynosPort->bIsANBEnabled == OMX_TRUE)
+                            Exynos_OSAL_UnlockANB(pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
+#endif
                         Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     } else if (portIndex == INPUT_PORT_INDEX) {
                         Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->extendBufferHeader[i].OMXBufferHeader);
