@@ -377,6 +377,7 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 } else {
                     /* kMetadataBufferTypeCameraSource */
                     Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)inputUseBuffer->bufferHeader->pBuffer, ppBuf);
+#ifndef USE_USERPTR_CAMERA_INPUT
 #ifdef USE_DMA_BUF
                     srcInputData->buffer.multiPlaneBuffer.fd[0] = ppBuf[0];
                     srcInputData->buffer.multiPlaneBuffer.fd[1] = ppBuf[1];
@@ -394,6 +395,12 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                     /* input buffers are 2 plane. */
                     srcInputData->buffer.multiPlaneBuffer.dataBuffer[2] = NULL;
                     srcInputData->buffer.multiPlaneBuffer.fd[2] = -1;
+#else
+                    for (plane = 0; plane < MFC_INPUT_BUFFER_PLANE; plane++) {
+                        srcInputData->buffer.multiPlaneBuffer.dataBuffer[plane] = ppBuf[plane];
+                    }
+                    srcInputData->buffer.multiPlaneBuffer.dataBuffer[2] = NULL;
+#endif
 #else
                     for (plane = 0; plane < MFC_INPUT_BUFFER_PLANE; plane++) {
                         srcInputData->buffer.multiPlaneBuffer.dataBuffer[plane] = ppBuf[plane];
