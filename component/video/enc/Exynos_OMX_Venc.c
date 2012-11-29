@@ -293,10 +293,12 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
         cacheable);             /* cacheable */
     csc_set_src_buffer(
         pVideoEnc->csc_handle,  /* handle */
-        pSrcBuf);               /* YUV Addr or FD */
+        pSrcBuf,
+        CSC_MEMORY_DMABUF);     /* YUV Addr or FD */
     csc_set_dst_buffer(
         pVideoEnc->csc_handle,  /* handle */
-        pDstBuf);               /* YUV Addr or FD */
+        pDstBuf,
+        CSC_MEMORY_DMABUF);     /* YUV Addr or FD */
     cscRet = csc_convert(pVideoEnc->csc_handle);
     if (cscRet != CSC_ErrorNone)
         ret = OMX_FALSE;

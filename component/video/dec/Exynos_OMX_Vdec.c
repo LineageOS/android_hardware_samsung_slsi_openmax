@@ -300,10 +300,12 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     }
     csc_set_src_buffer(
         pVideoDec->csc_handle,  /* handle */
-        pSrcBuf);            /* YUV Addr or FD */
+        pSrcBuf,
+        CSC_MEMORY_DMABUF);    /* YUV Addr or FD */
     csc_set_dst_buffer(
         pVideoDec->csc_handle,  /* handle */
-        pYUVBuf);            /* YUV Addr or FD */
+        pYUVBuf,
+        CSC_MEMORY_DMABUF);    /* YUV Addr or FD */
     cscRet = csc_convert(pVideoDec->csc_handle);
     if (cscRet != CSC_ErrorNone)
         ret = OMX_FALSE;
