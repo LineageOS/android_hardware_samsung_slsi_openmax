@@ -178,6 +178,14 @@ typedef enum _EXYNOS_OMX_FPARGMT_TYPE
 } EXYNOS_OMX_FPARGMT_TYPE;
 #endif
 
+typedef enum _EXYNOS_OMX_EVENTTYPE
+{
+   OMX_EventVendorStart    = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
+#ifdef USE_S3D_SUPPORT
+   OMX_EventS3DInformation,
+#endif
+} EXYNOS_OMX_EVENTTYPE;
+
 #ifdef USE_KHRONOS_OMX_HEADER
 #define OMX_VIDEO_CodingVPX     0x09    /**< Google VPX, formerly known as On2 VP8 */
 #endif

@@ -742,12 +742,12 @@ OMX_BOOL H264CodecCheckFramePacking(OMX_COMPONENTTYPE *pOMXComponent)
 
         pH264Dec->hMFCH264Handle.S3DFPArgmtType = (EXYNOS_OMX_FPARGMT_TYPE) framePacking.arrangement_type;
         /** Send Port Settings changed call back - output color format change */
-       (*(pExynosComponent->pCallbacks->EventHandler))
+        (*(pExynosComponent->pCallbacks->EventHandler))
               (pOMXComponent,
                pExynosComponent->callbackData,
-               OMX_EventPortSettingsChanged, /* The command was completed */
-               OMX_DirOutput, /* This is the port index */
-               0,
+               OMX_EventS3DInformation,                             /* The command was completed */
+               OMX_TRUE,                                            /* S3D is enabled */
+               (OMX_S32)pH264Dec->hMFCH264Handle.S3DFPArgmtType,    /* S3D FPArgmtType */
                NULL);
 
         Exynos_OSAL_SleepMillisec(0);
@@ -1993,6 +1993,7 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
             (displayStatus == VIDEO_FRAME_STATUS_DISPLAY_ONLY) ||
             (displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL) ||
             (displayStatus == VIDEO_FRAME_STATUS_DECODING_FINISHED) ||
+            (displayStatus == VIDEO_FRAME_STATUS_ENABLED_S3D) ||
             (CHECK_PORT_BEING_FLUSHED(pExynosOutputPort))) {
             ret = OMX_ErrorNone;
             break;
@@ -2000,9 +2001,20 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
     }
 
     if ((pVideoDec->bThumbnailMode == OMX_FALSE) &&
-        (displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL)) {
+        ((displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL) ||
+         (displayStatus == VIDEO_FRAME_STATUS_ENABLED_S3D))) {
         if (pVideoDec->bReconfigDPB != OMX_TRUE) {
             pVideoDec->bReconfigDPB = OMX_TRUE;
+#ifdef USE_S3D_SUPPORT
+            /* Check Whether frame packing information is available */
+            if ((displayStatus == VIDEO_FRAME_STATUS_ENABLED_S3D) &&
+                (pH264Dec->hMFCH264Handle.S3DFPArgmtType == OMX_SEC_FPARGMT_NONE)) {
+                if (H264CodecCheckFramePacking(pOMXComponent) != OMX_TRUE) {
+                    ret = (OMX_ERRORTYPE)OMX_ErrorCodecDecode;
+                    goto EXIT;
+                }
+            }
+#endif
             H264CodecCheckResolutionChange(pOMXComponent);
             pVideoDec->csc_set_format = OMX_FALSE;
         }
@@ -2056,15 +2068,6 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
         pBufferInfo->ColorFormat = OMX_SEC_COLOR_FormatNV12Tiled;
         break;
     }
-
-#ifdef USE_S3D_SUPPORT
-    /* Check Whether frame packing information is available */
-    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY &&
-        pVideoDec->bThumbnailMode == OMX_FALSE &&
-        pH264Dec->hMFCH264Handle.S3DFPArgmtType == OMX_SEC_FPARGMT_NONE) {
-        H264CodecCheckFramePacking(pOMXComponent);
-    }
-#endif
 
     indexTimestamp = pDecOps->Get_FrameTag(hMFCHandle);
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "out indexTimestamp: %d", indexTimestamp);
