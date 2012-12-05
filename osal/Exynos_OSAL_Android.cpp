@@ -91,6 +91,17 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     case OMX_SEC_COLOR_FormatNV12Tiled:
         usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
         break;
+    case OMX_COLOR_FormatAndroidOpaque:
+    {
+        OMX_COLOR_FORMATTYPE formatType;
+        formatType = Exynos_OSAL_GetANBColorFormat(priv_hnd);
+        if ((formatType == OMX_COLOR_FormatYUV420SemiPlanar) ||
+            (formatType == OMX_SEC_COLOR_FormatNV12Tiled))
+            usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
+        else
+            usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN | GRALLOC_USAGE_HW_VIDEO_ENCODER;
+    }
+        break;
     default:
         usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
         break;
