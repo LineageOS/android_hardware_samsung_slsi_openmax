@@ -261,6 +261,9 @@ OMX_ERRORTYPE Exynos_Output_CodecBufferToData(
     pData->buffer.multiPlaneBuffer.dataBuffer[0] = pCodecBuffer->pVirAddr[0];
     pData->buffer.multiPlaneBuffer.dataBuffer[1] = pCodecBuffer->pVirAddr[1];
     pData->buffer.multiPlaneBuffer.dataBuffer[2] = pCodecBuffer->pVirAddr[2];
+    pData->buffer.multiPlaneBuffer.fd[0] = pCodecBuffer->fd[0];
+    pData->buffer.multiPlaneBuffer.fd[1] = pCodecBuffer->fd[1];
+    pData->buffer.multiPlaneBuffer.fd[2] = pCodecBuffer->fd[2];
     pData->allocSize     = pCodecBuffer->bufferSize[0] + pCodecBuffer->bufferSize[1] + pCodecBuffer->bufferSize[2];
     pData->dataLen       = 0;
     pData->usedDataLen   = 0;
@@ -338,8 +341,8 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     pYUVBuf[1]  = (unsigned char *)pOutputBuf + imageSize;
     pYUVBuf[2]  = (unsigned char *)pOutputBuf + imageSize + imageSize / 4;
 
-    csc_get_method(pVideoDec->csc_handle, &csc_method);
 #ifdef USE_DMA_BUF
+    csc_get_method(pVideoDec->csc_handle, &csc_method);
     if (csc_method == CSC_METHOD_HW) {
         pSrcBuf[0] = dstOutputData->buffer.multiPlaneBuffer.fd[0];
         pSrcBuf[1] = dstOutputData->buffer.multiPlaneBuffer.fd[1];
