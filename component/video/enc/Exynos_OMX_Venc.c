@@ -80,6 +80,105 @@ inline void Exynos_UpdateFrameSize(OMX_COMPONENTTYPE *pOMXComponent)
     return;
 }
 
+void Exynos_Free_CodecBuffers(
+    OMX_COMPONENTTYPE   *pOMXComponent,
+    OMX_U32              nPortIndex)
+{
+    OMX_ERRORTYPE                    ret                = OMX_ErrorNone;
+    EXYNOS_OMX_BASECOMPONENT        *pExynosComponent   = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+    EXYNOS_OMX_VIDEOENC_COMPONENT   *pVideoEnc          = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
+    CODEC_ENC_BUFFER               **ppCodecBuffer      = NULL;
+
+    OMX_U32 nPlaneCnt = 0;
+    int i, j;
+
+    FunctionIn();
+
+    if (nPortIndex == INPUT_PORT_INDEX) {
+        ppCodecBuffer = &(pVideoEnc->pMFCEncInputBuffer[0]);
+        nPlaneCnt = MFC_INPUT_BUFFER_PLANE;
+    } else {
+        ppCodecBuffer = &(pVideoEnc->pMFCEncOutputBuffer[0]);
+        nPlaneCnt = MFC_OUTPUT_BUFFER_PLANE;
+    }
+
+    for (i = 0; i < MFC_OUTPUT_BUFFER_NUM_MAX; i++) {
+        if (ppCodecBuffer[i] != NULL) {
+            for (j = 0; j < nPlaneCnt; j++) {
+                if (ppCodecBuffer[i]->pVirAddr[j] != NULL)
+                    Exynos_OSAL_SharedMemory_Free(pVideoEnc->hSharedMemory, ppCodecBuffer[i]->pVirAddr[j]);
+            }
+
+            Exynos_OSAL_Free(ppCodecBuffer[i]);
+            ppCodecBuffer[i] = NULL;
+        }
+    }
+
+    FunctionOut();
+}
+
+OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
+    OMX_COMPONENTTYPE   *pOMXComponent,
+    OMX_U32              nPortIndex,
+    OMX_U32              nBufferCnt,
+    OMX_U32              nPlaneSize[MFC_OUTPUT_BUFFER_PLANE])
+{
+    OMX_ERRORTYPE                    ret                = OMX_ErrorNone;
+    EXYNOS_OMX_BASECOMPONENT        *pExynosComponent   = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+    EXYNOS_OMX_VIDEOENC_COMPONENT   *pVideoEnc          = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
+    MEMORY_TYPE                      eMemoryType        = NORMAL_MEMORY;
+    CODEC_ENC_BUFFER               **ppCodecBuffer      = NULL;
+
+    OMX_U32 nPlaneCnt = 0;
+    int i, j;
+
+    FunctionIn();
+
+    if (nPortIndex == INPUT_PORT_INDEX) {
+        ppCodecBuffer = &(pVideoEnc->pMFCEncInputBuffer[0]);
+        nPlaneCnt = MFC_INPUT_BUFFER_PLANE;
+    } else {
+        ppCodecBuffer = &(pVideoEnc->pMFCEncOutputBuffer[0]);
+        nPlaneCnt = MFC_OUTPUT_BUFFER_PLANE;
+    }
+
+    for (i = 0; i < nBufferCnt; i++) {
+        ppCodecBuffer[i] = (CODEC_ENC_BUFFER *)Exynos_OSAL_Malloc(sizeof(CODEC_ENC_BUFFER));
+        if (ppCodecBuffer[i] == NULL) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Alloc codec buffer");
+            ret = OMX_ErrorInsufficientResources;
+            goto EXIT;
+        }
+        Exynos_OSAL_Memset(ppCodecBuffer[i], 0, sizeof(CODEC_ENC_BUFFER));
+
+        for (j = 0; j < nPlaneCnt; j++) {
+            ppCodecBuffer[i]->pVirAddr[j] =
+                (void *)Exynos_OSAL_SharedMemory_Alloc(pVideoEnc->hSharedMemory, nPlaneSize[j], eMemoryType);
+            if (ppCodecBuffer[i]->pVirAddr[j] == NULL) {
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Alloc plane");
+                ret = OMX_ErrorInsufficientResources;
+                goto EXIT;
+            }
+
+            ppCodecBuffer[i]->fd[j] =
+                Exynos_OSAL_SharedMemory_VirtToION(pVideoEnc->hSharedMemory, ppCodecBuffer[i]->pVirAddr[j]);
+            ppCodecBuffer[i]->bufferSize[j] = nPlaneSize[j];
+            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "PORT[%d]: pMFCCodecBuffer[%d]->pVirAddr[%d]: 0x%x", nPortIndex, i, j, ppCodecBuffer[i]->pVirAddr[j]);
+        }
+
+        ppCodecBuffer[i]->dataSize = 0;
+    }
+
+    return OMX_ErrorNone;
+
+EXIT:
+    Exynos_Free_CodecBuffers(pOMXComponent, nPortIndex);
+
+    FunctionOut();
+
+    return ret;
+}
+
 OMX_BOOL Exynos_Check_BufferProcess_State(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_U32 nPortIndex)
 {
     OMX_BOOL ret = OMX_FALSE;
