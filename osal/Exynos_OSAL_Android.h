@@ -45,6 +45,8 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(OMX_IN OMX_HANDLETYPE hComponent,
                                           OMX_IN OMX_INDEXTYPE nIndex,
                                           OMX_IN OMX_PTR ComponentParameterStructure);
 
+OMX_COLOR_FORMATTYPE Exynos_OSAL_GetANBColorFormat(OMX_IN OMX_U32 handle);
+
 OMX_ERRORTYPE Exynos_OSAL_LockANB(OMX_IN OMX_PTR pBuffer,
                                   OMX_IN OMX_U32 width,
                                   OMX_IN OMX_U32 height,

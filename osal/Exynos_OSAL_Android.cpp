@@ -94,7 +94,7 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     case OMX_COLOR_FormatAndroidOpaque:
     {
         OMX_COLOR_FORMATTYPE formatType;
-        formatType = Exynos_OSAL_GetANBColorFormat(priv_hnd);
+        formatType = Exynos_OSAL_GetANBColorFormat((OMX_U32)priv_hnd);
         if ((formatType == OMX_COLOR_FormatYUV420SemiPlanar) ||
             (formatType == OMX_SEC_COLOR_FormatNV12Tiled))
             usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
