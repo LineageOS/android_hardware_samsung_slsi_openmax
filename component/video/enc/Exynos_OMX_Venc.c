@@ -203,15 +203,6 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
     pDstBuf[1] = srcInputData->buffer.multiPlaneBuffer.dataBuffer[1];
     pDstBuf[2] = srcInputData->buffer.multiPlaneBuffer.dataBuffer[2];
 
-#ifdef USE_DMA_BUF
-    csc_get_method(pVideoEnc->csc_handle, &csc_method);
-    if (csc_method == CSC_METHOD_HW) {
-        pDstBuf[0] = srcInputData->buffer.multiPlaneBuffer.fd[0];
-        pDstBuf[1] = srcInputData->buffer.multiPlaneBuffer.fd[1];
-        pDstBuf[2] = srcInputData->buffer.multiPlaneBuffer.fd[2];
-    }
-#endif
-
 #ifdef USE_METADATABUFFERTYPE
     OMX_PTR ppBuf[MAX_BUFFER_PLANE];
 
@@ -236,7 +227,18 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 
             imageSize = nFrameWidth * nFrameHeight * 3; /* RGB888 */
 
+#ifdef USE_GSC_RGB_ENCODER
+            if (pVideoEnc->csc_set_format == OMX_FALSE) {
+                cscRet = csc_set_method(pVideoEnc->csc_handle, CSC_METHOD_HW);
+                if (cscRet != CSC_ErrorNone) {
+                    ret = OMX_FALSE;
+                    goto EXIT;
+                }
+            }
+#endif
+
 #ifdef USE_DMA_BUF
+            csc_get_method(pVideoEnc->csc_handle, &csc_method);
             if (csc_method == CSC_METHOD_HW)
                 pSrcBuf[0]  = (unsigned char *)planes[0].fd;
             else
@@ -249,6 +251,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 #endif
     {
 #ifdef USE_DMA_BUF
+        csc_get_method(pVideoEnc->csc_handle, &csc_method);
         if (csc_method == CSC_METHOD_HW) {
             pSrcBuf[0]  = Exynos_OSAL_SharedMemory_VirtToION(pVideoEnc->hSharedMemory, checkInputStream);
             pSrcBuf[1]  = NULL;
@@ -273,6 +276,14 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
             break;
         }
     }
+
+#ifdef USE_DMA_BUF
+    if (csc_method == CSC_METHOD_HW) {
+        pDstBuf[0] = srcInputData->buffer.multiPlaneBuffer.fd[0];
+        pDstBuf[1] = srcInputData->buffer.multiPlaneBuffer.fd[1];
+        pDstBuf[2] = srcInputData->buffer.multiPlaneBuffer.fd[2];
+    }
+#endif
 
     csc_set_src_format(
         pVideoEnc->csc_handle,  /* handle */
