@@ -1648,7 +1648,8 @@ OMX_ERRORTYPE Exynos_WmvDec_SrcIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_D
     }
 
     bStartCode = Check_Stream_PrefixCode(pSrcInputData->buffer.singlePlaneBuffer.dataBuffer, oneFrameSize, pWmvDec->hMFCWmvHandle.wmvFormat);
-    if (bStartCode == OMX_FALSE) {
+    if ((bStartCode == OMX_FALSE) &&
+        ((pSrcInputData->nFlags & OMX_BUFFERFLAG_EOS) != OMX_BUFFERFLAG_EOS)) {
         if (pSrcInputData->allocSize < oneFrameSize+4) {
             Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Can't attach startcode due to lack of buffer space");
             ret = (OMX_ERRORTYPE)OMX_ErrorCodecDecode;
