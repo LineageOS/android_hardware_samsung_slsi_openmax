@@ -501,12 +501,6 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
         if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
             if (pExynosPort->processData.bufferHeader != NULL) {
                 if (nPortIndex == INPUT_PORT_INDEX) {
-#ifdef USE_METADATABUFFERTYPE
-                    if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
-                        (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
-                         Exynos_OSAL_UnlockANB(pExynosPort->processData.bufferHeader->pBuffer);
-                    }
-#endif
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
                 } else if (nPortIndex == OUTPUT_PORT_INDEX) {
                     Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
@@ -520,12 +514,6 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                         Exynos_OMX_OutputBufferReturn(pOMXComponent,
                                                       pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     } else if (nPortIndex == INPUT_PORT_INDEX) {
-#ifdef USE_METADATABUFFERTYPE
-                        if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
-                            (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
-                             Exynos_OSAL_UnlockANB(pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
-                        }
-#endif
                         Exynos_OMX_InputBufferReturn(pOMXComponent,
                                                      pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     }
