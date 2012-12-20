@@ -501,6 +501,14 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
         if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
             if (pExynosPort->processData.bufferHeader != NULL) {
                 if (nPortIndex == INPUT_PORT_INDEX) {
+#ifdef USE_METADATABUFFERTYPE
+                    if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
+                        (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
+                        OMX_PTR ppBuf[MAX_BUFFER_PLANE];
+                        Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->processData.bufferHeader->pBuffer, ppBuf);
+                        Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+                    }
+#endif
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
                 } else if (nPortIndex == OUTPUT_PORT_INDEX) {
                     Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
@@ -514,6 +522,14 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                         Exynos_OMX_OutputBufferReturn(pOMXComponent,
                                                       pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     } else if (nPortIndex == INPUT_PORT_INDEX) {
+#ifdef USE_METADATABUFFERTYPE
+                        if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
+                            (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
+                            OMX_PTR ppBuf[MAX_BUFFER_PLANE];
+                            Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer, ppBuf);
+                            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+                        }
+#endif
                         Exynos_OMX_InputBufferReturn(pOMXComponent,
                                                      pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     }
@@ -1813,6 +1829,28 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetExtensionIndex(
 #endif
 EXIT:
     FunctionOut();
+
+    return ret;
+}
+
+OMX_ERRORTYPE Exynos_Shared_DataToBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_DATABUFFER *pUseBuffer, OMX_BOOL bNeedUnlock)
+{
+    OMX_ERRORTYPE ret = OMX_ErrorNone;
+
+    pUseBuffer->bufferHeader          = pData->bufferHeader;
+    pUseBuffer->allocSize             = pData->allocSize;
+    pUseBuffer->dataLen               = pData->dataLen;
+    pUseBuffer->usedDataLen           = pData->usedDataLen;
+    pUseBuffer->remainDataLen         = pData->remainDataLen;
+    pUseBuffer->timeStamp             = pData->timeStamp;
+    pUseBuffer->nFlags                = pData->nFlags;
+    pUseBuffer->pPrivate              = pData->pPrivate;
+
+    if ((bNeedUnlock == OMX_TRUE) && (pUseBuffer->bufferHeader != NULL)) {
+        OMX_PTR ppBuf[MAX_BUFFER_PLANE];
+        Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pUseBuffer->bufferHeader->pBuffer, ppBuf);
+        Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+    }
 
     return ret;
 }

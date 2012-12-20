@@ -900,19 +900,3 @@ OMX_ERRORTYPE Exynos_Shared_BufferToData(EXYNOS_OMX_DATABUFFER *pUseBuffer, EXYN
 EXIT:
     return ret;
 }
-
-OMX_ERRORTYPE Exynos_Shared_DataToBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_DATABUFFER *pUseBuffer)
-{
-    OMX_ERRORTYPE ret = OMX_ErrorNone;
-
-    pUseBuffer->bufferHeader          = pData->bufferHeader;
-    pUseBuffer->allocSize             = pData->allocSize;
-    pUseBuffer->dataLen               = pData->dataLen;
-    pUseBuffer->usedDataLen           = pData->usedDataLen;
-    pUseBuffer->remainDataLen         = pData->remainDataLen;
-    pUseBuffer->timeStamp             = pData->timeStamp;
-    pUseBuffer->nFlags                = pData->nFlags;
-    pUseBuffer->pPrivate              = pData->pPrivate;
-
-    return ret;
-}

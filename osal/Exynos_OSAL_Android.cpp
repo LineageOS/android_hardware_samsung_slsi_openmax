@@ -61,6 +61,7 @@ using namespace android;
 extern "C" {
 #endif
 
+static int lockCnt = 0;
 
 OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     OMX_IN OMX_U32 handle,
@@ -112,6 +113,8 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
         ret = OMX_ErrorUndefined;
         goto EXIT;
     }
+    lockCnt++;
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: lockCnt:%d", __func__, lockCnt);
 
 #ifdef USE_DMA_BUF
     vplanes[0].fd = priv_hnd->fd;
@@ -148,6 +151,8 @@ OMX_ERRORTYPE Exynos_OSAL_UnlockANBHandle(OMX_IN OMX_U32 handle)
         ret = OMX_ErrorUndefined;
         goto EXIT;
     }
+    lockCnt--;
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: lockCnt:%d", __func__, lockCnt);
 
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: buffer unlocked: 0x%x", __func__, handle);
 

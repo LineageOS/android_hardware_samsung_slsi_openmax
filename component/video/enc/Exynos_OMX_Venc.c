@@ -610,7 +610,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
     FunctionIn();
 
     if (exynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        if (Exynos_Shared_DataToBuffer(dstOutputData, outputUseBuffer) == OMX_ErrorNone)
+        if (Exynos_Shared_DataToBuffer(dstOutputData, outputUseBuffer, OMX_FALSE) == OMX_ErrorNone)
             outputUseBuffer->dataValid = OMX_TRUE;
     }
 
@@ -870,7 +870,11 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
                         Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, codecBuffer);
                 }
                 if (exynosInputPort->bufferProcessType & BUFFER_SHARE) {
-                    Exynos_Shared_DataToBuffer(&srcOutputData, srcOutputUseBuffer);
+                    OMX_BOOL bNeedUnlock = OMX_FALSE;
+                    OMX_COLOR_FORMATTYPE eColorFormat = exynosInputPort->portDefinition.format.video.eColorFormat;
+                    if (eColorFormat == OMX_COLOR_FormatAndroidOpaque)
+                        bNeedUnlock = OMX_TRUE;
+                    Exynos_Shared_DataToBuffer(&srcOutputData, srcOutputUseBuffer, bNeedUnlock);
                     Exynos_InputBufferReturn(pOMXComponent);
                 }
                 Exynos_ResetCodecData(&srcOutputData);
