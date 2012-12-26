@@ -157,7 +157,7 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
     OMX_U8                *temp_buffer = NULL;
     int                    temp_buffer_fd = -1;
     OMX_U32                i = 0;
-    MEMORY_TYPE            mem_type;
+    MEMORY_TYPE            mem_type = SYSTEM_MEMORY;
 
     FunctionIn();
 
@@ -194,13 +194,14 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
         goto EXIT;
     }
 
-    if ((pVideoDec->bDRMPlayerMode == OMX_TRUE) && (nPortIndex == INPUT_PORT_INDEX)) {
+    if ((pVideoDec->bDRMPlayerMode == OMX_TRUE) &&
+        (nPortIndex == INPUT_PORT_INDEX)) {
         mem_type = SECURE_MEMORY;
-    } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
+    } else if ((nPortIndex == OUTPUT_PORT_INDEX) &&
+               (pExynosPort->bufferProcessType & BUFFER_SHARE)) {
         mem_type = NORMAL_MEMORY;
-    } else {
-        mem_type = SYSTEM_MEMORY;
     }
+
     temp_buffer = Exynos_OSAL_SharedMemory_Alloc(pVideoDec->hSharedMemory, nSizeBytes, mem_type);
     if (temp_buffer == NULL) {
         ret = OMX_ErrorInsufficientResources;

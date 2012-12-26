@@ -126,7 +126,7 @@ OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
     OMX_ERRORTYPE                    ret                = OMX_ErrorNone;
     EXYNOS_OMX_BASECOMPONENT        *pExynosComponent   = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
     EXYNOS_OMX_VIDEOENC_COMPONENT   *pVideoEnc          = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
-    MEMORY_TYPE                      eMemoryType        = NORMAL_MEMORY;
+    MEMORY_TYPE                      eMemoryType        = SYSTEM_MEMORY;
     CODEC_ENC_BUFFER               **ppCodecBuffer      = NULL;
 
     OMX_U32 nPlaneCnt = 0;
@@ -140,6 +140,9 @@ OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
     } else {
         ppCodecBuffer = &(pVideoEnc->pMFCEncOutputBuffer[0]);
         nPlaneCnt = MFC_OUTPUT_BUFFER_PLANE;
+#ifdef USE_CSC_HW
+        eMemoryType = NORMAL_MEMORY;
+#endif
     }
 
     for (i = 0; i < nBufferCnt; i++) {

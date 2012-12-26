@@ -156,7 +156,7 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
     OMX_BUFFERHEADERTYPE            *pTempBufferHdr     = NULL;
     OMX_U8                          *pTempBuffer        = NULL;
     int                              fdTempBuffer       = -1;
-    MEMORY_TYPE                      eMemType;
+    MEMORY_TYPE                      eMemType           = SYSTEM_MEMORY;
     OMX_U32                          i                  = 0;
 
     FunctionIn();
@@ -200,10 +200,10 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
         goto EXIT;
     }
 
-    if (pExynosPort->bufferProcessType & BUFFER_SHARE)
+    if ((nPortIndex == INPUT_PORT_INDEX) &&
+        (pExynosPort->bufferProcessType & BUFFER_SHARE)) {
         eMemType = NORMAL_MEMORY;
-    else
-        eMemType = SYSTEM_MEMORY;
+    }
 
     pTempBuffer = Exynos_OSAL_SharedMemory_Alloc(pVideoEnc->hSharedMemory, nSizeBytes, eMemType);
     if (pTempBuffer == NULL) {

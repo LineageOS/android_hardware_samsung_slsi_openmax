@@ -37,4 +37,8 @@ ifeq ($(BOARD_USE_DMA_BUF), true)
 LOCAL_CFLAGS += -DUSE_DMA_BUF
 endif
 
+ifeq ($(BOARD_USE_CSC_HW), true)
+LOCAL_CFLAGS += -DUSE_CSC_HW
+endif
+
 include $(BUILD_STATIC_LIBRARY)
