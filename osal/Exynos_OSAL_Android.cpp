@@ -367,6 +367,9 @@ OMX_ERRORTYPE Exynos_OSAL_GetANBParameter(
          * modifications since currently not defined what the 'nUsage' is for.
          */
         pANBParams->nUsage |= (GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP);
+#if defined(USE_IMPROVED_BUFFER) && !defined(USE_CSC_HW)
+        pANBParams->nUsage |= (GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
+#endif
     }
         break;
 

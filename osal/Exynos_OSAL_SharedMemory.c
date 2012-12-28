@@ -19,6 +19,7 @@
  * @file        Exynos_OSAL_SharedMemory.c
  * @brief
  * @author      SeungBeom Kim (sbcrux.kim@samsung.com)
+ *              Jinsung Yang (jsgood.yang@samsung.com)
  *              Taehwan Kim (t_h.kim@samsung.com)
  * @version     2.0.0
  * @history
@@ -165,8 +166,13 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
         flag = 0;
         break;
     case SYSTEM_MEMORY:
+#ifdef USE_IMPROVED_BUFFER
+        mask = ION_HEAP_SYSTEM_MASK;
+        flag = ION_FLAG_CACHED | ION_FLAG_CACHED_NEEDS_SYNC | ION_FLAG_PRESERVE_KMAP;
+#else
         mask = ION_HEAP_SYSTEM_MASK;
         flag = ION_FLAG_CACHED;
+#endif
         break;
     default:
         pBuffer = NULL;

@@ -29,6 +29,14 @@ ifeq ($(BOARD_USE_DMA_BUF), true)
 LOCAL_CFLAGS += -DUSE_DMA_BUF
 endif
 
+ifeq ($(BOARD_USE_IMPROVED_BUFFER), true)
+LOCAL_CFLAGS += -DUSE_IMPROVED_BUFFER
+endif
+
+ifeq ($(BOARD_USE_CSC_HW), true)
+LOCAL_CFLAGS += -DUSE_CSC_HW
+endif
+
 LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
 LOCAL_C_INCLUDES := \
