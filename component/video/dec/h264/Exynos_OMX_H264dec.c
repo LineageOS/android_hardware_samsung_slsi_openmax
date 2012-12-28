@@ -1694,8 +1694,8 @@ OMX_ERRORTYPE Exynos_H264Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
 
     pExynosComponent->getAllDelayBuffer = OMX_FALSE;
 
-#if 0//defined(USE_CSC_GSCALER)
-    csc_method = CSC_METHOD_HW; //in case of Use ION buffer.
+#ifdef USE_CSC_HW
+    csc_method = CSC_METHOD_HW;
 #endif
     if (pVideoDec->bDRMPlayerMode == OMX_TRUE) {
         pVideoDec->csc_handle = csc_init(CSC_METHOD_HW);

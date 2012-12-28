@@ -1854,8 +1854,8 @@ OMX_ERRORTYPE Exynos_Mpeg4Enc_Init(OMX_COMPONENTTYPE *pOMXComponent)
 
     pExynosComponent->getAllDelayBuffer = OMX_FALSE;
 
-#if 0//defined(USE_CSC_GSCALER)
-    csc_method = CSC_METHOD_HW; //in case of Use ION buffer.
+#ifdef USE_CSC_HW
+    csc_method = CSC_METHOD_HW;
 #endif
     pVideoEnc->csc_handle = csc_init(csc_method);
     if (pVideoEnc->csc_handle == NULL) {

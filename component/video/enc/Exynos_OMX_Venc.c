@@ -290,7 +290,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
     unsigned int csc_src_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_FormatYUV420SemiPlanar);
     unsigned int csc_dst_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_FormatYUV420SemiPlanar);
     CSC_METHOD csc_method = CSC_METHOD_SW;
-    unsigned int cacheable = 1;
+    unsigned int srcCacheable = 1, dstCacheable = 1;
 
     unsigned char *pSrcBuf[3] = {NULL, };
     unsigned char *pDstBuf[3] = {NULL, };
@@ -304,6 +304,10 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
     pDstBuf[0] = srcInputData->buffer.multiPlaneBuffer.dataBuffer[0];
     pDstBuf[1] = srcInputData->buffer.multiPlaneBuffer.dataBuffer[1];
     pDstBuf[2] = srcInputData->buffer.multiPlaneBuffer.dataBuffer[2];
+
+    csc_get_method(pVideoEnc->csc_handle, &csc_method);
+    if (csc_method == CSC_METHOD_HW)
+        dstCacheable = 0;
 
 #ifdef USE_METADATABUFFERTYPE
     OMX_PTR ppBuf[MAX_BUFFER_PLANE];
@@ -340,7 +344,6 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 #endif
 
 #ifdef USE_DMA_BUF
-            csc_get_method(pVideoEnc->csc_handle, &csc_method);
             if (csc_method == CSC_METHOD_HW)
                 pSrcBuf[0]  = (unsigned char *)planes[0].fd;
             else
@@ -353,7 +356,6 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 #endif
     {
 #ifdef USE_DMA_BUF
-        csc_get_method(pVideoEnc->csc_handle, &csc_method);
         if (csc_method == CSC_METHOD_HW) {
             pSrcBuf[0]  = Exynos_OSAL_SharedMemory_VirtToION(pVideoEnc->hSharedMemory, checkInputStream);
             pSrcBuf[1]  = NULL;
@@ -396,7 +398,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
         nFrameWidth,                  /* crop_width */
         nFrameHeight,                 /* crop_height */
         csc_src_color_format,   /* color_format */
-        cacheable);             /* cacheable */
+        srcCacheable);             /* cacheable */
     csc_set_dst_format(
         pVideoEnc->csc_handle,  /* handle */
         nFrameWidth,                  /* width */
@@ -406,7 +408,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
         nFrameWidth,                  /* crop_width */
         nFrameHeight,                 /* crop_height */
         csc_dst_color_format,   /* color_format */
-        cacheable);             /* cacheable */
+        dstCacheable);             /* cacheable */
     csc_set_src_buffer(
         pVideoEnc->csc_handle,  /* handle */
         pSrcBuf,

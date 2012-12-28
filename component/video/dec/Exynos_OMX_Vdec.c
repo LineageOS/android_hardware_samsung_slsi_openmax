@@ -327,7 +327,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
 
     CSC_ERRORCODE cscRet = CSC_ErrorNone;
     CSC_METHOD csc_method = CSC_METHOD_SW;
-    unsigned int cacheable = 1;
+    unsigned int srcCacheable = 1, dstCacheable = 1;
 
     pBufferInfo = (DECODE_CODEC_EXTRA_BUFFERINFO *)dstOutputData->extInfo;
 
@@ -344,8 +344,11 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     pYUVBuf[1]  = (unsigned char *)pOutputBuf + imageSize;
     pYUVBuf[2]  = (unsigned char *)pOutputBuf + imageSize + imageSize / 4;
 
-#ifdef USE_DMA_BUF
     csc_get_method(pVideoDec->csc_handle, &csc_method);
+    if (csc_method == CSC_METHOD_HW)
+        srcCacheable = 0;
+
+#ifdef USE_DMA_BUF
     if (csc_method == CSC_METHOD_HW) {
         pSrcBuf[0] = dstOutputData->buffer.multiPlaneBuffer.fd[0];
         pSrcBuf[1] = dstOutputData->buffer.multiPlaneBuffer.fd[1];
@@ -392,7 +395,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
             width,            /* crop_width */
             height,           /* crop_height */
             omx_2_hal_pixel_format(colorFormat), /* color_format */
-            cacheable);             /* cacheable */
+            srcCacheable);             /* cacheable */
         csc_set_dst_format(
             pVideoDec->csc_handle,  /* handle */
             width,           /* width */
@@ -402,7 +405,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
             width,           /* crop_width */
             height,           /* crop_height */
             omx_2_hal_pixel_format(exynosOutputPort->portDefinition.format.video.eColorFormat), /* color_format */
-            cacheable);             /* cacheable */
+            dstCacheable);             /* cacheable */
         pVideoDec->csc_set_format = OMX_TRUE;
     }
     csc_set_src_buffer(

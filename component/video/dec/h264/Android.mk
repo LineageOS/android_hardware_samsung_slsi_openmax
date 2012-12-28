@@ -25,6 +25,10 @@ ifeq ($(BOARD_USE_S3D_SUPPORT), true)
 LOCAL_CFLAGS += -DUSE_S3D_SUPPORT
 endif
 
+ifeq ($(BOARD_USE_CSC_HW), true)
+LOCAL_CFLAGS += -DUSE_CSC_HW
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Vdec libExynosOMX_OSAL libExynosOMX_Basecomponent \
