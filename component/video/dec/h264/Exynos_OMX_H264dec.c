@@ -1931,7 +1931,8 @@ OMX_ERRORTYPE Exynos_H264Dec_DstIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
                                         pDstInputData->buffer.multiPlaneBuffer.dataBuffer[1]);
 
     if ((pVideoDec->bReconfigDPB == OMX_TRUE) &&
-        (pExynosOutputPort->bufferProcessType & BUFFER_SHARE)) {
+        (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) &&
+        (pExynosOutputPort->exceptionFlag == GENERAL_STATE)) {
         ret = H264CodecDstSetup(pOMXComponent);
         if (ret != OMX_ErrorNone)
             goto EXIT;
@@ -2004,6 +2005,7 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
         ((displayStatus == VIDEO_FRAME_STATUS_CHANGE_RESOL) ||
          (displayStatus == VIDEO_FRAME_STATUS_ENABLED_S3D))) {
         if (pVideoDec->bReconfigDPB != OMX_TRUE) {
+            pExynosOutputPort->exceptionFlag = NEED_PORT_FLUSH;
             pVideoDec->bReconfigDPB = OMX_TRUE;
 #ifdef USE_S3D_SUPPORT
             /* Check Whether frame packing information is available */
