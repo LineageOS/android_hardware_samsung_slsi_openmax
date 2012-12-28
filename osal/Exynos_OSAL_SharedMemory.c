@@ -42,6 +42,7 @@
 #include "Exynos_OSAL_Log.h"
 
 static int mem_cnt = 0;
+static int map_cnt = 0;
 
 struct EXYNOS_SHAREDMEM_LIST;
 typedef struct _EXYNOS_SHAREDMEM_LIST
@@ -110,14 +111,15 @@ void Exynos_OSAL_SharedMemory_Close(OMX_HANDLETYPE handle)
         pDeleteElement->mapAddr = NULL;
         pDeleteElement->allocSize = 0;
 
-        if (pDeleteElement->owner)
+        if (pDeleteElement->owner) {
             ion_free(pDeleteElement->IONBuffer);
+            mem_cnt--;
+        }
         pDeleteElement->IONBuffer = 0;
 
         Exynos_OSAL_Free(pDeleteElement);
 
-        mem_cnt--;
-        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory free count: %d", mem_cnt);
+        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory mem count: %d", mem_cnt);
     }
 
     pHandle->pAllocMemory = pSMList = NULL;
@@ -207,7 +209,7 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
     Exynos_OSAL_MutexUnlock(pHandle->hSMMutex);
 
     mem_cnt++;
-    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory alloc count: %d", mem_cnt);
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory mem count: %d", mem_cnt);
 
 EXIT:
     return pBuffer;
@@ -258,14 +260,15 @@ void Exynos_OSAL_SharedMemory_Free(OMX_HANDLETYPE handle, OMX_PTR pBuffer)
     pDeleteElement->mapAddr = NULL;
     pDeleteElement->allocSize = 0;
 
-    if (pDeleteElement->owner)
+    if (pDeleteElement->owner) {
         ion_free(pDeleteElement->IONBuffer);
+        mem_cnt--;
+    }
     pDeleteElement->IONBuffer = 0;
 
     Exynos_OSAL_Free(pDeleteElement);
 
-    mem_cnt--;
-    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory free count: %d", mem_cnt);
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory mem count: %d", mem_cnt);
 
 EXIT:
     return;
@@ -321,8 +324,8 @@ OMX_PTR Exynos_OSAL_SharedMemory_Map(OMX_HANDLETYPE handle, OMX_U32 size, unsign
     }
     Exynos_OSAL_MutexUnlock(pHandle->hSMMutex);
 
-    mem_cnt++;
-    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory alloc count: %d", mem_cnt);
+    map_cnt++;
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory map count: %d", map_cnt);
 
 EXIT:
     return pBuffer;
@@ -376,8 +379,8 @@ void Exynos_OSAL_SharedMemory_Unmap(OMX_HANDLETYPE handle, unsigned int ionfd)
 
     Exynos_OSAL_Free(pDeleteElement);
 
-    mem_cnt--;
-    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory free count: %d", mem_cnt);
+    map_cnt--;
+    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "SharedMemory map count: %d", map_cnt);
 
 EXIT:
     return;
