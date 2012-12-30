@@ -851,6 +851,13 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
         }
     }
 
+    if (pMFCH264Handle->bPrependSpsPpsToIdr == OMX_TRUE) {
+        if (pEncOps->Enable_PrependSpsPpsToIdr)
+            pEncOps->Enable_PrependSpsPpsToIdr(pH264Enc->hMFCH264Handle.hMFCHandle);
+        else
+            Exynos_OSAL_Log(EXYNOS_LOG_WARNING, "%s: Not supported control: Enable_PrependSpsPpsToIdr", __func__);
+    }
+
     /* input buffer info: only 3 config values needed */
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
     bufferConf.eColorFormat = pEncParam->commonParam.FrameMap;
@@ -1332,6 +1339,16 @@ OMX_ERRORTYPE Exynos_H264Enc_SetParameter(
         pDstErrorCorrectionType->bEnableRVLC = pSrcErrorCorrectionType->bEnableRVLC;
     }
         break;
+#ifdef USE_H264_PREPEND_SPS_PPS
+    case OMX_IndexParamPrependSPSPPSToIDR:
+    {
+        EXYNOS_H264ENC_HANDLE *pH264Enc = NULL;
+
+        pH264Enc = (EXYNOS_H264ENC_HANDLE *)((EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
+        pH264Enc->hMFCH264Handle.bPrependSpsPpsToIdr = OMX_TRUE;
+    }
+        break;
+#endif
     default:
         ret = Exynos_OMX_VideoEncodeSetParameter(hComponent, nIndex, pComponentParameterStructure);
         break;
@@ -1514,6 +1531,11 @@ OMX_ERRORTYPE Exynos_H264Enc_GetExtensionIndex(
     if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_CONFIG_VIDEO_INTRAPERIOD) == 0) {
         *pIndexType = OMX_IndexConfigVideoIntraPeriod;
         ret = OMX_ErrorNone;
+#ifdef USE_H264_PREPEND_SPS_PPS
+    } else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_PREPEND_SPSPPS_TO_IDR) == 0) {
+        *pIndexType = OMX_IndexParamPrependSPSPPSToIDR;
+        goto EXIT;
+#endif
     } else {
         ret = Exynos_OMX_VideoEncodeGetExtensionIndex(hComponent, cParameterName, pIndexType);
     }

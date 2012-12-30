@@ -25,6 +25,10 @@ ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
 endif
 
+ifeq ($(BOARD_USE_H264_PREPEND_SPS_PPS), true)
+LOCAL_CFLAGS += -DUSE_H264_PREPEND_SPS_PPS
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Venc libExynosOMX_OSAL libExynosOMX_Basecomponent \
