@@ -289,13 +289,15 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 
     unsigned int csc_src_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_FormatYUV420SemiPlanar);
     unsigned int csc_dst_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_FormatYUV420SemiPlanar);
-    CSC_METHOD csc_method = CSC_METHOD_SW;
+
+    CSC_ERRORCODE   cscRet      = CSC_ErrorNone;
+    CSC_METHOD      csc_method  = CSC_METHOD_SW;
+    CSC_MEMTYPE     csc_memType = CSC_MEMORY_USERPTR;
+
     unsigned int srcCacheable = 1, dstCacheable = 1;
 
     unsigned char *pSrcBuf[3] = {NULL, };
     unsigned char *pDstBuf[3] = {NULL, };
-
-    CSC_ERRORCODE cscRet = CSC_ErrorNone;
 
     pSrcBuf[0]  = checkInputStream;
     pSrcBuf[1]  = checkInputStream + (nFrameWidth * nFrameHeight);
@@ -344,9 +346,10 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
 #endif
 
 #ifdef USE_DMA_BUF
-            if (csc_method == CSC_METHOD_HW)
+            if (csc_method == CSC_METHOD_HW) {
+                csc_memType = CSC_MEMORY_DMABUF;
                 pSrcBuf[0]  = (unsigned char *)planes[0].fd;
-            else
+            } else
 #endif
             pSrcBuf[0] = planes[0].addr;
             pSrcBuf[1]  = NULL;
@@ -357,6 +360,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
     {
 #ifdef USE_DMA_BUF
         if (csc_method == CSC_METHOD_HW) {
+            csc_memType = CSC_MEMORY_DMABUF;
             pSrcBuf[0]  = Exynos_OSAL_SharedMemory_VirtToION(pVideoEnc->hSharedMemory, checkInputStream);
             pSrcBuf[1]  = NULL;
             pSrcBuf[2]  = NULL;
@@ -412,11 +416,11 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
     csc_set_src_buffer(
         pVideoEnc->csc_handle,  /* handle */
         pSrcBuf,
-        CSC_MEMORY_DMABUF);     /* YUV Addr or FD */
+        csc_memType);           /* YUV Addr or FD */
     csc_set_dst_buffer(
         pVideoEnc->csc_handle,  /* handle */
         pDstBuf,
-        CSC_MEMORY_DMABUF);     /* YUV Addr or FD */
+        csc_memType);           /* YUV Addr or FD */
     cscRet = csc_convert(pVideoEnc->csc_handle);
     if (cscRet != CSC_ErrorNone)
         ret = OMX_FALSE;

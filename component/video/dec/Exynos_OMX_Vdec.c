@@ -325,8 +325,10 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     void *pSrcBuf[MAX_BUFFER_PLANE] = {NULL, };
     void *pYUVBuf[MAX_BUFFER_PLANE] = {NULL, };
 
-    CSC_ERRORCODE cscRet = CSC_ErrorNone;
-    CSC_METHOD csc_method = CSC_METHOD_SW;
+    CSC_ERRORCODE   cscRet      = CSC_ErrorNone;
+    CSC_METHOD      csc_method  = CSC_METHOD_SW;
+    CSC_MEMTYPE     csc_memType = CSC_MEMORY_USERPTR;
+
     unsigned int srcCacheable = 1, dstCacheable = 1;
 
     pBufferInfo = (DECODE_CODEC_EXTRA_BUFFERINFO *)dstOutputData->extInfo;
@@ -350,6 +352,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
 
 #ifdef USE_DMA_BUF
     if (csc_method == CSC_METHOD_HW) {
+        csc_memType = CSC_MEMORY_DMABUF;
         pSrcBuf[0] = dstOutputData->buffer.multiPlaneBuffer.fd[0];
         pSrcBuf[1] = dstOutputData->buffer.multiPlaneBuffer.fd[1];
         pSrcBuf[2] = dstOutputData->buffer.multiPlaneBuffer.fd[2];
@@ -411,11 +414,11 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     csc_set_src_buffer(
         pVideoDec->csc_handle,  /* handle */
         pSrcBuf,
-        CSC_MEMORY_DMABUF);    /* YUV Addr or FD */
+        csc_memType);           /* YUV Addr or FD */
     csc_set_dst_buffer(
         pVideoDec->csc_handle,  /* handle */
         pYUVBuf,
-        CSC_MEMORY_DMABUF);    /* YUV Addr or FD */
+        csc_memType);           /* YUV Addr or FD */
     cscRet = csc_convert(pVideoDec->csc_handle);
     if (cscRet != CSC_ErrorNone)
         ret = OMX_FALSE;
