@@ -983,10 +983,8 @@ OMX_ERRORTYPE Mpeg4CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     OMX_U32 dataLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
     int plane;
 
-    nAllocLen[0] = calc_plane(pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameWidth,
-                        pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameHeight);
-    nAllocLen[1] = calc_plane(pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameWidth,
-                        pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameHeight >> 1);
+    nAllocLen[0] = pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nAlignPlaneSize[0];
+    nAllocLen[1] = pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nAlignPlaneSize[1];
 
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         ret = Exynos_Allocate_CodecBuffers(pOMXComponent, OUTPUT_PORT_INDEX, nOutbufs, nAllocLen);

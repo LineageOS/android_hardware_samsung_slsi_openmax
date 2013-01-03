@@ -53,20 +53,6 @@
 //#define EXYNOS_TRACE_ON
 #include "Exynos_OSAL_Log.h"
 
-
-int calc_plane(int width, int height)
-{
-    int mbX, mbY;
-
-    mbX = (width + 15)/16;
-    mbY = (height + 15)/16;
-
-    /* Alignment for interlaced processing */
-    mbY = (mbY + 1) / 2 * 2;
-
-    return (mbX * 16) * (mbY * 16);
-}
-
 inline void Exynos_UpdateFrameSize(OMX_COMPONENTTYPE *pOMXComponent)
 {
     EXYNOS_OMX_BASECOMPONENT *pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
@@ -91,17 +77,9 @@ inline void Exynos_UpdateFrameSize(OMX_COMPONENTTYPE *pOMXComponent)
         switch(exynosOutputPort->portDefinition.format.video.eColorFormat) {
         case OMX_COLOR_FormatYUV420Planar:
         case OMX_COLOR_FormatYUV420SemiPlanar:
+        case OMX_SEC_COLOR_FormatNV12Tiled:
             if (width && height)
                 exynosOutputPort->portDefinition.nBufferSize = (width * height * 3) / 2;
-            break;
-        case OMX_SEC_COLOR_FormatNV12Tiled:
-            width = exynosOutputPort->portDefinition.format.video.nFrameWidth;
-            height = exynosOutputPort->portDefinition.format.video.nFrameHeight;
-            if (width && height) {
-                int YBufferSize = calc_plane(width, height);
-                int CBufferSize = calc_plane(width, height >> 1);
-                exynosOutputPort->portDefinition.nBufferSize = YBufferSize + CBufferSize;
-            }
             break;
         default:
             if (width && height)

@@ -795,10 +795,8 @@ OMX_ERRORTYPE VP8CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     OMX_U32 dataLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
     int plane;
 
-    nAllocLen[0] = calc_plane(pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameWidth,
-                        pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameHeight);
-    nAllocLen[1] = calc_plane(pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameWidth,
-                        pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameHeight >> 1);
+    nAllocLen[0] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[0];
+    nAllocLen[1] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[1];
 
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         ret = Exynos_Allocate_CodecBuffers(pOMXComponent, OUTPUT_PORT_INDEX, nOutbufs, nAllocLen);

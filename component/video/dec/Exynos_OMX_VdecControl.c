@@ -1232,23 +1232,13 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetParameter(
             switch (pExynosOutputPort->portDefinition.format.video.eColorFormat) {
             case OMX_COLOR_FormatYUV420Planar:
             case OMX_COLOR_FormatYUV420SemiPlanar:
-                pExynosOutputPort->portDefinition.nBufferSize = (width * height * 3) / 2;
-                break;
             case OMX_SEC_COLOR_FormatNV12Tiled:
-                pExynosOutputPort->portDefinition.nBufferSize =
-                    calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight) +
-                    calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight >> 1);
+                pExynosOutputPort->portDefinition.nBufferSize = (width * height * 3) / 2;
                 break;
             default:
                 Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Color format is not support!! use default YUV size!!");
                 ret = OMX_ErrorUnsupportedSetting;
                 break;
-            }
-
-            if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-                pExynosOutputPort->portDefinition.nBufferSize =
-                    calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight) +
-                    calc_plane(pExynosPort->portDefinition.format.video.nFrameWidth, pExynosOutputPort->portDefinition.format.video.nFrameHeight >> 1);
             }
         }
     }
