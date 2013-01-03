@@ -169,6 +169,7 @@ typedef struct _EXYNOS_OMX_BASEPORT
 
     OMX_BOOL                       bIsANBEnabled;
     OMX_BOOL                       bStoreMetaData;
+    OMX_BOOL                       bNeedContigMem;
 
     EXYNOS_OMX_BUFFERPROCESS_TYPE  bufferProcessType;
     EXYNOS_OMX_PORT_WAY_TYPE       portWayType;

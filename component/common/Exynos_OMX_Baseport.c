@@ -611,6 +611,7 @@ OMX_ERRORTYPE Exynos_OMX_Port_Constructor(OMX_HANDLETYPE hComponent)
     pExynosInputPort->tunnelBufferNum = 0;
     pExynosInputPort->bufferSupplier = OMX_BufferSupplyUnspecified;
     pExynosInputPort->tunnelFlags = 0;
+    pExynosInputPort->bNeedContigMem = OMX_FALSE;
     ret = Exynos_OSAL_SemaphoreCreate(&pExynosInputPort->loadedResource);
     if (ret != OMX_ErrorNone) {
         Exynos_OSAL_Free(pExynosInputPort->bufferStateAllocate);
@@ -701,6 +702,7 @@ OMX_ERRORTYPE Exynos_OMX_Port_Constructor(OMX_HANDLETYPE hComponent)
     pExynosOutputPort->tunnelBufferNum = 0;
     pExynosOutputPort->bufferSupplier = OMX_BufferSupplyUnspecified;
     pExynosOutputPort->tunnelFlags = 0;
+    pExynosOutputPort->bNeedContigMem = OMX_FALSE;
     ret = Exynos_OSAL_SemaphoreCreate(&pExynosOutputPort->loadedResource);
     if (ret != OMX_ErrorNone) {
         Exynos_OSAL_Free(pExynosOutputPort->bufferStateAllocate);
