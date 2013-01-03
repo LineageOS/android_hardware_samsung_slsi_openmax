@@ -1336,6 +1336,18 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetConfig(
     }
 
     switch (nIndex) {
+    case OMX_IndexVendorGetBufferFD:
+    {
+        EXYNOS_OMX_VIDEODEC_COMPONENT       *pVideoDec      = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
+        EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO  *pBufferInfo    = (EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO *)pComponentConfigStructure;
+
+        ret = Exynos_OMX_Check_SizeVersion(pBufferInfo, sizeof(EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pBufferInfo->fd = Exynos_OSAL_SharedMemory_VirtToION(pVideoDec->hSharedMemory, pBufferInfo->pVirAddr);
+    }
+        break;
     default:
         ret = Exynos_OMX_GetConfig(hComponent, nIndex, pComponentConfigStructure);
         break;
@@ -1439,6 +1451,10 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetExtensionIndex(
 
     if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_NEED_CONTIG_MEMORY) == 0) {
         *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorNeedContigMemory;
+        ret = OMX_ErrorNone;
+        goto EXIT;
+    } else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_CONFIG_GET_BUFFER_FD) == 0) {
+        *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorGetBufferFD;
         ret = OMX_ErrorNone;
         goto EXIT;
     }
