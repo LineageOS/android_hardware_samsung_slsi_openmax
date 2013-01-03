@@ -66,6 +66,13 @@ typedef struct _EXYNOS_OMX_PRIORITYMGMTTYPE
     OMX_U32 nGroupID;
 } EXYNOS_OMX_PRIORITYMGMTTYPE;
 
+typedef struct _EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE {
+    OMX_U32         nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32         nPortIndex;
+    OMX_BOOL        bNeedContigMem;
+} EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE;
+
 typedef enum _EXYNOS_OMX_INDEXTYPE
 {
 #define EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL "OMX.SEC.index.ThumbnailMode"
@@ -76,6 +83,8 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
 #define EXYNOS_INDEX_PARAM_GET_S3D "OMX.SEC.index.S3DMode"
     OMX_IndexVendorS3DMode                  = 0x7F000003,
 #endif
+#define EXYNOS_INDEX_PARAM_NEED_CONTIG_MEMORY "OMX.SEC.index.NeedContigMemory"
+    OMX_IndexVendorNeedContigMemory         = 0x7F000004,
 
     /* for Android Native Window */
 #define EXYNOS_INDEX_PARAM_ENABLE_ANB "OMX.google.android.index.enableAndroidNativeBuffers"

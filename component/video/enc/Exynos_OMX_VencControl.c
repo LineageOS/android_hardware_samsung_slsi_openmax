@@ -200,7 +200,9 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
         goto EXIT;
     }
 
-    if ((nPortIndex == INPUT_PORT_INDEX) &&
+    if (pExynosPort->bNeedContigMem == OMX_TRUE) {
+        eMemType = CONTIG_MEMORY;
+    } else if ((nPortIndex == INPUT_PORT_INDEX) &&
         (pExynosPort->bufferProcessType & BUFFER_SHARE)) {
         eMemType = NORMAL_MEMORY;
     }
@@ -1409,6 +1411,26 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetParameter(
 #endif
     }
         break;
+    case OMX_IndexVendorNeedContigMemory:
+    {
+        EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE  *pPortMemType    = (EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE *)pComponentParameterStructure;
+        OMX_U32                              nPortIndex      = pPortMemType->nPortIndex;
+        EXYNOS_OMX_BASEPORT                 *pExynosPort;
+
+        if (nPortIndex >= pExynosComponent->portParam.nPorts) {
+            ret = OMX_ErrorBadPortIndex;
+            goto EXIT;
+        }
+
+        ret = Exynos_OMX_Check_SizeVersion(pPortMemType, sizeof(EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pExynosPort = &pExynosComponent->pExynosPort[nPortIndex];
+
+        pPortMemType->bNeedContigMem = pExynosPort->bNeedContigMem;
+    }
+        break;
     default:
     {
         ret = Exynos_OMX_GetParameter(hComponent, nParamIndex, pComponentParameterStructure);
@@ -1594,6 +1616,33 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeSetParameter(
     }
         break;
 #endif
+    case OMX_IndexVendorNeedContigMemory:
+    {
+        EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE  *pPortMemType    = (EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE *)pComponentParameterStructure;
+        OMX_U32                              nPortIndex      = pPortMemType->nPortIndex;
+        EXYNOS_OMX_BASEPORT                 *pExynosPort;
+
+        if (nPortIndex >= pExynosComponent->portParam.nPorts) {
+            ret = OMX_ErrorBadPortIndex;
+            goto EXIT;
+        }
+
+        ret = Exynos_OMX_Check_SizeVersion(pPortMemType, sizeof(EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pExynosPort = &pExynosComponent->pExynosPort[nPortIndex];
+
+        if ((pExynosComponent->currentState != OMX_StateLoaded) && (pExynosComponent->currentState != OMX_StateWaitForResources)) {
+            if (pExynosPort->portDefinition.bEnabled == OMX_TRUE) {
+                ret = OMX_ErrorIncorrectStateOperation;
+                goto EXIT;
+            }
+        }
+
+        pExynosPort->bNeedContigMem = pPortMemType->bNeedContigMem;
+    }
+        break;
     default:
     {
         ret = Exynos_OMX_SetParameter(hComponent, nParamIndex, pComponentParameterStructure);
@@ -1815,6 +1864,12 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetExtensionIndex(
 
     if (pExynosComponent->currentState == OMX_StateInvalid) {
         ret = OMX_ErrorInvalidState;
+        goto EXIT;
+    }
+
+    if (Exynos_OSAL_Strcmp(szParamName, EXYNOS_INDEX_PARAM_NEED_CONTIG_MEMORY) == 0) {
+        *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorNeedContigMemory;
+        ret = OMX_ErrorNone;
         goto EXIT;
     }
 
