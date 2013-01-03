@@ -34,7 +34,8 @@ typedef enum _MEMORY_TYPE
 {
     NORMAL_MEMORY = 0x00,
     SECURE_MEMORY = 0x01,
-    SYSTEM_MEMORY = 0x02
+    SYSTEM_MEMORY = 0x02,
+    CONTIG_MEMORY = 0x03,
 } MEMORY_TYPE;
 
 #ifdef __cplusplus
