@@ -956,6 +956,8 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 n
 
     Exynos_OSAL_SignalSet(pExynosComponent->pauseEvent);
 
+    pExynosComponent->pExynosPort[nPortIndex].bIsPortFlushed = OMX_TRUE;
+
     pExynosPort = &pExynosComponent->pExynosPort[nPortIndex];
     Exynos_OMX_GetFlushBuffer(pExynosPort, &flushPortBuffer);
 
