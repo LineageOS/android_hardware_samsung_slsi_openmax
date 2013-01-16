@@ -1908,7 +1908,9 @@ OMX_ERRORTYPE Exynos_WmvDec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
         /* For timestamp correction. if mfc support frametype detect */
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "disp_pic_frame_type: %d", pVideoBuffer->frameType);
 #ifdef NEED_TIMESTAMP_REORDER
-        if ((pVideoBuffer->frameType == VIDEO_FRAME_I)) {
+        if ((pVideoBuffer->frameType == VIDEO_FRAME_I) ||
+            ((pVideoBuffer->frameType == VIDEO_FRAME_OTHERS) &&
+                ((pExynosComponent->nFlags[indexTimestamp] & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS))) {
             pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
             pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
             pWmvDec->hMFCWmvHandle.outputIndexTimestamp = indexTimestamp;
