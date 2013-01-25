@@ -94,6 +94,9 @@ typedef struct _EXYNOS_OMX_VIDEOENC_COMPONENT
     /* Shared Memory Handle */
     OMX_HANDLETYPE hSharedMemory;
 
+    /* For DRM Record */
+    OMX_BOOL bDRMPlayerMode;
+
     OMX_BOOL configChange;
     OMX_BOOL IntraRefreshVOP;
     OMX_VIDEO_CONTROLRATETYPE eControlRate[ALL_PORT_NUM];

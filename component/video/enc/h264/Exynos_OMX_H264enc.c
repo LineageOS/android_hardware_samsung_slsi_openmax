@@ -993,64 +993,25 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
                                 (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        /* Register input buffer */
+        /* Register output buffer */
         /*************/
         /*    TBD    */
         /*************/
-        ExynosVideoPlane plane;
         for (i = 0; i < pExynosOutputPort->portDefinition.nBufferCountActual; i++) {
-            plane.addr = pExynosOutputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer;
+            ExynosVideoPlane plane;
+            if (pVideoEnc->bDRMPlayerMode == OMX_TRUE) {
+                plane.addr = Exynos_OSAL_SharedMemory_IONToVirt(pVideoEnc->hSharedMemory, pExynosOutputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
+            } else {
+                plane.addr = pExynosOutputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer;
+            }
             plane.fd = pExynosOutputPort->extendBufferHeader[i].buf_fd[0];
             plane.allocSize = OutBufferSize;
             if (pOutbufOps->Register(hMFCHandle, &plane, MFC_OUTPUT_BUFFER_PLANE) != VIDEO_ERROR_NONE) {
-                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Register input buffer");
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Register output buffer");
                 ret = OMX_ErrorInsufficientResources;
                 goto EXIT;
             }
-            pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)&pExynosOutputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer,
-                                   (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
-    }
-
-    /* start header encoding */
-    if (pOutbufOps->Run(hMFCHandle) != VIDEO_ERROR_NONE) {
-        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to run output buffer");
-        ret = OMX_ErrorInsufficientResources;
-        goto EXIT;
-    }
-
-    if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        OMX_BUFFERHEADERTYPE *OMXBuffer = NULL;
-        ExynosVideoBuffer *pVideoBuffer = NULL;
-
-        OMXBuffer = Exynos_OutputBufferGetQueue_Direct(pExynosComponent);
-        if (OMXBuffer == OMX_ErrorNone) {
-            ret = OMX_ErrorUndefined;
-            goto EXIT;
-        }
-
-        if ((pVideoBuffer = pOutbufOps->Dequeue(hMFCHandle)) == NULL) {
-            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: %d: Failed - pOutbufOps->Dequeue", __FUNCTION__, __LINE__);
-            ret = OMX_ErrorUndefined;
-            goto EXIT;
-        }
-
-        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "dst:0x%x, src:0x%x, dataSize:%d",
-                            OMXBuffer->pBuffer,
-                            pVideoBuffer->planes[0].addr,
-                            pVideoBuffer->planes[0].dataSize);
-        Exynos_OSAL_Memcpy(OMXBuffer->pBuffer, pVideoBuffer->planes[0].addr, pVideoBuffer->planes[0].dataSize);
-        OMXBuffer->nFilledLen = pVideoBuffer->planes[0].dataSize;
-        OMXBuffer->nOffset = 0;
-        OMXBuffer->nTimeStamp = 0;
-        OMXBuffer->nFlags |= OMX_BUFFERFLAG_CODECCONFIG;
-        OMXBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-        Exynos_OMX_OutputBufferReturn(pOMXComponent, OMXBuffer);
-
-        pVideoEnc->bFirstOutput = OMX_TRUE;
-        ret = OMX_ErrorNone;
-
-        H264CodecStop(pOMXComponent, OUTPUT_PORT_INDEX);
     }
     pH264Enc->hMFCH264Handle.bConfiguredMFCDst = OMX_TRUE;
 
@@ -1669,7 +1630,13 @@ OMX_ERRORTYPE Exynos_H264Enc_Init(OMX_COMPONENTTYPE *pOMXComponent)
 #ifdef USE_CSC_HW
     csc_method = CSC_METHOD_HW;
 #endif
-    pVideoEnc->csc_handle = csc_init(csc_method);
+    if (pVideoEnc->bDRMPlayerMode == OMX_TRUE) {
+        pVideoEnc->csc_handle = csc_init(CSC_METHOD_HW);
+        csc_set_hw_property(pVideoEnc->csc_handle, CSC_HW_PROPERTY_FIXED_NODE, 2);
+        csc_set_hw_property(pVideoEnc->csc_handle, CSC_HW_PROPERTY_MODE_DRM, pVideoEnc->bDRMPlayerMode);
+    } else {
+        pVideoEnc->csc_handle = csc_init(csc_method);
+    }
     if (pVideoEnc->csc_handle == NULL) {
         ret = OMX_ErrorInsufficientResources;
         goto EXIT;
@@ -2008,23 +1975,26 @@ OMX_ERRORTYPE Exynos_H264Enc_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
     pDstOutputData->bufferHeader = (OMX_BUFFERHEADERTYPE *)pVideoBuffer->pPrivate;
 
     if (pVideoEnc->bFirstOutput == OMX_FALSE) {
-        OMX_U8 *p = NULL;
-        int iSpsSize = 0;
-        int iPpsSize = 0;
+        if (pVideoEnc->bDRMPlayerMode == OMX_FALSE) {
+            OMX_U8 *p = NULL;
+            int iSpsSize = 0;
+            int iPpsSize = 0;
 
-        /* Calculate sps/pps size if needed */
-        p = FindDelimiter((OMX_U8 *)(pDstOutputData->buffer.singlePlaneBuffer.dataBuffer + 4),
-                            pDstOutputData->dataLen - 4);
+            /* start header return */
+            /* Calculate sps/pps size if needed */
+            p = FindDelimiter((OMX_U8 *)(pDstOutputData->buffer.singlePlaneBuffer.dataBuffer + 4),
+                                pDstOutputData->dataLen - 4);
 
-        iSpsSize = (unsigned int)p - (unsigned int)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer;
-        pH264Enc->hMFCH264Handle.headerData.pHeaderSPS =
-            (OMX_PTR)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer;
-        pH264Enc->hMFCH264Handle.headerData.SPSLen = iSpsSize;
+            iSpsSize = (unsigned int)p - (unsigned int)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer;
+            pH264Enc->hMFCH264Handle.headerData.pHeaderSPS =
+                (OMX_PTR)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer;
+            pH264Enc->hMFCH264Handle.headerData.SPSLen = iSpsSize;
 
-        iPpsSize = pDstOutputData->dataLen - iSpsSize;
-        pH264Enc->hMFCH264Handle.headerData.pHeaderPPS =
-            (OMX_U8 *)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer + iSpsSize;
-        pH264Enc->hMFCH264Handle.headerData.PPSLen = iPpsSize;
+            iPpsSize = pDstOutputData->dataLen - iSpsSize;
+            pH264Enc->hMFCH264Handle.headerData.pHeaderPPS =
+                (OMX_U8 *)pDstOutputData->buffer.singlePlaneBuffer.dataBuffer + iSpsSize;
+            pH264Enc->hMFCH264Handle.headerData.PPSLen = iPpsSize;
+        }
 
         pDstOutputData->timeStamp = 0;
         pDstOutputData->nFlags |= OMX_BUFFERFLAG_CODECCONFIG;
@@ -2220,6 +2190,7 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(
     EXYNOS_OMX_BASEPORT           *pExynosPort      = NULL;
     EXYNOS_OMX_VIDEOENC_COMPONENT *pVideoEnc        = NULL;
     EXYNOS_H264ENC_HANDLE         *pH264Enc         = NULL;
+    OMX_BOOL                       bDRMPlayerMode   = OMX_FALSE;
     int i = 0;
 
     FunctionIn();
@@ -2229,7 +2200,12 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "OMX_ErrorBadParameter, Line:%d", __LINE__);
         goto EXIT;
     }
-    if (Exynos_OSAL_Strcmp(EXYNOS_OMX_COMPONENT_H264_ENC, componentName) != 0) {
+
+    if (Exynos_OSAL_Strcmp(EXYNOS_OMX_COMPONENT_H264_ENC, componentName) == 0) {
+        bDRMPlayerMode = OMX_FALSE;
+    } else if (Exynos_OSAL_Strcmp(EXYNOS_OMX_COMPONENT_H264_DRM_ENC, componentName) == 0) {
+        bDRMPlayerMode = OMX_TRUE;
+    } else {
         ret = OMX_ErrorBadParameter;
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "OMX_ErrorBadParameter, componentName:%s, Line:%d", componentName, __LINE__);
         goto EXIT;
@@ -2267,7 +2243,13 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(
     pVideoEnc->quantization.nQpP = 20;
     pVideoEnc->quantization.nQpB = 20;
 
-    Exynos_OSAL_Strcpy(pExynosComponent->componentName, EXYNOS_OMX_COMPONENT_H264_ENC);
+    if (bDRMPlayerMode == OMX_TRUE)
+        Exynos_OSAL_Strcpy(pExynosComponent->componentName, EXYNOS_OMX_COMPONENT_H264_DRM_ENC);
+    else
+        Exynos_OSAL_Strcpy(pExynosComponent->componentName, EXYNOS_OMX_COMPONENT_H264_ENC);
+
+    pVideoEnc->bDRMPlayerMode = bDRMPlayerMode;
+
     /* Set componentVersion */
     pExynosComponent->componentVersion.s.nVersionMajor = VERSIONMAJOR_NUMBER;
     pExynosComponent->componentVersion.s.nVersionMinor = VERSIONMINOR_NUMBER;
@@ -2305,6 +2287,8 @@ OSCL_EXPORT_REF OMX_ERRORTYPE Exynos_OMX_ComponentInit(
     pExynosPort->portDefinition.format.video.eColorFormat = OMX_COLOR_FormatUnused;
     pExynosPort->portDefinition.bEnabled = OMX_TRUE;
     pExynosPort->bufferProcessType = BUFFER_SHARE;
+    if (bDRMPlayerMode == OMX_TRUE)
+        pExynosPort->bufferProcessType = BUFFER_SHARE;
     pExynosPort->portWayType = WAY2_PORT;
 
     for(i = 0; i < ALL_PORT_NUM; i++) {

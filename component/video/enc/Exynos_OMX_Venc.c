@@ -145,6 +145,9 @@ OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
 #endif
     }
 
+    if (pVideoEnc->bDRMPlayerMode == OMX_TRUE)
+        eMemoryType = SECURE_MEMORY;
+
     for (i = 0; i < nBufferCnt; i++) {
         ppCodecBuffer[i] = (CODEC_ENC_BUFFER *)Exynos_OSAL_Malloc(sizeof(CODEC_ENC_BUFFER));
         if (ppCodecBuffer[i] == NULL) {
@@ -914,6 +917,18 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
                         break;
                     }
                     Exynos_Shared_BufferToData(dstInputUseBuffer, &dstInputData, ONE_PLANE);
+                    if (pVideoEnc->bDRMPlayerMode == OMX_TRUE) {
+                        OMX_PTR dataBuffer = NULL;
+                        dataBuffer = Exynos_OSAL_SharedMemory_IONToVirt(pVideoEnc->hSharedMemory,
+                                                    dstInputData.buffer.singlePlaneBuffer.dataBuffer);
+                        if (dataBuffer == NULL) {
+                            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Wrong dst-input Secure buffer", __LINE__);
+                            ret = OMX_ErrorUndefined;
+                            break;
+                        }
+
+                        dstInputData.buffer.singlePlaneBuffer.dataBuffer = dataBuffer;
+                    }
                     Exynos_ResetDataBuffer(dstInputUseBuffer);
                 }
             }

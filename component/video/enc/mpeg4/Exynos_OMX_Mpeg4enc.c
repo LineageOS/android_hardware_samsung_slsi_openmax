@@ -1119,7 +1119,7 @@ OMX_ERRORTYPE Mpeg4CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
                                 (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        /* Register input buffer */
+        /* Register output buffer */
         /*************/
         /*    TBD    */
         /*************/
@@ -1129,56 +1129,11 @@ OMX_ERRORTYPE Mpeg4CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
             plane.fd = pExynosOutputPort->extendBufferHeader[i].buf_fd[0];
             plane.allocSize = OutBufferSize;
             if (pOutbufOps->Register(hMFCHandle, &plane, MFC_OUTPUT_BUFFER_PLANE) != VIDEO_ERROR_NONE) {
-                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Register input buffer");
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Register output buffer");
                 ret = OMX_ErrorInsufficientResources;
                 goto EXIT;
             }
-            pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)&pExynosOutputPort->extendBufferHeader[i].OMXBufferHeader->pBuffer,
-                                   (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
-    }
-
-    /* start header encoding */
-    if (pOutbufOps->Run) {
-        if (pOutbufOps->Run(hMFCHandle) != VIDEO_ERROR_NONE) {
-            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to run output buffer");
-            ret = OMX_ErrorInsufficientResources;
-            goto EXIT;
-        }
-    }
-
-    if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        OMX_BUFFERHEADERTYPE *OMXBuffer = NULL;
-        ExynosVideoBuffer *pVideoBuffer = NULL;
-
-        OMXBuffer = Exynos_OutputBufferGetQueue_Direct(pExynosComponent);
-        if (OMXBuffer == OMX_ErrorNone) {
-            ret = OMX_ErrorUndefined;
-            goto EXIT;
-        }
-
-        if ((pVideoBuffer = pOutbufOps->Dequeue(hMFCHandle)) == NULL) {
-            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: %d: Failed - pOutbufOps->Dequeue", __FUNCTION__, __LINE__);
-            ret = OMX_ErrorUndefined;
-            goto EXIT;
-        }
-
-        Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "dst:0x%x, src:0x%x, dataSize:%d",
-                            OMXBuffer->pBuffer,
-                            pVideoBuffer->planes[0].addr,
-                            pVideoBuffer->planes[0].dataSize);
-        Exynos_OSAL_Memcpy(OMXBuffer->pBuffer, pVideoBuffer->planes[0].addr, pVideoBuffer->planes[0].dataSize);
-        OMXBuffer->nFilledLen = pVideoBuffer->planes[0].dataSize;
-        OMXBuffer->nOffset = 0;
-        OMXBuffer->nTimeStamp = 0;
-        OMXBuffer->nFlags |= OMX_BUFFERFLAG_CODECCONFIG;
-        OMXBuffer->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;
-        Exynos_OMX_OutputBufferReturn(pOMXComponent, OMXBuffer);
-
-        pVideoEnc->bFirstOutput = OMX_TRUE;
-        ret = OMX_ErrorNone;
-
-        Mpeg4CodecStop(pOMXComponent, OUTPUT_PORT_INDEX);
     }
     pMpeg4Enc->hMFCMpeg4Handle.bConfiguredMFCDst = OMX_TRUE;
 
@@ -2202,6 +2157,7 @@ OMX_ERRORTYPE Exynos_Mpeg4Enc_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
     if (pVideoEnc->bFirstOutput == OMX_FALSE) {
         OMX_U8 *p = NULL;
 
+        /* start header return */
         pDstOutputData->timeStamp = 0;
         pDstOutputData->nFlags |= OMX_BUFFERFLAG_CODECCONFIG;
         pDstOutputData->nFlags |= OMX_BUFFERFLAG_ENDOFFRAME;

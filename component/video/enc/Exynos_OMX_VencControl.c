@@ -200,10 +200,13 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
         goto EXIT;
     }
 
-    if (pExynosPort->bNeedContigMem == OMX_TRUE) {
+    if ((pVideoEnc->bDRMPlayerMode == OMX_TRUE) &&
+        (nPortIndex == OUTPUT_PORT_INDEX)) {
+        eMemType = SECURE_MEMORY;
+    } else if (pExynosPort->bNeedContigMem == OMX_TRUE) {
         eMemType = CONTIG_MEMORY;
     } else if ((nPortIndex == INPUT_PORT_INDEX) &&
-        (pExynosPort->bufferProcessType & BUFFER_SHARE)) {
+               (pExynosPort->bufferProcessType & BUFFER_SHARE)) {
         eMemType = NORMAL_MEMORY;
     }
 
@@ -228,7 +231,10 @@ OMX_ERRORTYPE Exynos_OMX_AllocateBuffer(
             pExynosPort->extendBufferHeader[i].buf_fd[0] = fdTempBuffer;
             pExynosPort->bufferStateAllocate[i] = (BUFFER_STATE_ALLOCATED | HEADER_STATE_ALLOCATED);
             INIT_SET_SIZE_VERSION(pTempBufferHdr, OMX_BUFFERHEADERTYPE);
-            pTempBufferHdr->pBuffer        = pTempBuffer;
+            if (eMemType == SECURE_MEMORY)
+                pTempBufferHdr->pBuffer = fdTempBuffer;
+            else
+                pTempBufferHdr->pBuffer = pTempBuffer;
             pTempBufferHdr->nAllocLen      = nSizeBytes;
             pTempBufferHdr->pAppPrivate    = pAppPrivate;
             if (nPortIndex == INPUT_PORT_INDEX)
@@ -324,7 +330,13 @@ OMX_ERRORTYPE Exynos_OMX_FreeBuffer(
 
             if (pOMXBufferHdr->pBuffer == pBufferHdr->pBuffer) {
                 if (pExynosPort->bufferStateAllocate[i] & BUFFER_STATE_ALLOCATED) {
-                    Exynos_OSAL_SharedMemory_Free(pVideoEnc->hSharedMemory, pOMXBufferHdr->pBuffer);
+                    if ((pVideoEnc->bDRMPlayerMode == OMX_TRUE) &&
+                        (nPortIndex == OUTPUT_PORT_INDEX)) {
+                        OMX_PTR mapBuffer = Exynos_OSAL_SharedMemory_IONToVirt(pVideoEnc->hSharedMemory, (int)pOMXBufferHdr->pBuffer);
+                        Exynos_OSAL_SharedMemory_Free(pVideoEnc->hSharedMemory, mapBuffer);
+                    } else {
+                        Exynos_OSAL_SharedMemory_Free(pVideoEnc->hSharedMemory, pOMXBufferHdr->pBuffer);
+                    }
                     pOMXBufferHdr->pBuffer = NULL;
                     pBufferHdr->pBuffer = NULL;
                 } else if (pExynosPort->bufferStateAllocate[i] & BUFFER_STATE_ASSIGNED) {

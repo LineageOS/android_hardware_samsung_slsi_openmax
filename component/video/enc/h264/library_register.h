@@ -33,11 +33,12 @@
 
 
 #define OSCL_EXPORT_REF __attribute__((visibility("default")))
-#define MAX_COMPONENT_NUM       1
+#define MAX_COMPONENT_NUM       2
 #define MAX_COMPONENT_ROLE_NUM  1
 
 /* H.264 */
 #define EXYNOS_OMX_COMPONENT_H264_ENC      "OMX.Exynos.AVC.Encoder"
+#define EXYNOS_OMX_COMPONENT_H264_DRM_ENC  "OMX.Exynos.AVC.Encoder.secure"
 #define EXYNOS_OMX_COMPONENT_H264_ENC_ROLE "video_encoder.avc"
 
 
