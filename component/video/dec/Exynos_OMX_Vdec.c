@@ -555,16 +555,16 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 pExynosComponent->checkTimeStamp.needSetStartTimeStamp = OMX_FALSE;
                 pExynosComponent->checkTimeStamp.needCheckStartTimeStamp = OMX_FALSE;
             } else {
-                Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "drop frame after seeking", pExynosComponent);
-                if (exynosOutputPort->bufferProcessType & BUFFER_SHARE)
-                    Exynos_OMX_FillThisBuffer(pOMXComponent, outputUseBuffer->bufferHeader);
-
                 if (pExynosComponent->checkTimeStamp.startTimeStamp < dstOutputData->timeStamp) {
                     pExynosComponent->checkTimeStamp.startTimeStamp = -19761123;
                     pExynosComponent->checkTimeStamp.nStartFlags = 0x0;
                     pExynosComponent->checkTimeStamp.needSetStartTimeStamp = OMX_FALSE;
                     pExynosComponent->checkTimeStamp.needCheckStartTimeStamp = OMX_FALSE;
                 } else {
+                    Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "drop frame after seeking", pExynosComponent);
+                    if (exynosOutputPort->bufferProcessType & BUFFER_SHARE)
+                        Exynos_OMX_FillThisBuffer(pOMXComponent, outputUseBuffer->bufferHeader);
+
                     ret = OMX_TRUE;
                     goto EXIT;
                 }
