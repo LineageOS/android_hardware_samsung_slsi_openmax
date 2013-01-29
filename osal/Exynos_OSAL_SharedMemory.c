@@ -176,7 +176,7 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
         break;
     case CONTIG_MEMORY:
         mask = ION_HEAP_EXYNOS_CONTIG_MASK;
-        flag = 0;
+        flag = ION_EXYNOS_MFC_INPUT_MASK;
         break;
     default:
         pBuffer = NULL;
@@ -187,7 +187,7 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
     IONBuffer = ion_alloc((ion_client)pHandle->hIONHandle, size, 0, mask, flag);
     if ((IONBuffer <= 0) &&
         (memoryType == CONTIG_MEMORY)) {
-        flag = ION_EXYNOS_MFC_INPUT_MASK;
+        flag = 0;
         IONBuffer = ion_alloc((ion_client)pHandle->hIONHandle, size, 0, mask, flag);
     }
 
