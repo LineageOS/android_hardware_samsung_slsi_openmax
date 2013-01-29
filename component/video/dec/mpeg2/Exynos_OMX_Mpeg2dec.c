@@ -670,13 +670,14 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         if ((pExynosInputPort->portDefinition.format.video.nFrameWidth != pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth) ||
             (pExynosInputPort->portDefinition.format.video.nFrameHeight != pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight)) {
+            pExynosOutputPort->exceptionFlag = NEED_PORT_DISABLE;
+
             pExynosInputPort->portDefinition.format.video.nFrameWidth = pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth;
             pExynosInputPort->portDefinition.format.video.nFrameHeight = pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight;
             pExynosInputPort->portDefinition.format.video.nStride = ((pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
             pExynosInputPort->portDefinition.format.video.nSliceHeight = ((pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight + 15) & (~15));
 
             Exynos_UpdateFrameSize(pOMXComponent);
-            pExynosOutputPort->exceptionFlag = NEED_PORT_DISABLE;
 
             /** Send Port Settings changed call back **/
             (*(pExynosComponent->pCallbacks->EventHandler))
@@ -691,6 +692,8 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
         if ((pExynosInputPort->portDefinition.format.video.nFrameWidth != pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth) ||
             (pExynosInputPort->portDefinition.format.video.nFrameHeight != pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight) ||
             (pExynosOutputPort->portDefinition.nBufferCountActual != pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum)) {
+            pExynosOutputPort->exceptionFlag = NEED_PORT_DISABLE;
+
             pExynosInputPort->portDefinition.format.video.nFrameWidth = pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth;
             pExynosInputPort->portDefinition.format.video.nFrameHeight = pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight;
             pExynosInputPort->portDefinition.format.video.nStride = ((pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
@@ -700,7 +703,6 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
             pExynosOutputPort->portDefinition.nBufferCountMin = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum - 2;
 
             Exynos_UpdateFrameSize(pOMXComponent);
-            pExynosOutputPort->exceptionFlag = NEED_PORT_DISABLE;
 
             /** Send Port Settings changed call back **/
             (*(pExynosComponent->pCallbacks->EventHandler))

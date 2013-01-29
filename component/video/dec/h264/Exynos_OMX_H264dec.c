@@ -800,13 +800,14 @@ OMX_ERRORTYPE H264CodecCheckResolutionChange(OMX_COMPONENTTYPE *pOMXComponent)
         if ((pVideoDec->bReconfigDPB) ||
             (pInputPort->portDefinition.format.video.nFrameWidth != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth) ||
             (pInputPort->portDefinition.format.video.nFrameHeight != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight)) {
+            pOutputPort->exceptionFlag = NEED_PORT_DISABLE;
+
             pInputPort->portDefinition.format.video.nFrameWidth     = pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth;
             pInputPort->portDefinition.format.video.nFrameHeight    = pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight;
             pInputPort->portDefinition.format.video.nStride         = ((pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
             pInputPort->portDefinition.format.video.nSliceHeight    = ((pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight + 15) & (~15));
 
             Exynos_UpdateFrameSize(pOMXComponent);
-            pOutputPort->exceptionFlag = NEED_PORT_DISABLE;
 
             /** Send Port Settings changed call back **/
             (*(pExynosComponent->pCallbacks->EventHandler))
@@ -822,6 +823,8 @@ OMX_ERRORTYPE H264CodecCheckResolutionChange(OMX_COMPONENTTYPE *pOMXComponent)
             (pInputPort->portDefinition.format.video.nFrameWidth != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth) ||
             (pInputPort->portDefinition.format.video.nFrameHeight != pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight) ||
             (pOutputPort->portDefinition.nBufferCountActual != pH264Dec->hMFCH264Handle.maxDPBNum)) {
+            pOutputPort->exceptionFlag = NEED_PORT_DISABLE;
+
             pInputPort->portDefinition.format.video.nFrameWidth     = pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth;
             pInputPort->portDefinition.format.video.nFrameHeight    = pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameHeight;
             pInputPort->portDefinition.format.video.nStride         = ((pH264Dec->hMFCH264Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
@@ -831,7 +834,6 @@ OMX_ERRORTYPE H264CodecCheckResolutionChange(OMX_COMPONENTTYPE *pOMXComponent)
             pOutputPort->portDefinition.nBufferCountMin     = pH264Dec->hMFCH264Handle.maxDPBNum - 2;
 
             Exynos_UpdateFrameSize(pOMXComponent);
-            pOutputPort->exceptionFlag = NEED_PORT_DISABLE;
 
             /** Send Port Settings changed call back **/
             (*(pExynosComponent->pCallbacks->EventHandler))

@@ -1483,11 +1483,12 @@ OMX_ERRORTYPE Exynos_Shared_ANBBufferToData(EXYNOS_OMX_DATABUFFER *pUseBuffer, E
 
         width = pExynosPort->portDefinition.format.video.nFrameWidth;
         height = pExynosPort->portDefinition.format.video.nFrameHeight;
-        if ((pUseBuffer->bufferHeader != NULL) && (pUseBuffer->bufferHeader->pBuffer != NULL)) {
+        if ((pUseBuffer->bufferHeader != NULL) &&
+            (pUseBuffer->bufferHeader->pBuffer != NULL) &&
+            (pExynosPort->exceptionFlag == GENERAL_STATE)) {
             Exynos_OSAL_LockANB(pUseBuffer->bufferHeader->pBuffer, width, height, pExynosPort->portDefinition.format.video.eColorFormat, &stride, planes);
             pUseBuffer->dataLen = sizeof(void *);
         } else {
-            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s : %d", __FUNCTION__, __LINE__);
             ret = OMX_ErrorBadParameter;
             goto EXIT;
         }
