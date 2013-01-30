@@ -145,9 +145,6 @@ OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
 
     FunctionIn();
 
-    if (pVideoDec->bDRMPlayerMode == OMX_TRUE)
-        eMemoryType = SECURE_MEMORY;
-
     if (nPortIndex == INPUT_PORT_INDEX) {
         ppCodecBuffer = &(pVideoDec->pMFCDecInputBuffer[0]);
         nPlaneCnt = MFC_INPUT_BUFFER_PLANE;
@@ -158,6 +155,9 @@ OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
         eMemoryType = NORMAL_MEMORY;
 #endif
     }
+
+    if (pVideoDec->bDRMPlayerMode == OMX_TRUE)
+        eMemoryType = SECURE_MEMORY;
 
     for (i = 0; i < nBufferCnt; i++) {
         ppCodecBuffer[i] = (CODEC_DEC_BUFFER *)Exynos_OSAL_Malloc(sizeof(CODEC_DEC_BUFFER));
