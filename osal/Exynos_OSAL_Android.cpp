@@ -623,6 +623,24 @@ EXIT:
     return ret;
 }
 
+OMX_ERRORTYPE Exynos_OSAL_SetPrependSPSPPSToIDR(
+    OMX_PTR pComponentParameterStructure,
+    OMX_PTR pbPrependSpsPpsToIdr)
+{
+    OMX_ERRORTYPE                    ret        = OMX_ErrorNone;
+    PrependSPSPPSToIDRFramesParams  *pANBParams = (PrependSPSPPSToIDRFramesParams *)pComponentParameterStructure;
+    ret = Exynos_OMX_Check_SizeVersion(pANBParams, sizeof(PrependSPSPPSToIDRFramesParams));
+    if (ret != OMX_ErrorNone) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: Exynos_OMX_Check_SizeVersion(PrependSPSPPSToIDRFramesParams) is failed", __func__);
+        goto EXIT;
+    }
+
+    (*((OMX_BOOL *)pbPrependSpsPpsToIdr)) = pANBParams->bEnable;
+
+EXIT:
+    return ret;
+}
+
 OMX_COLOR_FORMATTYPE Exynos_OSAL_Hal2OMXPixelFormat(
     unsigned int hal_format)
 {

@@ -1303,10 +1303,9 @@ OMX_ERRORTYPE Exynos_H264Enc_SetParameter(
 #ifdef USE_H264_PREPEND_SPS_PPS
     case OMX_IndexParamPrependSPSPPSToIDR:
     {
-        EXYNOS_H264ENC_HANDLE *pH264Enc = NULL;
+        EXYNOS_H264ENC_HANDLE *pH264Enc = (EXYNOS_H264ENC_HANDLE *)((EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
 
-        pH264Enc = (EXYNOS_H264ENC_HANDLE *)((EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
-        pH264Enc->hMFCH264Handle.bPrependSpsPpsToIdr = OMX_TRUE;
+        ret = Exynos_OSAL_SetPrependSPSPPSToIDR(pComponentParameterStructure, &(pH264Enc->hMFCH264Handle.bPrependSpsPpsToIdr));
     }
         break;
 #endif
