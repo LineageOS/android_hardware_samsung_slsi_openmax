@@ -742,9 +742,6 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
 
     FunctionIn();
 
-    /* get dpb count */
-    nOutbufs = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum;
-
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         /* should be done before prepare output buffer */
         if (pOutbufOps->Enable_Cacheable(hMFCHandle) != VIDEO_ERROR_NONE) {
@@ -754,11 +751,6 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     }
 
     pOutbufOps->Set_Shareable(hMFCHandle);
-    if (pOutbufOps->Setup(hMFCHandle, nOutbufs) != VIDEO_ERROR_NONE) {
-        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to setup output buffer");
-        ret = OMX_ErrorInsufficientResources;
-        goto EXIT;
-    }
 
     ExynosVideoPlane planes[MFC_OUTPUT_BUFFER_PLANE];
     OMX_U32 nAllocLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
@@ -769,6 +761,14 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     nAllocLen[1] = pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nAlignPlaneSize[1];
 
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
+        /* get dpb count */
+        nOutbufs = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum;
+        if (pOutbufOps->Setup(hMFCHandle, nOutbufs) != VIDEO_ERROR_NONE) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to setup output buffer");
+            ret = OMX_ErrorInsufficientResources;
+            goto EXIT;
+        }
+
         ret = Exynos_Allocate_CodecBuffers(pOMXComponent, OUTPUT_PORT_INDEX, nOutbufs, nAllocLen);
         if (ret != OMX_ErrorNone)
             goto EXIT;
@@ -783,6 +783,14 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
                             (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
+        /* get dpb count */
+        nOutbufs = pExynosOutputPort->portDefinition.nBufferCountActual;
+        if (pOutbufOps->Setup(hMFCHandle, nOutbufs) != VIDEO_ERROR_NONE) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to setup output buffer");
+            ret = OMX_ErrorInsufficientResources;
+            goto EXIT;
+        }
+
         /* Register output buffer */
         /*************/
         /*    TBD    */
