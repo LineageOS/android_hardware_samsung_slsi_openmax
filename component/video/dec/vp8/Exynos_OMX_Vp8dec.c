@@ -772,7 +772,15 @@ OMX_ERRORTYPE VP8CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
 
     int i, nOutbufs;
 
+    OMX_U32 nAllocLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
+    OMX_U32 dataLen[MFC_OUTPUT_BUFFER_PLANE]   = {0, 0};
+
     FunctionIn();
+
+    nAllocLen[0] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[0];
+    nAllocLen[1] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[1];
+
+    pOutbufOps->Set_Shareable(hMFCHandle);
 
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         /* should be done before prepare output buffer */
@@ -780,19 +788,7 @@ OMX_ERRORTYPE VP8CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
             ret = OMX_ErrorInsufficientResources;
             goto EXIT;
         }
-    }
 
-    pOutbufOps->Set_Shareable(hMFCHandle);
-
-    ExynosVideoPlane planes[MFC_OUTPUT_BUFFER_PLANE];
-    OMX_U32 nAllocLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
-    OMX_U32 dataLen[MFC_OUTPUT_BUFFER_PLANE] = {0, 0};
-    int plane;
-
-    nAllocLen[0] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[0];
-    nAllocLen[1] = pVp8Dec->hMFCVp8Handle.codecOutbufConf.nAlignPlaneSize[1];
-
-    if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         /* get dpb count */
         nOutbufs = pVp8Dec->hMFCVp8Handle.maxDPBNum;
         if (pOutbufOps->Setup(hMFCHandle, nOutbufs) != VIDEO_ERROR_NONE) {
@@ -815,6 +811,9 @@ OMX_ERRORTYPE VP8CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
                             (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
+        ExynosVideoPlane planes[MFC_OUTPUT_BUFFER_PLANE];
+        int plane;
+
         /* get dpb count */
         nOutbufs = pExynosOutputPort->portDefinition.nBufferCountActual;
         if (pOutbufOps->Setup(hMFCHandle, nOutbufs) != VIDEO_ERROR_NONE) {
