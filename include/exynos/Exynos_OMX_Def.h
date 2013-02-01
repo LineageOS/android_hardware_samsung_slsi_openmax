@@ -73,6 +73,12 @@ typedef struct _EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE {
     OMX_BOOL        bNeedContigMem;
 } EXYNOS_OMX_VIDEO_PARAM_PORTMEMTYPE;
 
+typedef struct _EXYNOS_OMX_VIDEO_PARAM_DTSMODE {
+    OMX_U32         nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_BOOL        bDTSMode;
+} EXYNOS_OMX_VIDEO_PARAM_DTSMODE;
+
 typedef struct _EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO {
     OMX_U32         nSize;
     OMX_VERSIONTYPE nVersion;
@@ -94,6 +100,8 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexVendorNeedContigMemory         = 0x7F000004,
 #define EXYNOS_INDEX_CONFIG_GET_BUFFER_FD "OMX.SEC.index.GetBufferFD"
     OMX_IndexVendorGetBufferFD              = 0x7F000005,
+#define EXYNOS_INDEX_PARAM_SET_DTS_MODE "OMX.SEC.index.SetDTSMode"
+    OMX_IndexVendorSetDTSMode               = 0x7F000006,
 
     /* for Android Native Window */
 #define EXYNOS_INDEX_PARAM_ENABLE_ANB "OMX.google.android.index.enableAndroidNativeBuffers"

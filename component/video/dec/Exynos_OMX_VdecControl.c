@@ -1278,6 +1278,18 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetParameter(
         pExynosPort->bNeedContigMem = pPortMemType->bNeedContigMem;
     }
         break;
+    case OMX_IndexVendorSetDTSMode:
+    {
+        EXYNOS_OMX_VIDEODEC_COMPONENT   *pVideoDec  = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
+        EXYNOS_OMX_VIDEO_PARAM_DTSMODE  *pDTSParam  = (EXYNOS_OMX_VIDEO_PARAM_DTSMODE *)ComponentParameterStructure;
+
+        ret = Exynos_OMX_Check_SizeVersion(pDTSParam, sizeof(EXYNOS_OMX_VIDEO_PARAM_DTSMODE));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pVideoDec->bDTSMode = pDTSParam->bDTSMode;
+    }
+        break;
     default:
     {
         ret = Exynos_OMX_SetParameter(hComponent, nIndex, ComponentParameterStructure);
@@ -1445,6 +1457,10 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetExtensionIndex(
         goto EXIT;
     } else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_CONFIG_GET_BUFFER_FD) == 0) {
         *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorGetBufferFD;
+        ret = OMX_ErrorNone;
+        goto EXIT;
+    } else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_SET_DTS_MODE) == 0) {
+        *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorSetDTSMode;
         ret = OMX_ErrorNone;
         goto EXIT;
     }

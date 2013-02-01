@@ -85,6 +85,7 @@ typedef struct _EXYNOS_OMX_VIDEODEC_COMPONENT
 {
     OMX_HANDLETYPE hCodecHandle;
     OMX_BOOL bThumbnailMode;
+    OMX_BOOL bDTSMode;                  /* true:Decoding Time Stamp, false:Presentation Time Stamp */
     OMX_BOOL bFirstFrame;
     CODEC_DEC_BUFFER *pMFCDecInputBuffer[MFC_INPUT_BUFFER_NUM_MAX];
     CODEC_DEC_BUFFER *pMFCDecOutputBuffer[MFC_OUTPUT_BUFFER_NUM_MAX];

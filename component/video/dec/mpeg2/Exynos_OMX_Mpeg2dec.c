@@ -573,6 +573,10 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
     if (pVideoDec->bThumbnailMode == OMX_TRUE)
         pDecOps->Set_DisplayDelay(hMFCHandle, 0);
 
+    if ((pDecOps->Enable_DTSMode != NULL) &&
+        (pVideoDec->bDTSMode == OMX_TRUE))
+        pDecOps->Enable_DTSMode(hMFCHandle);
+
     /* input buffer info */
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
     bufferConf.eCompressionFormat = VIDEO_CODING_MPEG2;
@@ -1682,19 +1686,18 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
     } else {
         /* For timestamp correction. if mfc support frametype detect */
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "disp_pic_frame_type: %d", pVideoBuffer->frameType);
-#ifdef NEED_TIMESTAMP_REORDER
-        if ((pVideoBuffer->frameType == VIDEO_FRAME_I)) {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-            pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp = indexTimestamp;
-        } else {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp];
+
+        /* NEED TIMESTAMP REORDER */
+        if (pVideoDec->bDTSMode == OMX_TRUE) {
+            if (pVideoBuffer->frameType == VIDEO_FRAME_I)
+                pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp = indexTimestamp;
+            else
+                indexTimestamp = pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp;
         }
-#else
+
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-#endif
+
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
 

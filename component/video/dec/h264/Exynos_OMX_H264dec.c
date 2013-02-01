@@ -912,6 +912,10 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
     if (pVideoDec->bThumbnailMode == OMX_TRUE)
         pDecOps->Set_DisplayDelay(hMFCHandle, 0);
 
+    if ((pDecOps->Enable_DTSMode != NULL) &&
+        (pVideoDec->bDTSMode == OMX_TRUE))
+        pDecOps->Enable_DTSMode(hMFCHandle);
+
     /* input buffer info */
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
     bufferConf.eCompressionFormat = VIDEO_CODING_AVC;
@@ -2093,19 +2097,18 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
     } else {
         /* For timestamp correction. if mfc support frametype detect */
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "disp_pic_frame_type: %d", pVideoBuffer->frameType);
-#ifdef NEED_TIMESTAMP_REORDER
-        if ((pVideoBuffer->frameType == VIDEO_FRAME_I)) {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-            pH264Dec->hMFCH264Handle.outputIndexTimestamp = indexTimestamp;
-        } else {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[pH264Dec->hMFCH264Handle.outputIndexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[pH264Dec->hMFCH264Handle.outputIndexTimestamp];
+
+        /* NEED TIMESTAMP REORDER */
+        if (pVideoDec->bDTSMode == OMX_TRUE) {
+            if (pVideoBuffer->frameType == VIDEO_FRAME_I)
+                pH264Dec->hMFCH264Handle.outputIndexTimestamp = indexTimestamp;
+            else
+                indexTimestamp = pH264Dec->hMFCH264Handle.outputIndexTimestamp;
         }
-#else
+
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-#endif
+
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
 

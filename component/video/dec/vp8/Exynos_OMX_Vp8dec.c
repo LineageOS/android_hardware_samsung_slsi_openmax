@@ -605,6 +605,10 @@ OMX_ERRORTYPE VP8CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     if (pVideoDec->bThumbnailMode == OMX_TRUE)
         pDecOps->Set_DisplayDelay(hMFCHandle, 0);
 
+    if ((pDecOps->Enable_DTSMode != NULL) &&
+        (pVideoDec->bDTSMode == OMX_TRUE))
+        pDecOps->Enable_DTSMode(hMFCHandle);
+
     /* input buffer info */
     Exynos_OSAL_Memset(&bufferConf, 0, sizeof(bufferConf));
     bufferConf.eCompressionFormat = VIDEO_CODING_VP8;
@@ -1626,19 +1630,18 @@ OMX_ERRORTYPE Exynos_VP8Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     } else {
         /* For timestamp correction. if mfc support frametype detect */
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "disp_pic_frame_type: %d", pVideoBuffer->frameType);
-#ifdef NEED_TIMESTAMP_REORDER
-        if ((pVideoBuffer->frameType == VIDEO_FRAME_I)) {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-            pVp8Dec->hMFCVp8Handle.outputIndexTimestamp = indexTimestamp;
-        } else {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[pVp8Dec->hMFCVp8Handle.outputIndexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[pVp8Dec->hMFCVp8Handle.outputIndexTimestamp];
+
+        /* NEED TIMESTAMP REORDER */
+        if (pVideoDec->bDTSMode == OMX_TRUE) {
+            if (pVideoBuffer->frameType == VIDEO_FRAME_I)
+               pVp8Dec->hMFCVp8Handle.outputIndexTimestamp = indexTimestamp;
+            else
+               indexTimestamp = pVp8Dec->hMFCVp8Handle.outputIndexTimestamp;
         }
-#else
+
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
-#endif
+
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
 
