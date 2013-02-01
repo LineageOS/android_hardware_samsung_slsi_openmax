@@ -499,16 +499,16 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
     if ((pDataBuffer[0] != NULL) &&
         (pDataBuffer[0]->dataValid == OMX_TRUE)) {
         if (nPortIndex == INPUT_PORT_INDEX)
-            Exynos_FlushInputBufferReturn(pOMXComponent, pDataBuffer[0]);
+            Exynos_InputBufferReturn(pOMXComponent, pDataBuffer[0]);
         else if (nPortIndex == OUTPUT_PORT_INDEX)
-            Exynos_FlushOutputBufferReturn(pOMXComponent, pDataBuffer[0]);
+            Exynos_OutputBufferReturn(pOMXComponent, pDataBuffer[0]);
     }
     if ((pDataBuffer[1] != NULL) &&
         (pDataBuffer[1]->dataValid == OMX_TRUE)) {
         if (nPortIndex == INPUT_PORT_INDEX)
-            Exynos_FlushInputBufferReturn(pOMXComponent, pDataBuffer[1]);
+            Exynos_InputBufferReturn(pOMXComponent, pDataBuffer[1]);
         else if (nPortIndex == OUTPUT_PORT_INDEX)
-            Exynos_FlushOutputBufferReturn(pOMXComponent, pDataBuffer[1]);
+            Exynos_OutputBufferReturn(pOMXComponent, pDataBuffer[1]);
     }
 
     if (pExynosComponent->bMultiThreadProcess == OMX_TRUE) {
@@ -688,12 +688,12 @@ EXIT:
 }
 
 OMX_ERRORTYPE Exynos_InputBufferReturn(
-    OMX_COMPONENTTYPE   *pOMXComponent)
+    OMX_COMPONENTTYPE       *pOMXComponent,
+    EXYNOS_OMX_DATABUFFER   *pDataBuffer)
 {
     OMX_ERRORTYPE                ret                = OMX_ErrorNone;
     EXYNOS_OMX_BASECOMPONENT    *pExynosComponent   = NULL;
     EXYNOS_OMX_BASEPORT         *pExynosPort        = NULL;
-    EXYNOS_OMX_DATABUFFER       *pDataBuffer        = NULL;
     OMX_BUFFERHEADERTYPE        *pBufferHdr         = NULL;
 
     FunctionIn();
@@ -709,22 +709,16 @@ OMX_ERRORTYPE Exynos_InputBufferReturn(
     }
     pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
     pExynosPort = &(pExynosComponent->pExynosPort[INPUT_PORT_INDEX]);
-
-    if (pExynosPort->bufferProcessType & BUFFER_COPY) {
-        pDataBuffer = &(pExynosPort->way.port2WayDataBuffer.inputDataBuffer);
-    } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
-        pDataBuffer = &(pExynosPort->way.port2WayDataBuffer.outputDataBuffer);
-    }
 
     if (pDataBuffer != NULL)
         pBufferHdr = pDataBuffer->bufferHeader;
 
     if (pBufferHdr != NULL) {
         if (pExynosPort->markType.hMarkTargetComponent != NULL) {
-            pBufferHdr->hMarkTargetComponent = pExynosPort->markType.hMarkTargetComponent;
-            pBufferHdr->pMarkData            = pExynosPort->markType.pMarkData;
-            pExynosPort->markType.hMarkTargetComponent = NULL;
-            pExynosPort->markType.pMarkData = NULL;
+            pBufferHdr->hMarkTargetComponent            = pExynosPort->markType.hMarkTargetComponent;
+            pBufferHdr->pMarkData                       = pExynosPort->markType.pMarkData;
+            pExynosPort->markType.hMarkTargetComponent  = NULL;
+            pExynosPort->markType.pMarkData             = NULL;
         }
 
         if (pBufferHdr->hMarkTargetComponent != NULL) {
@@ -734,72 +728,13 @@ OMX_ERRORTYPE Exynos_InputBufferReturn(
                                 OMX_EventMark,
                                 0, 0, pBufferHdr->pMarkData);
             } else {
-                pExynosComponent->propagateMarkType.hMarkTargetComponent = pBufferHdr->hMarkTargetComponent;
-                pExynosComponent->propagateMarkType.pMarkData = pBufferHdr->pMarkData;
+                pExynosComponent->propagateMarkType.hMarkTargetComponent    = pBufferHdr->hMarkTargetComponent;
+                pExynosComponent->propagateMarkType.pMarkData               = pBufferHdr->pMarkData;
             }
         }
 
-        pBufferHdr->nFilledLen = 0;
-        pBufferHdr->nOffset = 0;
-        Exynos_OMX_InputBufferReturn(pOMXComponent, pBufferHdr);
-    }
-
-    /* reset dataBuffer */
-    Exynos_ResetDataBuffer(pDataBuffer);
-
-EXIT:
-    FunctionOut();
-
-    return ret;
-}
-
-OMX_ERRORTYPE Exynos_FlushInputBufferReturn(
-    OMX_COMPONENTTYPE       *pOMXComponent,
-    EXYNOS_OMX_DATABUFFER   *pDataBuffer)
-{
-    OMX_ERRORTYPE                ret = OMX_ErrorNone;
-    EXYNOS_OMX_BASECOMPONENT    *pExynosComponent   = NULL;
-    EXYNOS_OMX_BASEPORT         *pExynosPort        = NULL;
-    OMX_BUFFERHEADERTYPE        *pBufferHdr         = NULL;
-
-    FunctionIn();
-
-    if (pOMXComponent == NULL) {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
-    }
-
-    if (pOMXComponent->pComponentPrivate == NULL) {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
-    }
-    pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
-    pExynosPort = &(pExynosComponent->pExynosPort[INPUT_PORT_INDEX]);
-
-    pBufferHdr = pDataBuffer->bufferHeader;
-
-    if (pBufferHdr != NULL) {
-        if (pExynosPort->markType.hMarkTargetComponent != NULL) {
-            pBufferHdr->hMarkTargetComponent  = pExynosPort->markType.hMarkTargetComponent;
-            pBufferHdr->pMarkData             = pExynosPort->markType.pMarkData;
-            pExynosPort->markType.hMarkTargetComponent = NULL;
-            pExynosPort->markType.pMarkData = NULL;
-        }
-
-        if (pBufferHdr->hMarkTargetComponent != NULL) {
-            if (pBufferHdr->hMarkTargetComponent == pOMXComponent) {
-                pExynosComponent->pCallbacks->EventHandler(pOMXComponent,
-                                pExynosComponent->callbackData,
-                                OMX_EventMark,
-                                0, 0, pBufferHdr->pMarkData);
-            } else {
-                pExynosComponent->propagateMarkType.hMarkTargetComponent = pBufferHdr->hMarkTargetComponent;
-                pExynosComponent->propagateMarkType.pMarkData = pBufferHdr->pMarkData;
-            }
-        }
-
-        pBufferHdr->nFilledLen = 0;
-        pBufferHdr->nOffset = 0;
+        pBufferHdr->nFilledLen  = 0;
+        pBufferHdr->nOffset     = 0;
         Exynos_OMX_InputBufferReturn(pOMXComponent, pBufferHdr);
     }
 
@@ -870,12 +805,12 @@ EXIT:
 }
 
 OMX_ERRORTYPE Exynos_OutputBufferReturn(
-    OMX_COMPONENTTYPE   *pOMXComponent)
+    OMX_COMPONENTTYPE       *pOMXComponent,
+    EXYNOS_OMX_DATABUFFER   *pDataBuffer)
 {
     OMX_ERRORTYPE             ret               = OMX_ErrorNone;
     EXYNOS_OMX_BASECOMPONENT *pExynosComponent  = NULL;
     EXYNOS_OMX_BASEPORT      *pExynosPort       = NULL;
-    EXYNOS_OMX_DATABUFFER    *pDataBuffer       = NULL;
     OMX_BUFFERHEADERTYPE     *pBufferHdr        = NULL;
 
     FunctionIn();
@@ -892,8 +827,8 @@ OMX_ERRORTYPE Exynos_OutputBufferReturn(
     pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
     pExynosPort = &(pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX]);
 
-    pDataBuffer = &(pExynosPort->way.port2WayDataBuffer.outputDataBuffer);
-    pBufferHdr = pDataBuffer->bufferHeader;
+    if (pDataBuffer != NULL)
+        pBufferHdr = pDataBuffer->bufferHeader;
 
     if (pBufferHdr != NULL) {
         pBufferHdr->nFilledLen = pDataBuffer->remainDataLen;
@@ -904,8 +839,8 @@ OMX_ERRORTYPE Exynos_OutputBufferReturn(
         if (pExynosComponent->propagateMarkType.hMarkTargetComponent != NULL) {
             pBufferHdr->hMarkTargetComponent = pExynosComponent->propagateMarkType.hMarkTargetComponent;
             pBufferHdr->pMarkData            = pExynosComponent->propagateMarkType.pMarkData;
-            pExynosComponent->propagateMarkType.hMarkTargetComponent = NULL;
-            pExynosComponent->propagateMarkType.pMarkData = NULL;
+            pExynosComponent->propagateMarkType.hMarkTargetComponent    = NULL;
+            pExynosComponent->propagateMarkType.pMarkData               = NULL;
         }
 
         if ((pBufferHdr->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) {
@@ -918,62 +853,6 @@ OMX_ERRORTYPE Exynos_OutputBufferReturn(
                             pBufferHdr->nFlags, NULL);
         }
 
-        Exynos_OMX_OutputBufferReturn(pOMXComponent, pBufferHdr);
-    }
-
-    /* reset dataBuffer */
-    Exynos_ResetDataBuffer(pDataBuffer);
-
-EXIT:
-    FunctionOut();
-
-    return ret;
-}
-
-OMX_ERRORTYPE Exynos_FlushOutputBufferReturn(
-    OMX_COMPONENTTYPE       *pOMXComponent,
-    EXYNOS_OMX_DATABUFFER   *pDataBuffer)
-{
-    OMX_ERRORTYPE             ret               = OMX_ErrorNone;
-    EXYNOS_OMX_BASECOMPONENT *pExynosComponent  = NULL;
-    OMX_BUFFERHEADERTYPE     *pBufferHdr        = NULL;
-
-    FunctionIn();
-
-    if (pOMXComponent == NULL) {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
-    }
-
-    if (pOMXComponent->pComponentPrivate == NULL) {
-        ret = OMX_ErrorBadParameter;
-        goto EXIT;
-    }
-    pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
-    pBufferHdr = pDataBuffer->bufferHeader;
-
-    if (pBufferHdr != NULL) {
-        pBufferHdr->nFilledLen = pDataBuffer->remainDataLen;
-        pBufferHdr->nOffset    = 0;
-        pBufferHdr->nFlags     = pDataBuffer->nFlags;
-        pBufferHdr->nTimeStamp = pDataBuffer->timeStamp;
-
-        if (pExynosComponent->propagateMarkType.hMarkTargetComponent != NULL) {
-            pBufferHdr->hMarkTargetComponent    = pExynosComponent->propagateMarkType.hMarkTargetComponent;
-            pBufferHdr->pMarkData               = pExynosComponent->propagateMarkType.pMarkData;
-            pExynosComponent->propagateMarkType.hMarkTargetComponent = NULL;
-            pExynosComponent->propagateMarkType.pMarkData = NULL;
-        }
-
-        if ((pBufferHdr->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) {
-            pBufferHdr->nFilledLen = 0;
-            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "event OMX_BUFFERFLAG_EOS!!!");
-            pExynosComponent->pCallbacks->EventHandler(pOMXComponent,
-                            pExynosComponent->callbackData,
-                            OMX_EventBufferFlag,
-                            OUTPUT_PORT_INDEX,
-                            pBufferHdr->nFlags, NULL);
-        }
         Exynos_OMX_OutputBufferReturn(pOMXComponent, pBufferHdr);
     }
 

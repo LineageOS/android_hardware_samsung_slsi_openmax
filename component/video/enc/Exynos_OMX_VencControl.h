@@ -87,11 +87,9 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetExtensionIndex(
     OMX_IN OMX_HANDLETYPE  hComponent,
     OMX_IN OMX_STRING      szParameterName,
     OMX_OUT OMX_INDEXTYPE *pIndexType);
-OMX_ERRORTYPE Exynos_InputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent);
-OMX_ERRORTYPE Exynos_OutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent);
+OMX_ERRORTYPE Exynos_InputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
+OMX_ERRORTYPE Exynos_OutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
 OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 nPortIndex, OMX_BOOL bEvent);
-OMX_ERRORTYPE Exynos_FlushInputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
-OMX_ERRORTYPE Exynos_FlushOutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATABUFFER *pDataBuffer);
 OMX_ERRORTYPE Exynos_Shared_DataToBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_DATABUFFER *pUseBuffer, OMX_BOOL bNeedUnlock);
 
 #ifdef __cplusplus

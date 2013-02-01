@@ -574,7 +574,7 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
 
             if (((exynosInputPort->bStoreMetaData == OMX_TRUE) && (eColorFormat == OMX_COLOR_FormatAndroidOpaque)) ||
                 (exynosInputPort->bStoreMetaData == OMX_FALSE)) {
-                Exynos_InputBufferReturn(pOMXComponent);
+                Exynos_InputBufferReturn(pOMXComponent, inputUseBuffer);
             } else {
                 inputUseBuffer->dataValid = OMX_TRUE;
             }
@@ -655,7 +655,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
 
                 if ((outputUseBuffer->remainDataLen > 0) ||
                     (outputUseBuffer->nFlags & OMX_BUFFERFLAG_EOS)) {
-                    Exynos_OutputBufferReturn(pOMXComponent);
+                    Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
                 }
             } else {
                 Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "output buffer is smaller than encoded data size Out Length");
@@ -668,7 +668,7 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
             if ((outputUseBuffer->remainDataLen > 0) ||
                 ((outputUseBuffer->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) ||
                 (CHECK_PORT_BEING_FLUSHED(exynosOutputPort)))
-                Exynos_OutputBufferReturn(pOMXComponent);
+                Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
         }
     } else {
         ret = OMX_FALSE;
@@ -859,7 +859,7 @@ OMX_ERRORTYPE Exynos_OMX_SrcOutputBufferProcess(OMX_HANDLETYPE hComponent)
                     if (eColorFormat == OMX_COLOR_FormatAndroidOpaque)
                         bNeedUnlock = OMX_TRUE;
                     Exynos_Shared_DataToBuffer(&srcOutputData, srcOutputUseBuffer, bNeedUnlock);
-                    Exynos_InputBufferReturn(pOMXComponent);
+                    Exynos_InputBufferReturn(pOMXComponent, srcOutputUseBuffer);
                 }
                 Exynos_ResetCodecData(&srcOutputData);
             }
