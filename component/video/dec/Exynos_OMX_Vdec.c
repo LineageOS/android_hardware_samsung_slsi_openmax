@@ -100,20 +100,22 @@ void Exynos_Free_CodecBuffers(
     EXYNOS_OMX_VIDEODEC_COMPONENT   *pVideoDec          = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
     CODEC_DEC_BUFFER               **ppCodecBuffer      = NULL;
 
-    OMX_U32 nPlaneCnt = 0;
+    OMX_U32 nBufferCnt = 0, nPlaneCnt = 0;
     int i, j;
 
     FunctionIn();
 
     if (nPortIndex == INPUT_PORT_INDEX) {
         ppCodecBuffer = &(pVideoDec->pMFCDecInputBuffer[0]);
+        nBufferCnt = MFC_INPUT_BUFFER_NUM_MAX;
         nPlaneCnt = MFC_INPUT_BUFFER_PLANE;
     } else {
         ppCodecBuffer = &(pVideoDec->pMFCDecOutputBuffer[0]);
+        nBufferCnt = MFC_OUTPUT_BUFFER_NUM_MAX;
         nPlaneCnt = MFC_OUTPUT_BUFFER_PLANE;
     }
 
-    for (i = 0; i < MFC_OUTPUT_BUFFER_NUM_MAX; i++) {
+    for (i = 0; i < nBufferCnt; i++) {
         if (ppCodecBuffer[i] != NULL) {
             for (j = 0; j < nPlaneCnt; j++) {
                 if (ppCodecBuffer[i]->pVirAddr[j] != NULL)

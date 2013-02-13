@@ -126,12 +126,16 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlushProcess(OMX_COMPONENTTYPE *pOMXComponent, OM
     }
 
 EXIT:
-    if ((ret != OMX_ErrorNone) && (pOMXComponent != NULL) && (pExynosComponent != NULL)) {
+    if (ret != OMX_ErrorNone) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR,"%s : %d", __FUNCTION__, __LINE__);
-        pExynosComponent->pCallbacks->EventHandler(pOMXComponent,
-                        pExynosComponent->callbackData,
-                        OMX_EventError,
-                        ret, 0, NULL);
+
+        if ((pOMXComponent != NULL) &&
+            (pExynosComponent != NULL)) {
+            pExynosComponent->pCallbacks->EventHandler(pOMXComponent,
+                            pExynosComponent->callbackData,
+                            OMX_EventError,
+                            ret, 0, NULL);
+        }
     }
 
     FunctionOut();

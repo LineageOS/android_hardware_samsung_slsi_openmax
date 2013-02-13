@@ -1860,17 +1860,21 @@ OMX_ERRORTYPE Exynos_H264Enc_SrcOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
                                         pVideoBuffer->planes[2].allocSize;
 
         if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
-            int i = 0;
-            while (pSrcOutputData->buffer.multiPlaneBuffer.dataBuffer[0] != pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]) {
-                if (i >= MFC_INPUT_BUFFER_NUM_MAX) {
-                    Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: %d: Failed - Lost buffer", __FUNCTION__, __LINE__);
-                    ret = (OMX_ERRORTYPE)OMX_ErrorCodecEncode;
-                    goto EXIT;
+            int i;
+            for (i = 0; i < MFC_INPUT_BUFFER_NUM_MAX; i++) {
+                if (pSrcOutputData->buffer.multiPlaneBuffer.dataBuffer[0] ==
+                        pVideoEnc->pMFCEncInputBuffer[i]->pVirAddr[0]) {
+                    pVideoEnc->pMFCEncInputBuffer[i]->dataSize = 0;
+                    pSrcOutputData->pPrivate = pVideoEnc->pMFCEncInputBuffer[i];
+                    break;
                 }
-                i++;
             }
-            pVideoEnc->pMFCEncInputBuffer[i]->dataSize = 0;
-            pSrcOutputData->pPrivate = pVideoEnc->pMFCEncInputBuffer[i];
+
+            if (i >= MFC_INPUT_BUFFER_NUM_MAX) {
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: %d: Failed - Lost buffer", __FUNCTION__, __LINE__);
+                ret = (OMX_ERRORTYPE)OMX_ErrorCodecEncode;
+                goto EXIT;
+            }
         }
 
         /* For Share Buffer */

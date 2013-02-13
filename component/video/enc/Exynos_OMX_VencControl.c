@@ -1006,6 +1006,9 @@ OMX_ERRORTYPE Exynos_OutputBufferGetQueue(
         pDataBuffer = &(pExynosPort->way.port2WayDataBuffer.outputDataBuffer);
     } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
         pDataBuffer = &(pExynosPort->way.port2WayDataBuffer.inputDataBuffer);
+    } else {
+        ret = OMX_ErrorUndefined;
+        goto EXIT;
     }
 
     if (pExynosComponent->currentState != OMX_StateExecuting) {
@@ -1014,8 +1017,7 @@ OMX_ERRORTYPE Exynos_OutputBufferGetQueue(
     } else if ((pExynosComponent->transientState != EXYNOS_OMX_TransStateExecutingToIdle) &&
                (!CHECK_PORT_BEING_FLUSHED(pExynosPort))) {
         Exynos_OSAL_SemaphoreWait(pExynosPort->bufferSemID);
-        if ((pDataBuffer != NULL) &&
-            (pDataBuffer->dataValid != OMX_TRUE)) {
+        if (pDataBuffer->dataValid != OMX_TRUE) {
             pMessage = (EXYNOS_OMX_MESSAGE *)Exynos_OSAL_Dequeue(&pExynosPort->bufferQ);
             if (pMessage == NULL) {
                 ret = OMX_ErrorUndefined;

@@ -761,6 +761,9 @@ OMX_ERRORTYPE Exynos_OutputBufferGetQueue(EXYNOS_OMX_BASECOMPONENT *pExynosCompo
         outputUseBuffer = &(pExynosPort->way.port2WayDataBuffer.outputDataBuffer);
     } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
         outputUseBuffer = &(pExynosPort->way.port2WayDataBuffer.inputDataBuffer);
+    } else {
+        ret = OMX_ErrorUndefined;
+        goto EXIT;
     }
 
     if (pExynosComponent->currentState != OMX_StateExecuting) {

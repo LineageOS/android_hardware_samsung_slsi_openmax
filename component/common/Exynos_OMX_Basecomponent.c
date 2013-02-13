@@ -335,10 +335,7 @@ OMX_ERRORTYPE Exynos_OMX_ComponentStateSet(OMX_COMPONENTTYPE *pOMXComponent, OMX
         case OMX_StateLoaded:
             for (i = 0; i < pExynosComponent->portParam.nPorts; i++) {
                 pExynosPort = (pExynosComponent->pExynosPort + i);
-                if (pExynosPort == NULL) {
-                    ret = OMX_ErrorBadParameter;
-                    goto EXIT;
-                }
+
                 if (CHECK_PORT_TUNNELED(pExynosPort) && CHECK_PORT_BUFFER_SUPPLIER(pExynosPort)) {
                     if (CHECK_PORT_ENABLED(pExynosPort)) {
                         ret = pExynosComponent->exynos_AllocateTunnelBuffer(pExynosPort, i);

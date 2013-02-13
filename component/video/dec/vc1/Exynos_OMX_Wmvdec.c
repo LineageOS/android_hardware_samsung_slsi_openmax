@@ -1152,6 +1152,7 @@ OMX_ERRORTYPE Exynos_WmvDec_GetParameter(
 
         if (pDstWmvParam->nPortIndex > OUTPUT_PORT_INDEX) {
             ret = OMX_ErrorBadPortIndex;
+            goto EXIT;
         }
 
         pWmvDec = (EXYNOS_WMVDEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
@@ -1746,17 +1747,21 @@ OMX_ERRORTYPE Exynos_WmvDec_SrcOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
         pSrcOutputData->allocSize  = pVideoBuffer->planes[0].allocSize;
 
         if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
-            int i = 0;
-            while (pSrcOutputData->buffer.singlePlaneBuffer.dataBuffer != pVideoDec->pMFCDecInputBuffer[i]->pVirAddr[0]) {
-                if (i >= MFC_INPUT_BUFFER_NUM_MAX) {
-                    Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Can not find buffer");
-                    ret = (OMX_ERRORTYPE)OMX_ErrorCodecDecode;
-                    goto EXIT;
+            int i;
+            for (i = 0; i < MFC_INPUT_BUFFER_NUM_MAX; i++) {
+                if (pSrcOutputData->buffer.singlePlaneBuffer.dataBuffer ==
+                        pVideoDec->pMFCDecInputBuffer[i]->pVirAddr[0]) {
+                    pVideoDec->pMFCDecInputBuffer[i]->dataSize = 0;
+                    pSrcOutputData->pPrivate = pVideoDec->pMFCDecInputBuffer[i];
+                    break;
                 }
-                i++;
             }
-            pVideoDec->pMFCDecInputBuffer[i]->dataSize = 0;
-            pSrcOutputData->pPrivate = pVideoDec->pMFCDecInputBuffer[i];
+
+            if (i >= MFC_INPUT_BUFFER_NUM_MAX) {
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Can not find buffer");
+                ret = (OMX_ERRORTYPE)OMX_ErrorCodecDecode;
+                goto EXIT;
+            }
         }
 
         /* For Share Buffer */
