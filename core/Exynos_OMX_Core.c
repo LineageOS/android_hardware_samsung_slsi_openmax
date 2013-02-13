@@ -210,12 +210,13 @@ EXIT:
 OMX_API OMX_ERRORTYPE OMX_APIENTRY Exynos_OMX_FreeHandle(OMX_IN OMX_HANDLETYPE hComponent)
 {
     OMX_ERRORTYPE         ret = OMX_ErrorNone;
-    EXYNOS_OMX_COMPONENT *currentComponent;
-    EXYNOS_OMX_COMPONENT *deleteComponent;
+    EXYNOS_OMX_COMPONENT *currentComponent = NULL;
+    EXYNOS_OMX_COMPONENT *deleteComponent  = NULL;
 
     FunctionIn();
 
-    if (gInitialized != 1) {
+    if ((gInitialized != 1) ||
+        (gLoadComponentList == NULL)) {
         ret = OMX_ErrorNotReady;
         goto EXIT;
     }
@@ -226,18 +227,23 @@ OMX_API OMX_ERRORTYPE OMX_APIENTRY Exynos_OMX_FreeHandle(OMX_IN OMX_HANDLETYPE h
     }
 
     Exynos_OSAL_MutexLock(ghLoadComponentListMutex);
-    currentComponent = gLoadComponentList;
     if (gLoadComponentList->pOMXComponent == hComponent) {
         deleteComponent = gLoadComponentList;
         gLoadComponentList = gLoadComponentList->nextOMXComp;
     } else {
-        while ((currentComponent != NULL) && (((EXYNOS_OMX_COMPONENT *)(currentComponent->nextOMXComp))->pOMXComponent != hComponent))
-            currentComponent = currentComponent->nextOMXComp;
+        currentComponent = gLoadComponentList;
 
-        if (((EXYNOS_OMX_COMPONENT *)(currentComponent->nextOMXComp))->pOMXComponent == hComponent) {
-            deleteComponent = currentComponent->nextOMXComp;
-            currentComponent->nextOMXComp = deleteComponent->nextOMXComp;
-        } else if (currentComponent == NULL) {
+        while ((currentComponent != NULL) &&
+               (currentComponent->nextOMXComp != NULL)) {
+            if (currentComponent->nextOMXComp->pOMXComponent == hComponent) {
+                deleteComponent = currentComponent->nextOMXComp;
+                currentComponent->nextOMXComp = deleteComponent->nextOMXComp;
+                break;
+            }
+            currentComponent = currentComponent->nextOMXComp;
+        }
+
+        if (deleteComponent == NULL) {
             ret = OMX_ErrorComponentNotFound;
             Exynos_OSAL_MutexUnlock(ghLoadComponentListMutex);
             goto EXIT;
