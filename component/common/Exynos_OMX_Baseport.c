@@ -58,9 +58,10 @@ OMX_ERRORTYPE Exynos_OMX_InputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, OMX
             break;
         }
     }
-
     Exynos_OSAL_MutexUnlock(pExynosPort->hPortMutex);
-    pExynosComponent->pCallbacks->EmptyBufferDone(pOMXComponent, pExynosComponent->callbackData, bufferHeader);
+
+    if ((bufferHeader != NULL) && (bufferHeader->pBuffer != NULL))
+        pExynosComponent->pCallbacks->EmptyBufferDone(pOMXComponent, pExynosComponent->callbackData, bufferHeader);
 
     return ret;
 }
@@ -79,9 +80,10 @@ OMX_ERRORTYPE Exynos_OMX_OutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, OM
             break;
         }
     }
-
     Exynos_OSAL_MutexUnlock(pExynosPort->hPortMutex);
-    pExynosComponent->pCallbacks->FillBufferDone(pOMXComponent, pExynosComponent->callbackData, bufferHeader);
+
+    if ((bufferHeader != NULL) && (bufferHeader->pBuffer != NULL))
+        pExynosComponent->pCallbacks->FillBufferDone(pOMXComponent, pExynosComponent->callbackData, bufferHeader);
 
     return ret;
 }
