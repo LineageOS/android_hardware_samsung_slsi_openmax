@@ -782,6 +782,12 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
             pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)pVideoDec->pMFCDecOutputBuffer[i]->pVirAddr,
                             (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
         }
+
+        if (pOutbufOps->Run(hMFCHandle) != VIDEO_ERROR_NONE) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to run output buffer");
+            ret = OMX_ErrorInsufficientResources;
+            goto EXIT;
+        }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
         ExynosVideoPlane planes[MFC_OUTPUT_BUFFER_PLANE];
         int plane;
@@ -815,6 +821,12 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
                 pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)pExynosOutputPort->extendBufferHeader[i].pYUVBuf,
                               (unsigned int *)dataLen, MFC_OUTPUT_BUFFER_PLANE, NULL);
             }
+
+            if (pOutbufOps->Apply_RegisteredBuffer(hMFCHandle) != VIDEO_ERROR_NONE) {
+                Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to Apply output buffer");
+                ret = OMX_ErrorHardware;
+                goto EXIT;
+            }
         } else {
             ret = OMX_ErrorNotImplemented;
             goto EXIT;
@@ -825,15 +837,6 @@ OMX_ERRORTYPE Mpeg2CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
 #endif
     }
 
-    if (pOutbufOps->Run(hMFCHandle) != VIDEO_ERROR_NONE) {
-        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to run output buffer");
-        ret = OMX_ErrorInsufficientResources;
-        goto EXIT;
-    }
-
-    if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        Mpeg2CodecStop (pOMXComponent, OUTPUT_PORT_INDEX);
-    }
     pMpeg2Dec->hMFCMpeg2Handle.bConfiguredMFCDst = OMX_TRUE;
 
     ret = OMX_ErrorNone;
