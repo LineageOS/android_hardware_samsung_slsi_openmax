@@ -48,6 +48,8 @@
 
 #define MAX_BUFFER_PLANE     3
 
+#define INDEX_AFTER_EOS      0xE05
+
 #define EXYNOS_OMX_INSTALL_PATH "/system/lib/omx/"
 
 typedef enum _EXYNOS_CODEC_TYPE

@@ -1916,9 +1916,14 @@ OMX_ERRORTYPE Exynos_WmvDec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     if ((indexTimestamp < 0) || (indexTimestamp >= MAX_TIMESTAMP)) {
         if ((pExynosComponent->checkTimeStamp.needSetStartTimeStamp != OMX_TRUE) &&
             (pExynosComponent->checkTimeStamp.needCheckStartTimeStamp != OMX_TRUE)) {
-            pDstOutputData->timeStamp = pExynosComponent->timeStamp[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
-            pDstOutputData->nFlags = pExynosComponent->nFlags[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
-            Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "missing out indexTimestamp: %d", indexTimestamp);
+            if (indexTimestamp == INDEX_AFTER_EOS) {
+                pDstOutputData->timeStamp = 0x00;
+                pDstOutputData->nFlags = 0x00;
+            } else {
+                pDstOutputData->timeStamp = pExynosComponent->timeStamp[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
+                pDstOutputData->nFlags = pExynosComponent->nFlags[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
+                Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "missing out indexTimestamp: %d", indexTimestamp);
+            }
         } else {
             pDstOutputData->timeStamp = 0x00;
             pDstOutputData->nFlags = 0x00;
