@@ -676,6 +676,8 @@ OMX_BOOL Exynos_Postprocess_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
                 ((outputUseBuffer->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) ||
                 (CHECK_PORT_BEING_FLUSHED(exynosOutputPort)))
                 Exynos_OutputBufferReturn(pOMXComponent, outputUseBuffer);
+            else
+                Exynos_OMX_FillThisBuffer(pOMXComponent, outputUseBuffer->bufferHeader);
         }
     } else {
         ret = OMX_FALSE;
