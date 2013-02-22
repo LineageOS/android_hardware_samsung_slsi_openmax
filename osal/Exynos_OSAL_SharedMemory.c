@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+#include "Exynos_OSAL_Mutex.h"
 #include "Exynos_OSAL_SharedMemory.h"
 #include "ion.h"
 
@@ -69,9 +70,9 @@ OMX_HANDLETYPE Exynos_OSAL_SharedMemory_Open()
     ion_client            IONClient = 0;
 
     pHandle = (EXYNOS_SHARED_MEMORY *)Exynos_OSAL_Malloc(sizeof(EXYNOS_SHARED_MEMORY));
-    Exynos_OSAL_Memset(pHandle, 0, sizeof(EXYNOS_SHARED_MEMORY));
     if (pHandle == NULL)
         goto EXIT;
+    Exynos_OSAL_Memset(pHandle, 0, sizeof(EXYNOS_SHARED_MEMORY));
 
     IONClient = ion_client_create();
     if (IONClient < 0) {
@@ -83,7 +84,14 @@ OMX_HANDLETYPE Exynos_OSAL_SharedMemory_Open()
 
     pHandle->hIONHandle = IONClient;
 
-    Exynos_OSAL_MutexCreate(&pHandle->hSMMutex);
+    if (OMX_ErrorNone != Exynos_OSAL_MutexCreate(&pHandle->hSMMutex)) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Exynos_OSAL_MutexCreate(hSMMutex) is failed");
+        ion_client_destroy((ion_client)pHandle->hIONHandle);
+        pHandle->hIONHandle = NULL;
+
+        Exynos_OSAL_Free((void *)pHandle);
+        pHandle = NULL;
+    }
 
 EXIT:
     return (OMX_HANDLETYPE)pHandle;
@@ -153,6 +161,8 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
         goto EXIT;
 
     pElement = (EXYNOS_SHAREDMEM_LIST *)Exynos_OSAL_Malloc(sizeof(EXYNOS_SHAREDMEM_LIST));
+    if (pElement == NULL)
+        goto EXIT;
     Exynos_OSAL_Memset(pElement, 0, sizeof(EXYNOS_SHAREDMEM_LIST));
     pElement->owner = OMX_TRUE;
 
@@ -179,6 +189,8 @@ OMX_PTR Exynos_OSAL_SharedMemory_Alloc(OMX_HANDLETYPE handle, OMX_U32 size, MEMO
         flag = ION_EXYNOS_MFC_INPUT_MASK;
         break;
     default:
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "memory type is wrong");
+        Exynos_OSAL_Free((OMX_PTR)pElement);
         pBuffer = NULL;
         goto EXIT;
         break;
