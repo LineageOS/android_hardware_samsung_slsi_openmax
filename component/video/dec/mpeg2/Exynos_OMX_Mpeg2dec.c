@@ -1288,6 +1288,7 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pMpeg2Dec->hMFCMpeg2Handle.bConfiguredMFCDst = OMX_FALSE;
     pExynosComponent->bUseFlagEOF = OMX_TRUE;
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
+    pExynosComponent->bBehaviorEOS = OMX_FALSE;
 
     /* Mpeg2 Codec Open */
     ret = Mpeg2CodecOpen(pMpeg2Dec);
@@ -1407,6 +1408,8 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
         /* Does not require any actions. */
     }
     Mpeg2CodecClose(pMpeg2Dec);
+
+    Exynos_ResetAllPortConfig(pOMXComponent);
 
 EXIT:
     FunctionOut();
@@ -1718,6 +1721,12 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
         ((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "displayStatus:%d, nFlags0x%x", displayStatus, pDstOutputData->nFlags);
         pDstOutputData->remainDataLen = 0;
+
+        if (((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) &&
+            (pExynosComponent->bBehaviorEOS == OMX_TRUE)) {
+            pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
+            pExynosComponent->bBehaviorEOS = OMX_FALSE;
+        }
     } else {
         pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
     }

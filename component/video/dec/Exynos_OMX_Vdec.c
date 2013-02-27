@@ -214,6 +214,47 @@ OMX_BOOL Exynos_Check_BufferProcess_State(EXYNOS_OMX_BASECOMPONENT *pExynosCompo
     return ret;
 }
 
+OMX_ERRORTYPE Exynos_ResetAllPortConfig(OMX_COMPONENTTYPE *pOMXComponent)
+{
+    OMX_ERRORTYPE                  ret               = OMX_ErrorNone;
+    EXYNOS_OMX_BASECOMPONENT      *pExynosComponent  = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+    EXYNOS_OMX_BASEPORT           *pInputPort        = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
+    EXYNOS_OMX_BASEPORT           *pOutputPort       = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
+
+    /* Input port */
+    pInputPort->portDefinition.format.video.nFrameWidth             = DEFAULT_FRAME_WIDTH;
+    pInputPort->portDefinition.format.video.nFrameHeight            = DEFAULT_FRAME_HEIGHT;
+    pInputPort->portDefinition.format.video.nStride                 = 0; /*DEFAULT_FRAME_WIDTH;*/
+    pInputPort->portDefinition.format.video.nSliceHeight            = 0;
+    pInputPort->portDefinition.format.video.pNativeRender           = 0;
+    pInputPort->portDefinition.format.video.bFlagErrorConcealment   = OMX_FALSE;
+    pInputPort->portDefinition.format.video.eColorFormat            = OMX_COLOR_FormatUnused;
+
+    pInputPort->portDefinition.nBufferSize  = DEFAULT_VIDEO_INPUT_BUFFER_SIZE;
+    pInputPort->portDefinition.bEnabled     = OMX_TRUE;
+
+    pInputPort->bufferProcessType   = BUFFER_SHARE;
+    pInputPort->portWayType         = WAY2_PORT;
+
+    /* Output port */
+    pOutputPort->portDefinition.format.video.nFrameWidth            = DEFAULT_FRAME_WIDTH;
+    pOutputPort->portDefinition.format.video.nFrameHeight           = DEFAULT_FRAME_HEIGHT;
+    pOutputPort->portDefinition.format.video.nStride                = 0; /*DEFAULT_FRAME_WIDTH;*/
+    pOutputPort->portDefinition.format.video.nSliceHeight           = 0;
+    pOutputPort->portDefinition.format.video.pNativeRender          = 0;
+    pOutputPort->portDefinition.format.video.bFlagErrorConcealment  = OMX_FALSE;
+    pOutputPort->portDefinition.format.video.eColorFormat           = OMX_COLOR_FormatYUV420Planar;
+
+    pOutputPort->portDefinition.nBufferSize  = DEFAULT_VIDEO_OUTPUT_BUFFER_SIZE;
+    pOutputPort->portDefinition.bEnabled     = OMX_TRUE;
+
+    pOutputPort->bufferProcessType  = BUFFER_COPY | BUFFER_ANBSHARE;
+    pOutputPort->bIsANBEnabled      = OMX_FALSE;
+    pOutputPort->portWayType        = WAY2_PORT;
+
+    return ret;
+}
+
 OMX_ERRORTYPE Exynos_Input_CodecBufferToData(EXYNOS_OMX_BASECOMPONENT *pExynosComponent, OMX_PTR codecBuffer, EXYNOS_OMX_DATA *pData)
 {
     OMX_ERRORTYPE                  ret = OMX_ErrorNone;
@@ -495,9 +536,9 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
 
         if ((srcInputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) {
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "bSaveFlagEOS : OMX_TRUE");
-            srcInputData->dataLen = 0;
-            srcInputData->remainDataLen = 0;
             pExynosComponent->bSaveFlagEOS = OMX_TRUE;
+            if (srcInputData->dataLen != 0)
+                pExynosComponent->bBehaviorEOS = OMX_TRUE;
         }
 
         if (pExynosComponent->checkTimeStamp.needSetStartTimeStamp == OMX_TRUE) {
@@ -1128,6 +1169,9 @@ OMX_ERRORTYPE Exynos_OMX_BufferProcess_Terminate(OMX_HANDLETYPE hComponent)
     Exynos_OSAL_ThreadTerminate(pVideoDec->hDstOutputThread);
     pVideoDec->hDstOutputThread = NULL;
 
+    pExynosComponent->checkTimeStamp.needSetStartTimeStamp      = OMX_FALSE;
+    pExynosComponent->checkTimeStamp.needCheckStartTimeStamp    = OMX_FALSE;
+
 EXIT:
     FunctionOut();
 
@@ -1185,6 +1229,7 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeComponentInit(OMX_IN OMX_HANDLETYPE hCompone
     pExynosComponent->hComponentHandle = (OMX_HANDLETYPE)pVideoDec;
 
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
+    pExynosComponent->bBehaviorEOS = OMX_FALSE;
     pExynosComponent->bMultiThreadProcess = OMX_TRUE;
 
     /* Input port */

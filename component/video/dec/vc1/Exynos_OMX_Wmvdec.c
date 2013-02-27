@@ -1507,6 +1507,7 @@ OMX_ERRORTYPE Exynos_WmvDec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pWmvDec->hMFCWmvHandle.bConfiguredMFCDst = OMX_FALSE;
     pExynosComponent->bUseFlagEOF = OMX_TRUE;
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
+    pExynosComponent->bBehaviorEOS = OMX_FALSE;
 
     /* WMV Codec Open */
     ret = WmvCodecOpen(pWmvDec);
@@ -1628,6 +1629,8 @@ OMX_ERRORTYPE Exynos_WmvDec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
         /* Does not require any actions. */
     }
     WmvCodecClose(pWmvDec);
+
+    Exynos_ResetAllPortConfig(pOMXComponent);
 
 EXIT:
     FunctionOut();
@@ -1953,6 +1956,12 @@ OMX_ERRORTYPE Exynos_WmvDec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
         ((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "displayStatus:%d, nFlags0x%x", displayStatus, pDstOutputData->nFlags);
         pDstOutputData->remainDataLen = 0;
+
+        if (((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) &&
+            (pExynosComponent->bBehaviorEOS == OMX_TRUE)) {
+            pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
+            pExynosComponent->bBehaviorEOS = OMX_FALSE;
+        }
     } else {
         pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
     }

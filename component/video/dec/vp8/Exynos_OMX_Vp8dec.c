@@ -1232,6 +1232,7 @@ OMX_ERRORTYPE Exynos_VP8Dec_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pVp8Dec->hMFCVp8Handle.bConfiguredMFCDst = OMX_FALSE;
     pExynosComponent->bUseFlagEOF = OMX_TRUE;
     pExynosComponent->bSaveFlagEOS = OMX_FALSE;
+    pExynosComponent->bBehaviorEOS = OMX_FALSE;
 
     /* VP8 Codec Open */
     ret = VP8CodecOpen(pVp8Dec);
@@ -1351,6 +1352,8 @@ OMX_ERRORTYPE Exynos_VP8Dec_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
         /* Does not require any actions. */
     }
     VP8CodecClose(pVp8Dec);
+
+    Exynos_ResetAllPortConfig(pOMXComponent);
 
 EXIT:
     FunctionOut();
@@ -1662,6 +1665,12 @@ OMX_ERRORTYPE Exynos_VP8Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
         ((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS)) {
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "displayStatus:%d, nFlags0x%x", displayStatus, pDstOutputData->nFlags);
         pDstOutputData->remainDataLen = 0;
+
+        if (((pDstOutputData->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) &&
+            (pExynosComponent->bBehaviorEOS == OMX_TRUE)) {
+            pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
+            pExynosComponent->bBehaviorEOS = OMX_FALSE;
+        }
     } else {
         pDstOutputData->remainDataLen = bufferGeometry->nFrameWidth * bufferGeometry->nFrameHeight * 3 / 2;
     }

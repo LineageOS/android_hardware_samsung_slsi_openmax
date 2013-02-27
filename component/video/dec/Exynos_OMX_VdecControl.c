@@ -577,6 +577,7 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 n
             Exynos_OSAL_Memset(pExynosComponent->nFlags, 0, sizeof(OMX_U32) * MAX_FLAGS);
             pExynosComponent->getAllDelayBuffer = OMX_FALSE;
             pExynosComponent->bSaveFlagEOS = OMX_FALSE;
+            pExynosComponent->bBehaviorEOS = OMX_FALSE;
             pExynosComponent->reInputData = OMX_FALSE;
         }
 
@@ -728,7 +729,6 @@ OMX_ERRORTYPE Exynos_OutputBufferReturn(
         }
 
         if ((pBufferHdr->nFlags & OMX_BUFFERFLAG_EOS) == OMX_BUFFERFLAG_EOS) {
-            pBufferHdr->nFilledLen = 0;
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE,"event OMX_BUFFERFLAG_EOS!!!");
             pExynosComponent->pCallbacks->EventHandler(pOMXComponent,
                             pExynosComponent->callbackData,
@@ -1022,28 +1022,44 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetParameter(
             pExynosPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
             portDefinition = &pExynosPort->portDefinition;
 
-            switch (index) {
-            case supportFormat_0:
-                portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                portFormat->eColorFormat       = OMX_COLOR_FormatYUV420Planar;
-                portFormat->xFramerate         = portDefinition->format.video.xFramerate;
-                break;
-            case supportFormat_1:
-                portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                portFormat->eColorFormat       = OMX_COLOR_FormatYUV420SemiPlanar;
-                portFormat->xFramerate         = portDefinition->format.video.xFramerate;
-                break;
-            case supportFormat_2:
-                portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
-                portFormat->xFramerate         = portDefinition->format.video.xFramerate;
-                break;
-            default:
-                if (index > supportFormat_0) {
-                    ret = OMX_ErrorNoMore;
-                    goto EXIT;
+            if (pExynosPort->bIsANBEnabled == OMX_FALSE) {
+                switch (index) {
+                case supportFormat_0:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_COLOR_FormatYUV420Planar;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+                case supportFormat_1:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_COLOR_FormatYUV420SemiPlanar;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+                case supportFormat_2:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+                default:
+                    if (index > supportFormat_0) {
+                        ret = OMX_ErrorNoMore;
+                        goto EXIT;
+                    }
+                    break;
                 }
-                break;
+            } else {
+                switch (index) {
+                case supportFormat_0:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+                default:
+                    if (index > supportFormat_0) {
+                        ret = OMX_ErrorNoMore;
+                        goto EXIT;
+                    }
+                    break;
+                }
             }
         }
         ret = OMX_ErrorNone;
