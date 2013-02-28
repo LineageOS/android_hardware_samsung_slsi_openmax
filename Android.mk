@@ -2,8 +2,6 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-include device/samsung/$(TARGET_BOOTLOADER_BOARD_NAME)/BoardConfig.mk
-
 BOARD_USE_ANB := true
 
 # Set to false to use Android's OMX header files
