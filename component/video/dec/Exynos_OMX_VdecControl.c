@@ -298,12 +298,16 @@ OMX_ERRORTYPE Exynos_OMX_FreeBuffer(
         goto EXIT;
     }
 
-    if ((pExynosPort->portState != OMX_StateLoaded) && (pExynosPort->portState != OMX_StateInvalid)) {
+    if (((pExynosPort->portState != OMX_StateLoaded) &&
+         (pExynosPort->portState != OMX_StateInvalid)) &&
+        (pExynosPort->portDefinition.bEnabled != OMX_FALSE)) {
         (*(pExynosComponent->pCallbacks->EventHandler)) (pOMXComponent,
                         pExynosComponent->callbackData,
                         (OMX_U32)OMX_EventError,
                         (OMX_U32)OMX_ErrorPortUnpopulated,
                         nPortIndex, NULL);
+        ret = OMX_ErrorInvalidState;
+        goto EXIT;
     }
 
     for (i = 0; i < /*pExynosPort->portDefinition.nBufferCountActual*/MAX_BUFFER_NUM; i++) {

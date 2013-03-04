@@ -713,7 +713,8 @@ OMX_ERRORTYPE Exynos_OMX_SrcInputBufferProcess(OMX_HANDLETYPE hComponent)
             Exynos_OSAL_SleepMillisec(0);
 
             if ((CHECK_PORT_BEING_FLUSHED(exynosInputPort)) ||
-                ((exynosOutputPort->exceptionFlag == NEED_PORT_DISABLE) && (ret == OMX_ErrorInputDataDecodeYet)))
+                ((exynosOutputPort->exceptionFlag == NEED_PORT_DISABLE) && (ret == OMX_ErrorInputDataDecodeYet)) ||
+                (exynosOutputPort->exceptionFlag == INVALID_STATE))
                 break;
             if (exynosInputPort->portState != OMX_StateIdle)
                 break;

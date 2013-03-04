@@ -156,6 +156,11 @@ OMX_ERRORTYPE Exynos_OMX_EnablePort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 po
 
     if ((pExynosComponent->currentState != OMX_StateLoaded) && (pExynosComponent->currentState != OMX_StateWaitForResources)) {
         Exynos_OSAL_SemaphoreWait(pExynosPort->loadedResource);
+
+        if (pExynosPort->exceptionFlag == INVALID_STATE) {
+            pExynosPort->exceptionFlag = NEED_PORT_DISABLE;
+            goto EXIT;
+        }
         pExynosPort->portDefinition.bPopulated = OMX_TRUE;
     }
     pExynosPort->exceptionFlag = GENERAL_STATE;
