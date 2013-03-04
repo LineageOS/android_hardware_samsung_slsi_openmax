@@ -250,28 +250,37 @@ static void Set_Mpeg4Enc_Param(EXYNOS_OMX_BASECOMPONENT *pExynosComponent)
         pCommonParam->RandomIntraMBRefresh = 0;
     }
 
-    if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
-        if (pVideoEnc->ANBColorFormat == OMX_SEC_COLOR_FormatNV21Linear)
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
-        if (pVideoEnc->ANBColorFormat == OMX_SEC_COLOR_FormatNV12Tiled)
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
-    } else {
-        switch ((EXYNOS_OMX_COLOR_FORMATTYPE)pExynosInputPort->portDefinition.format.video.eColorFormat) {
-        case OMX_COLOR_FormatYUV420SemiPlanar:
-        case OMX_COLOR_FormatYUV420Planar: /* Converted to NV12 in Exynos_CSC_InputData */
+    switch ((EXYNOS_OMX_COLOR_FORMATTYPE)pExynosInputPort->portDefinition.format.video.eColorFormat) {
+    case OMX_COLOR_FormatYUV420SemiPlanar:
+    case OMX_COLOR_FormatYUV420Planar: /* Converted to NV12 in Exynos_CSC_InputData */
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+        break;
 #ifdef USE_METADATABUFFERTYPE
-        case OMX_COLOR_FormatAndroidOpaque:
-#endif
+    case OMX_COLOR_FormatAndroidOpaque:
+        if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+            switch (pVideoEnc->ANBColorFormat) {
+            case OMX_COLOR_FormatYUV420SemiPlanar:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+                break;
+            case OMX_SEC_COLOR_FormatNV12Tiled:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
+                break;
+            default:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+                break;
+            }
+        } else {
             pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
-            break;
-        case OMX_SEC_COLOR_FormatNV21Linear:
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV21;
-            break;
-        case OMX_SEC_COLOR_FormatNV12Tiled:
-        default:
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
-            break;
         }
+        break;
+#endif
+    case OMX_SEC_COLOR_FormatNV21Linear:
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV21;
+        break;
+    case OMX_SEC_COLOR_FormatNV12Tiled:
+    default:
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
+        break;
     }
 
     /* Mpeg4 specific parameters */
@@ -359,28 +368,37 @@ static void Set_H263Enc_Param(EXYNOS_OMX_BASECOMPONENT *pExynosComponent)
         pCommonParam->RandomIntraMBRefresh = 0;
     }
 
-    if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
-        if (pVideoEnc->ANBColorFormat == OMX_SEC_COLOR_FormatNV21Linear)
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
-        if (pVideoEnc->ANBColorFormat == OMX_SEC_COLOR_FormatNV12Tiled)
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
-    } else {
-        switch ((EXYNOS_OMX_COLOR_FORMATTYPE)pExynosInputPort->portDefinition.format.video.eColorFormat) {
-        case OMX_COLOR_FormatYUV420SemiPlanar:
-        case OMX_COLOR_FormatYUV420Planar: /* Converted to NV12 in Exynos_CSC_InputData */
+    switch ((EXYNOS_OMX_COLOR_FORMATTYPE)pExynosInputPort->portDefinition.format.video.eColorFormat) {
+    case OMX_COLOR_FormatYUV420SemiPlanar:
+    case OMX_COLOR_FormatYUV420Planar: /* Converted to NV12 in Exynos_CSC_InputData */
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+        break;
 #ifdef USE_METADATABUFFERTYPE
-        case OMX_COLOR_FormatAndroidOpaque:
-#endif
+    case OMX_COLOR_FormatAndroidOpaque:
+        if (pExynosInputPort->bufferProcessType == BUFFER_SHARE) {
+            switch (pVideoEnc->ANBColorFormat) {
+            case OMX_COLOR_FormatYUV420SemiPlanar:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+                break;
+            case OMX_SEC_COLOR_FormatNV12Tiled:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
+                break;
+            default:
+                pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
+                break;
+            }
+        } else {
             pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12;
-            break;
-        case OMX_SEC_COLOR_FormatNV21Linear:
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV21;
-            break;
-        case OMX_SEC_COLOR_FormatNV12Tiled:
-        default:
-            pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
-            break;
         }
+        break;
+#endif
+    case OMX_SEC_COLOR_FormatNV21Linear:
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV21;
+        break;
+    case OMX_SEC_COLOR_FormatNV12Tiled:
+    default:
+        pCommonParam->FrameMap = VIDEO_COLORFORMAT_NV12_TILED;
+        break;
     }
 
     /* H263 specific parameters */
