@@ -1970,7 +1970,14 @@ OMX_ERRORTYPE Exynos_Mpeg4Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
     }
 
     while (1) {
-        if ((pVideoBuffer = pOutbufOps->Dequeue(hMFCHandle)) == NULL) {
+        pVideoBuffer = pOutbufOps->Dequeue(hMFCHandle);
+        if (pVideoBuffer == (ExynosVideoBuffer *)VIDEO_ERROR_DQBUF_EIO) {
+            Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "HW is not available");
+            ret = OMX_ErrorHardware;
+            goto EXIT;
+        }
+
+        if (pVideoBuffer == NULL) {
             ret = OMX_ErrorNone;
             goto EXIT;
         }
