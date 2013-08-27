@@ -1,5 +1,9 @@
 LOCAL_PATH := $(call my-dir)
 
+ifeq ($(TARGET_SLSI_VARIANT),insignal)
+
+PLATFORM_DIR := $(TARGET_BOARD_PLATFORM)-insignal
+
 include $(CLEAR_VARS)
 
 BOARD_USE_ANB := true
@@ -17,9 +21,9 @@ EXYNOS_OMX_INC := $(EXYNOS_OMX_TOP)/include
 EXYNOS_OMX_COMPONENT := $(EXYNOS_OMX_TOP)/component
 
 EXYNOS_VIDEO_CODEC := \
-	hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/libcodec/video
+	hardware/samsung_slsi/$(PLATFORM_DIR)/libcodec/video
 EXYNOS_AUDIO_CODEC := \
-	hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/libcodec/audio
+	hardware/samsung_slsi/$(PLATFORM_DIR)/libcodec/audio
 
 include $(EXYNOS_OMX_TOP)/osal/Android.mk
 include $(EXYNOS_OMX_TOP)/core/Android.mk
@@ -45,4 +49,6 @@ endif
 
 ifeq ($(BOARD_USE_WMA_CODEC), true)
 include $(EXYNOS_OMX_COMPONENT)/audio/dec/wma/Android.mk
+endif
+
 endif

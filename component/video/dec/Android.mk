@@ -1,6 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
+PLATFORM_DIR := $(TARGET_BOARD_PLATFORM)-insignal
+
 LOCAL_SRC_FILES := \
 	Exynos_OMX_VdecControl.c \
 	Exynos_OMX_Vdec.c
@@ -17,7 +19,7 @@ LOCAL_C_INCLUDES := \
 	$(EXYNOS_OMX_COMPONENT)/video/dec \
 	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
 	$(TOP)/hardware/samsung_slsi/exynos/include \
-	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include
+	$(TOP)/hardware/samsung_slsi/$(PLATFORM_DIR)/include
 
 LOCAL_STATIC_LIBRARIES := libExynosVideoApi
 
