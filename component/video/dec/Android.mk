@@ -12,6 +12,7 @@ LOCAL_ARM_MODE := arm
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_C_INCLUDES := \
+	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include \
 	$(EXYNOS_OMX_INC)/exynos \
 	$(EXYNOS_OMX_TOP)/osal \
 	$(EXYNOS_OMX_TOP)/core \
@@ -20,6 +21,9 @@ LOCAL_C_INCLUDES := \
 	$(EXYNOS_VIDEO_CODEC)/v4l2/include \
 	$(TOP)/hardware/samsung_slsi/exynos/include \
 	$(TOP)/hardware/samsung_slsi/$(PLATFORM_DIR)/include
+
+LOCAL_ADDITIONAL_DEPENDENCIES += \
+	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 
 LOCAL_STATIC_LIBRARIES := libExynosVideoApi
 
