@@ -39,6 +39,14 @@ ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
 endif
 
+ifeq ($(TARGET_BOARD_PLATFORM),exynos3)
+LOCAL_CFLAGS += -DUSE_MFC5X_ALIGNMENT
+endif
+
+ifeq ($(TARGET_BOARD_PLATFORM),exynos4)
+LOCAL_CFLAGS += -DUSE_MFC5X_ALIGNMENT
+endif
+
 LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
 LOCAL_C_INCLUDES := \

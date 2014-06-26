@@ -52,18 +52,30 @@
 #define DEFAULT_MFC_OUTPUT_CBUFFER_SIZE     1920 * 1080 / 2
 
 #define INPUT_PORT_SUPPORTFORMAT_NUM_MAX    1
+#ifdef USE_DUALDPB_MODE
+#define OUTPUT_PORT_SUPPORTFORMAT_NUM_MAX   5
+#else
 #define OUTPUT_PORT_SUPPORTFORMAT_NUM_MAX   4
+#endif
 
 #define EXTRA_DPB_NUM                       5
 
-#define MFC_INPUT_BUFFER_PLANE              1
-#define MFC_OUTPUT_BUFFER_PLANE             2
+#define MFC_DEFAULT_INPUT_BUFFER_PLANE      1
+#define MFC_DEFAULT_OUTPUT_BUFFER_PLANE     2
+
+#define MAX_INPUTBUFFER_NUM_DYNAMIC         0 /* Dynamic number of metadata buffer */
 
 typedef struct
 {
     void *pAddrY;
     void *pAddrC;
 } CODEC_DEC_ADDR_INFO;
+
+typedef struct _BYPASS_BUFFER_INFO
+{
+    OMX_U32   nFlags;
+    OMX_TICKS timeStamp;
+} BYPASS_BUFFER_INFO;
 
 typedef struct _CODEC_DEC_BUFFER
 {
@@ -87,6 +99,8 @@ typedef struct _EXYNOS_OMX_VIDEODEC_COMPONENT
     OMX_BOOL bThumbnailMode;
     OMX_BOOL bDTSMode;                  /* true:Decoding Time Stamp, false:Presentation Time Stamp */
     OMX_BOOL bFirstFrame;
+    OMX_BOOL bQosChanged;
+    OMX_U32  nQosRatio;
     CODEC_DEC_BUFFER *pMFCDecInputBuffer[MFC_INPUT_BUFFER_NUM_MAX];
     CODEC_DEC_BUFFER *pMFCDecOutputBuffer[MFC_OUTPUT_BUFFER_NUM_MAX];
 
@@ -106,6 +120,9 @@ typedef struct _EXYNOS_OMX_VIDEODEC_COMPONENT
     /* For Reconfiguration DPB */
     OMX_BOOL bReconfigDPB;
     OMX_U32  nSavedDPBCnt;
+
+    /* For Dual DPB */
+    OMX_BOOL bDualDPBMode;
 
     /* CSC handle */
     OMX_PTR csc_handle;

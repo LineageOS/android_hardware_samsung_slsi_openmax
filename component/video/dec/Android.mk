@@ -47,4 +47,12 @@ ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
 endif
 
+ifeq ($(BOARD_USE_QOS_CTRL), true)
+LOCAL_CFLAGS += -DUSE_QOS_CTRL
+endif
+
+ifeq ($(BOARD_USE_DUALDPB_MODE), true)
+LOCAL_CFLAGS += -DUSE_DUALDPB_MODE
+endif
+
 include $(BUILD_STATIC_LIBRARY)

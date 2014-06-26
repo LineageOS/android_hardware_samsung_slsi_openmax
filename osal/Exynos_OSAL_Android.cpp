@@ -95,13 +95,11 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     case OMX_COLOR_FormatAndroidOpaque:
     {
         OMX_COLOR_FORMATTYPE formatType;
-#ifdef USE_DMA_BUF
         formatType = Exynos_OSAL_GetANBColorFormat((OMX_U32)priv_hnd);
         if ((formatType == OMX_COLOR_FormatYUV420SemiPlanar) ||
             (formatType == OMX_SEC_COLOR_FormatNV12Tiled))
             usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
         else
-#endif
             usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN | GRALLOC_USAGE_HW_VIDEO_ENCODER;
     }
         break;
@@ -169,12 +167,10 @@ OMX_COLOR_FORMATTYPE Exynos_OSAL_GetANBColorFormat(OMX_IN OMX_U32 handle)
     FunctionIn();
 
     OMX_COLOR_FORMATTYPE ret = OMX_COLOR_FormatUnused;
-#ifdef USE_DMA_BUF
     private_handle_t *priv_hnd = (private_handle_t *) handle;
 
     ret = Exynos_OSAL_Hal2OMXPixelFormat(priv_hnd->format);
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "ColorFormat: 0x%x", ret);
-#endif
 
 EXIT:
     FunctionOut();
@@ -374,6 +370,12 @@ OMX_ERRORTYPE Exynos_OSAL_GetANBParameter(
 #if defined(USE_IMPROVED_BUFFER) && !defined(USE_CSC_HW)
         pANBParams->nUsage |= (GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 #endif
+#if defined(USE_MFC5X_ALIGNMENT)
+        if ((pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX].bufferProcessType & BUFFER_SHARE) &&
+            (pExynosComponent->pExynosPort[INPUT_PORT_INDEX].portDefinition.format.video.eCompressionFormat == OMX_VIDEO_CodingAVC)) {
+            pANBParams->nUsage |= GRALLOC_USAGE_PRIVATE_0;
+        }
+#endif
     }
         break;
 
@@ -461,11 +463,15 @@ OMX_ERRORTYPE Exynos_OSAL_SetANBParameter(
 #ifdef USE_ANB_OUTBUF_SHARE
          /* ANB and DPB Buffer Sharing */
         if ((portIndex == OUTPUT_PORT_INDEX) &&
-            (pExynosPort->bIsANBEnabled == OMX_TRUE) &&
-            ((pExynosPort->bufferProcessType & BUFFER_ANBSHARE) == BUFFER_ANBSHARE)) {
-            pExynosPort->bufferProcessType = BUFFER_SHARE;
-            pExynosPort->portDefinition.format.video.eColorFormat = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
-            Exynos_OSAL_Log(EXYNOS_LOG_INFO, "output buffer sharing mode is on");
+            (pExynosPort->bIsANBEnabled == OMX_TRUE)) {
+            if ((pExynosPort->bufferProcessType & BUFFER_ANBSHARE) == BUFFER_ANBSHARE) {
+                pExynosPort->bufferProcessType = BUFFER_SHARE;
+                pExynosPort->portDefinition.format.video.eColorFormat = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
+                Exynos_OSAL_Log(EXYNOS_LOG_INFO, "output buffer sharing mode is on");
+            } else {
+                pExynosPort->bufferProcessType = BUFFER_COPY;
+                pExynosPort->portDefinition.format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
+            }
         }
 #else
         if ((portIndex == OUTPUT_PORT_INDEX) &&
@@ -602,7 +608,9 @@ OMX_ERRORTYPE Exynos_OSAL_GetInfoFromMetaData(OMX_IN OMX_BYTE pBuffer,
     /* MetadataBufferType */
     Exynos_OSAL_Memcpy(&type, (MetadataBufferType *)pBuffer, sizeof(MetadataBufferType));
 
-    if (type == kMetadataBufferTypeCameraSource) {
+    switch (type) {
+    case kMetadataBufferTypeCameraSource:
+    {
         void *pAddress = NULL;
 
         /* Address. of Y */
@@ -613,12 +621,27 @@ OMX_ERRORTYPE Exynos_OSAL_GetInfoFromMetaData(OMX_IN OMX_BYTE pBuffer,
         Exynos_OSAL_Memcpy(&pAddress, pBuffer + sizeof(MetadataBufferType) + sizeof(void *), sizeof(void *));
         ppBuf[1] = (void *)pAddress;
 
-    } else if (type == kMetadataBufferTypeGrallocSource) {
+        if ((ppBuf[0] == NULL) || (ppBuf[1] == NULL))
+            ret = OMX_ErrorBadParameter;
+    }
+        break;
+    case kMetadataBufferTypeGrallocSource:
+    {
         buffer_handle_t    pBufHandle;
 
         /* buffer_handle_t */
         Exynos_OSAL_Memcpy(&pBufHandle, pBuffer + sizeof(MetadataBufferType), sizeof(buffer_handle_t));
         ppBuf[0] = (OMX_PTR)pBufHandle;
+
+        if (ppBuf[0] == NULL)
+            ret = OMX_ErrorBadParameter;
+    }
+        break;
+    default:
+    {
+        ret = OMX_ErrorBadParameter;
+    }
+        break;
     }
 
 EXIT:
@@ -662,8 +685,17 @@ OMX_COLOR_FORMATTYPE Exynos_OSAL_Hal2OMXPixelFormat(
     case HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED:
         omx_format = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
         break;
-    case HAL_PIXEL_FORMAT_RGBA_8888:
+    case HAL_PIXEL_FORMAT_BGRA_8888:
         omx_format = OMX_COLOR_Format32bitARGB8888;
+        break;
+    case HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP:
+        omx_format = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV21Linear;
+        break;
+    case HAL_PIXEL_FORMAT_EXYNOS_YV12:
+        omx_format = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatYVU420Planar;
+        break;
+    case HAL_PIXEL_FORMAT_CUSTOM_ARGB_8888:
+        omx_format = OMX_COLOR_Format32bitBGRA8888;
         break;
     default:
         omx_format = OMX_COLOR_FormatYUV420Planar;
@@ -690,8 +722,17 @@ unsigned int Exynos_OSAL_OMX2HalPixelFormat(
         hal_format = HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED;
         break;
     case OMX_COLOR_Format32bitARGB8888:
-        hal_format = HAL_PIXEL_FORMAT_RGBA_8888;
+        hal_format = HAL_PIXEL_FORMAT_BGRA_8888;
         break;
+    case OMX_SEC_COLOR_FormatNV21Linear:
+        hal_format = HAL_PIXEL_FORMAT_EXYNOS_YCrCb_420_SP;
+        break;
+    case OMX_SEC_COLOR_FormatYVU420Planar:
+        hal_format = HAL_PIXEL_FORMAT_EXYNOS_YV12;
+        break;
+    case OMX_COLOR_Format32bitBGRA8888:
+         hal_format = HAL_PIXEL_FORMAT_CUSTOM_ARGB_8888;
+         break;
     default:
         hal_format = HAL_PIXEL_FORMAT_YCbCr_420_P;
         break;

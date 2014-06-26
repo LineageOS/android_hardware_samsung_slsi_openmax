@@ -51,13 +51,18 @@
 #define DEFAULT_MFC_INPUT_CBUFFER_SIZE      ALIGN((DEFAULT_MFC_INPUT_YBUFFER_SIZE / 2), 256)
 #define DEFAULT_MFC_OUTPUT_BUFFER_SIZE      1920 * 1080 * 3 / 2
 
+#ifdef USE_ENCODER_RGBINPUT_SUPPORT
+#define INPUT_PORT_SUPPORTFORMAT_NUM_MAX    8
+#else
 #define INPUT_PORT_SUPPORTFORMAT_NUM_MAX    5
+#endif
 #define OUTPUT_PORT_SUPPORTFORMAT_NUM_MAX   1
 
-#define MFC_INPUT_BUFFER_PLANE              2
-#define MFC_OUTPUT_BUFFER_PLANE             1
+#define MFC_DEFAULT_INPUT_BUFFER_PLANE  2
+#define MFC_DEFAULT_OUTPUT_BUFFER_PLANE 1
 
 #define MAX_INPUTBUFFER_NUM_DYNAMIC         0 /* Dynamic number of metadata buffer */
+#define MAX_OUTPUTBUFFER_NUM_DYNAMIC        0 /* Dynamic number of metadata buffer */
 
 // The largest metadata buffer size advertised
 // when metadata buffer mode is used for video encoding
@@ -69,6 +74,12 @@ typedef struct
     void *pAddrC;
 } CODEC_ENC_ADDR_INFO;
 
+typedef struct _BYPASS_BUFFER_INFO
+{
+    OMX_U32   nFlags;
+    OMX_TICKS timeStamp;
+} BYPASS_BUFFER_INFO;
+
 typedef struct _CODEC_ENC_BUFFER
 {
     void *pVirAddr[MAX_BUFFER_PLANE];   /* virtual address   */
@@ -77,10 +88,19 @@ typedef struct _CODEC_ENC_BUFFER
     int   dataSize;              /* total data length */
 } CODEC_ENC_BUFFER;
 
+typedef struct _ENCODE_CODEC_EXTRA_BUFFERINFO
+{
+    /* For Encode Input */
+    OMX_COLOR_FORMATTYPE eColorFormat;
+} ENCODE_CODEC_EXTRA_BUFFERINFO;
+
 typedef struct _EXYNOS_OMX_VIDEOENC_COMPONENT
 {
     OMX_HANDLETYPE hCodecHandle;
     OMX_BOOL bFirstFrame;
+    OMX_BOOL bQosChanged;
+    OMX_U32  nQosRatio;
+    OMX_U32  nInbufSpareSize;
     CODEC_ENC_BUFFER *pMFCEncInputBuffer[MFC_INPUT_BUFFER_NUM_MAX];
     CODEC_ENC_BUFFER *pMFCEncOutputBuffer[MFC_OUTPUT_BUFFER_NUM_MAX];
 
@@ -107,6 +127,7 @@ typedef struct _EXYNOS_OMX_VIDEOENC_COMPONENT
     OMX_BOOL bFirstOutput;
 
     OMX_COLOR_FORMATTYPE ANBColorFormat;
+    OMX_BOOL bRGBSupport;
 
     /* CSC handle */
     OMX_PTR csc_handle;

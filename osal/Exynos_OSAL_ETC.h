@@ -28,7 +28,7 @@
 #define Exynos_OSAL_ETC
 
 #include "OMX_Types.h"
-
+#include "Exynos_OMX_Def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,6 +59,8 @@ OMX_U32 Exynos_OSAL_PerfFrameCount(PERF_ID_TYPE id);
 int Exynos_OSAL_PerfOver30ms(PERF_ID_TYPE id);
 void Exynos_OSAL_PerfPrint(OMX_STRING prefix, PERF_ID_TYPE id);
 
+unsigned int Exynos_OSAL_GetPlaneCount(OMX_COLOR_FORMATTYPE omx_format);
+void Exynos_OSAL_GetPlaneSize(OMX_COLOR_FORMATTYPE eColorFormat, OMX_U32 nWidth, OMX_U32 nHeight, OMX_U32 nPlaneSize[MAX_BUFFER_PLANE]);
 #ifdef __cplusplus
 }
 #endif

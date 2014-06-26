@@ -91,6 +91,8 @@ typedef struct _EXYNOS_WMVDEC_HANDLE
     OMX_BOOL bDestinationStart;
     OMX_HANDLETYPE hSourceStartEvent;
     OMX_HANDLETYPE hDestinationStartEvent;
+
+    EXYNOS_QUEUE bypassBufferInfoQ;
 } EXYNOS_WMVDEC_HANDLE;
 
 #ifdef __cplusplus

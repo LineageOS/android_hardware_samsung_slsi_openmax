@@ -62,6 +62,8 @@ typedef struct _EXYNOS_MPEG2DEC_HANDLE
     OMX_BOOL bDestinationStart;
     OMX_HANDLETYPE hSourceStartEvent;
     OMX_HANDLETYPE hDestinationStartEvent;
+
+    EXYNOS_QUEUE bypassBufferInfoQ;
 } EXYNOS_MPEG2DEC_HANDLE;
 
 #ifdef __cplusplus

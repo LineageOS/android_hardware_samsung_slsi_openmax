@@ -235,3 +235,59 @@ void Exynos_OSAL_PerfPrint(OMX_STRING prefix, PERF_ID_TYPE id)
                 prefix, (float)perfTotal / (float)(frameCount * 1000),
                 Exynos_OSAL_PerfOver30ms(id));
 }
+
+unsigned int Exynos_OSAL_GetPlaneCount(
+    OMX_COLOR_FORMATTYPE omx_format)
+{
+    unsigned int plane_cnt = 0;
+    switch (omx_format) {
+    case OMX_COLOR_FormatYCbYCr:
+    case OMX_COLOR_FormatYUV420Planar:
+    case OMX_SEC_COLOR_FormatYVU420Planar:
+        plane_cnt = 3;
+        break;
+    case OMX_COLOR_FormatYUV420SemiPlanar:
+    case OMX_SEC_COLOR_FormatNV21Linear:
+    case OMX_SEC_COLOR_FormatNV12Tiled:
+        plane_cnt = 2;
+        break;
+    case OMX_COLOR_Format32bitARGB8888:
+    case OMX_COLOR_Format32bitBGRA8888:
+        plane_cnt = 1;
+        break;
+    default:
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: unsupported color format.", __func__);
+        plane_cnt = 0;
+        break;
+    }
+
+    return plane_cnt;
+}
+
+void Exynos_OSAL_GetPlaneSize(
+    OMX_COLOR_FORMATTYPE    eColorFormat,
+    OMX_U32                 nWidth,
+    OMX_U32                 nHeight,
+    OMX_U32                 nPlaneSize[MAX_BUFFER_PLANE])
+{
+    switch (eColorFormat) {
+    case OMX_COLOR_FormatYUV420Planar:
+    case (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatYVU420Planar:
+        nPlaneSize[0] = nWidth * nHeight;
+        nPlaneSize[1] = nWidth * nHeight >> 2;
+        nPlaneSize[2] = nWidth * nHeight >> 2;
+        break;
+    case OMX_COLOR_FormatYUV420SemiPlanar:
+    case (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV21Linear:
+    case (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled:
+        nPlaneSize[0] = nWidth * nHeight;
+        nPlaneSize[1] = nWidth * nHeight >> 1;
+        break;
+    case OMX_COLOR_Format32bitARGB8888:
+    case OMX_COLOR_Format32bitBGRA8888:
+        nPlaneSize[0] = nWidth * nHeight * 4;
+        break;
+    default:
+        break;
+    }
+}

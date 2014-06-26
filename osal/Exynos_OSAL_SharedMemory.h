@@ -49,6 +49,11 @@ void Exynos_OSAL_SharedMemory_Free(OMX_HANDLETYPE handle, OMX_PTR pBuffer);
 int Exynos_OSAL_SharedMemory_VirtToION(OMX_HANDLETYPE handle, OMX_PTR pBuffer);
 OMX_PTR Exynos_OSAL_SharedMemory_IONToVirt(OMX_HANDLETYPE handle, int ion_addr);
 
+#ifdef USE_DMA_BUF
+OMX_PTR Exynos_OSAL_SharedMemory_Map(OMX_HANDLETYPE handle, OMX_U32 size, unsigned int ionfd);
+void Exynos_OSAL_SharedMemory_Unmap(OMX_HANDLETYPE handle, unsigned int ionfd);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

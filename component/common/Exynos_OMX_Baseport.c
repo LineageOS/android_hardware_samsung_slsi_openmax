@@ -74,7 +74,7 @@ OMX_ERRORTYPE Exynos_OMX_OutputBufferReturn(OMX_COMPONENTTYPE *pOMXComponent, OM
     OMX_U32                   i = 0;
 
     Exynos_OSAL_MutexLock(pExynosPort->hPortMutex);
-    for (i = 0; i < pExynosPort->portDefinition.nBufferCountActual; i++) {
+    for (i = 0; i < MAX_BUFFER_NUM; i++) {
         if (bufferHeader == pExynosPort->extendBufferHeader[i].OMXBufferHeader) {
             pExynosPort->extendBufferHeader[i].bBufferInOMX = OMX_FALSE;
             break;
@@ -292,14 +292,17 @@ OMX_ERRORTYPE Exynos_OMX_PortDisableProcess(OMX_COMPONENTTYPE *pOMXComponent, OM
 
     cnt = (nPortIndex == ALL_PORT_INDEX ) ? ALL_PORT_NUM : 1;
 
-    /* port flush*/
-    for(i = 0; i < cnt; i++) {
-        if (nPortIndex == ALL_PORT_INDEX)
-            portIndex = i;
-        else
-            portIndex = nPortIndex;
+    if ((pExynosComponent->currentState == OMX_StateExecuting) ||
+        (pExynosComponent->currentState == OMX_StatePause)) {
+        /* port flush*/
+        for(i = 0; i < cnt; i++) {
+            if (nPortIndex == ALL_PORT_INDEX)
+                portIndex = i;
+            else
+                portIndex = nPortIndex;
 
-        Exynos_OMX_BufferFlushProcess(pOMXComponent, portIndex, OMX_FALSE);
+            Exynos_OMX_BufferFlushProcess(pOMXComponent, portIndex, OMX_FALSE);
+        }
     }
 
     for(i = 0; i < cnt; i++) {
@@ -614,6 +617,7 @@ OMX_ERRORTYPE Exynos_OMX_Port_Constructor(OMX_HANDLETYPE hComponent)
 
     pExynosInputPort->bufferSemID = NULL;
     pExynosInputPort->assignedBufferNum = 0;
+    pExynosInputPort->nPlaneCnt = 0;
     pExynosInputPort->portState = OMX_StateMax;
     pExynosInputPort->bIsPortFlushed = OMX_FALSE;
     pExynosInputPort->bIsPortDisabled = OMX_FALSE;
@@ -705,6 +709,7 @@ OMX_ERRORTYPE Exynos_OMX_Port_Constructor(OMX_HANDLETYPE hComponent)
 
     pExynosOutputPort->bufferSemID = NULL;
     pExynosOutputPort->assignedBufferNum = 0;
+    pExynosOutputPort->nPlaneCnt = 0;
     pExynosOutputPort->portState = OMX_StateMax;
     pExynosOutputPort->bIsPortFlushed = OMX_FALSE;
     pExynosOutputPort->bIsPortDisabled = OMX_FALSE;

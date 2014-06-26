@@ -27,6 +27,14 @@ ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
 endif
 
+ifeq ($(BOARD_USE_QOS_CTRL), true)
+LOCAL_CFLAGS += -DUSE_QOS_CTRL
+endif
+
+ifeq ($(BOARD_USE_ENCODER_RGBINPUT_SUPPORT), true)
+LOCAL_CFLAGS += -DUSE_ENCODER_RGBINPUT_SUPPORT
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Venc libExynosOMX_OSAL libExynosOMX_Basecomponent \

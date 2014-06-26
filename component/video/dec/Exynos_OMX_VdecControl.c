@@ -503,12 +503,18 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
         Exynos_ResetCodecData(&pExynosPort->processData);
     }
 
-    while(1) {
-        OMX_S32 cnt = 0;
-        Exynos_OSAL_Get_SemaphoreCount(pExynosComponent->pExynosPort[portIndex].bufferSemID, &cnt);
-        if (cnt <= 0)
-            break;
-        Exynos_OSAL_SemaphoreWait(pExynosComponent->pExynosPort[portIndex].bufferSemID);
+    if (pExynosPort->bufferSemID != NULL) {
+        while (1) {
+            OMX_S32 cnt = 0;
+            Exynos_OSAL_Get_SemaphoreCount(pExynosPort->bufferSemID, &cnt);
+            if (cnt == 0)
+                break;
+            else if (cnt > 0)
+                Exynos_OSAL_SemaphoreWait(pExynosPort->bufferSemID);
+            else if (cnt < 0)
+                Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+            Exynos_OSAL_SleepMillisec(0);
+        }
     }
     Exynos_OSAL_ResetQueue(&pExynosPort->bufferQ);
 
@@ -560,7 +566,18 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 n
 
     if (pExynosComponent->pExynosPort[nPortIndex].bufferProcessType & BUFFER_COPY)
         Exynos_OSAL_SemaphorePost(pExynosPort->codecSemID);
-    Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+
+    if (pExynosPort->bufferSemID != NULL) {
+        while (1) {
+            OMX_S32 cnt = 0;
+            Exynos_OSAL_Get_SemaphoreCount(pExynosPort->bufferSemID, &cnt);
+            if (cnt > 0)
+                break;
+            else
+                Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+            Exynos_OSAL_SleepMillisec(0);
+        }
+    }
 
     pVideoDec->exynos_codec_bufferProcessRun(pOMXComponent, nPortIndex);
     Exynos_OSAL_MutexLock(flushPortBuffer[0]->bufferMutex);
@@ -1043,6 +1060,18 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetParameter(
                     portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
                     portFormat->xFramerate         = portDefinition->format.video.xFramerate;
                     break;
+#ifdef USE_DUALDPB_MODE
+                case supportFormat_3:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV21Linear;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+                case supportFormat_4:
+                    portFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                    portFormat->eColorFormat       = OMX_SEC_COLOR_FormatYVU420Planar;
+                    portFormat->xFramerate         = portDefinition->format.video.xFramerate;
+                    break;
+#endif
                 default:
                     if (index > supportFormat_0) {
                         ret = OMX_ErrorNoMore;
@@ -1427,6 +1456,23 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeSetConfig(
         ret = OMX_ErrorNone;
     }
         break;
+#ifdef USE_QOS_CTRL
+    case OMX_IndexVendorSetQosRatio:
+    {
+        EXYNOS_OMX_VIDEODEC_COMPONENT   *pVideoDec = (EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle;
+        EXYNOS_OMX_VIDEO_CONFIG_QOSINFO *pQosInfo  = (EXYNOS_OMX_VIDEO_CONFIG_QOSINFO *)pComponentConfigStructure;
+
+        ret = Exynos_OMX_Check_SizeVersion(pQosInfo, sizeof(EXYNOS_OMX_VIDEO_CONFIG_QOSINFO));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pVideoDec->nQosRatio = pQosInfo->nQosRatio;
+        pVideoDec->bQosChanged = OMX_TRUE;
+
+        ret = OMX_ErrorNone;
+    }
+        break;
+#endif
     default:
         ret = Exynos_OMX_SetConfig(hComponent, nIndex, pComponentConfigStructure);
         break;
@@ -1487,6 +1533,13 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetExtensionIndex(
         ret = OMX_ErrorNone;
         goto EXIT;
     }
+#ifdef USE_QOS_CTRL
+      else if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_CONFIG_SET_QOS_RATIO) == 0) {
+        *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorSetQosRatio;
+        ret = OMX_ErrorNone;
+        goto EXIT;
+    }
+#endif
 
 #ifdef USE_ANB
     if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_ENABLE_ANB) == 0)

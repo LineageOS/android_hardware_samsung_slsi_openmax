@@ -522,8 +522,9 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                     if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
                         (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
                         OMX_PTR ppBuf[MAX_BUFFER_PLANE];
-                        Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->processData.bufferHeader->pBuffer, ppBuf);
-                        Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+                        if (OMX_ErrorNone ==
+                            Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->processData.bufferHeader->pBuffer, ppBuf))
+                            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
                     }
 #endif
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
@@ -543,8 +544,9 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                         if ((pExynosPort->bStoreMetaData == OMX_TRUE) &&
                             (pExynosPort->portDefinition.format.video.eColorFormat == OMX_COLOR_FormatAndroidOpaque)) {
                             OMX_PTR ppBuf[MAX_BUFFER_PLANE];
-                            Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer, ppBuf);
-                            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+                            if (OMX_ErrorNone ==
+                                Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer, ppBuf))
+                                Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
                         }
 #endif
                         Exynos_OMX_InputBufferReturn(pOMXComponent,
@@ -557,12 +559,18 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
         Exynos_ResetCodecData(&pExynosPort->processData);
     }
 
-    while (1) {
-        OMX_S32 cnt = 0;
-        Exynos_OSAL_Get_SemaphoreCount(pExynosPort->bufferSemID, &cnt);
-        if (cnt <= 0)
-            break;
-        Exynos_OSAL_SemaphoreWait(pExynosPort->bufferSemID);
+    if (pExynosPort->bufferSemID != NULL) {
+        while (1) {
+            OMX_S32 cnt = 0;
+            Exynos_OSAL_Get_SemaphoreCount(pExynosPort->bufferSemID, &cnt);
+            if (cnt == 0)
+                break;
+            else if (cnt > 0)
+                Exynos_OSAL_SemaphoreWait(pExynosPort->bufferSemID);
+            else if (cnt < 0)
+                Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+            Exynos_OSAL_SleepMillisec(0);
+        }
     }
     Exynos_OSAL_ResetQueue(&pExynosPort->bufferQ);
 
@@ -633,7 +641,18 @@ OMX_ERRORTYPE Exynos_OMX_BufferFlush(
 
     if (pExynosPort->bufferProcessType & BUFFER_COPY)
         Exynos_OSAL_SemaphorePost(pExynosPort->codecSemID);
-    Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+
+    if (pExynosPort->bufferSemID != NULL) {
+        while (1) {
+            OMX_S32 cnt = 0;
+            Exynos_OSAL_Get_SemaphoreCount(pExynosPort->bufferSemID, &cnt);
+            if (cnt > 0)
+                break;
+            else
+                Exynos_OSAL_SemaphorePost(pExynosPort->bufferSemID);
+            Exynos_OSAL_SleepMillisec(0);
+        }
+    }
 
     pVideoEnc->exynos_codec_bufferProcessRun(pOMXComponent, nPortIndex);
 
@@ -1190,12 +1209,12 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetParameter(
                 break;
             case supportFormat_2:
                 pPortFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                pPortFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV12Tiled;
+                pPortFormat->eColorFormat       = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV12Tiled;
                 pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
                 break;
             case supportFormat_3:
                 pPortFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
-                pPortFormat->eColorFormat       = OMX_SEC_COLOR_FormatNV21Linear;
+                pPortFormat->eColorFormat       = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatNV21Linear;
                 pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
                 break;
             case supportFormat_4:
@@ -1203,6 +1222,23 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetParameter(
                 pPortFormat->eColorFormat       = OMX_COLOR_FormatAndroidOpaque;
                 pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
                 break;
+#ifdef USE_ENCODER_RGBINPUT_SUPPORT
+            case supportFormat_5:
+                pPortFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                pPortFormat->eColorFormat       = (OMX_COLOR_FORMATTYPE)OMX_SEC_COLOR_FormatYVU420Planar;
+                pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
+                break;
+            case supportFormat_6:
+                pPortFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                pPortFormat->eColorFormat       = OMX_COLOR_Format32bitARGB8888;
+                pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
+                break;
+            case supportFormat_7:
+                pPortFormat->eCompressionFormat = OMX_VIDEO_CodingUnused;
+                pPortFormat->eColorFormat       = OMX_COLOR_Format32bitBGRA8888;
+                pPortFormat->xFramerate         = pPortDef->format.video.xFramerate;
+                break;
+#endif
             default:
                 if (nIndex > supportFormat_0) {
                     ret = OMX_ErrorNoMore;
@@ -1778,6 +1814,29 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeSetConfig(
         }
     }
         break;
+#ifdef USE_QOS_CTRL
+    case OMX_IndexVendorSetQosRatio:
+    {
+        EXYNOS_OMX_VIDEO_CONFIG_QOSINFO *pQosInfo  = (EXYNOS_OMX_VIDEO_CONFIG_QOSINFO *)pComponentConfigStructure;
+        EXYNOS_OMX_VIDEOENC_COMPONENT   *pVideoEnc = NULL;
+
+        if (pExynosComponent->hComponentHandle == NULL) {
+            ret = OMX_ErrorBadParameter;
+            goto EXIT;
+        }
+        pVideoEnc = (EXYNOS_OMX_VIDEOENC_COMPONENT *)pExynosComponent->hComponentHandle;
+
+        ret = Exynos_OMX_Check_SizeVersion(pQosInfo, sizeof(EXYNOS_OMX_VIDEO_CONFIG_QOSINFO));
+        if (ret != OMX_ErrorNone)
+            goto EXIT;
+
+        pVideoEnc->nQosRatio = pQosInfo->nQosRatio;
+        pVideoEnc->bQosChanged = OMX_TRUE;
+
+        ret = OMX_ErrorNone;
+    }
+        break;
+#endif
     default:
     {
         ret = Exynos_OMX_SetConfig(hComponent, nParamIndex, pComponentConfigStructure);
@@ -1837,6 +1896,13 @@ OMX_ERRORTYPE Exynos_OMX_VideoEncodeGetExtensionIndex(
         ret = OMX_ErrorNone;
         goto EXIT;
     }
+#ifdef USE_QOS_CTRL
+      else if (Exynos_OSAL_Strcmp(szParamName, EXYNOS_INDEX_CONFIG_SET_QOS_RATIO) == 0) {
+        *pIndexType = (OMX_INDEXTYPE) OMX_IndexVendorSetQosRatio;
+        ret = OMX_ErrorNone;
+        goto EXIT;
+    }
+#endif
 
 #ifdef USE_STOREMETADATA
     if (Exynos_OSAL_Strcmp(szParamName, EXYNOS_INDEX_PARAM_STORE_METADATA_BUFFER) == 0) {
@@ -1868,8 +1934,9 @@ OMX_ERRORTYPE Exynos_Shared_DataToBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_DATA
 
     if ((bNeedUnlock == OMX_TRUE) && (pUseBuffer->bufferHeader != NULL)) {
         OMX_PTR ppBuf[MAX_BUFFER_PLANE];
-        Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pUseBuffer->bufferHeader->pBuffer, ppBuf);
-        Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
+        if (OMX_ErrorNone ==
+            Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pUseBuffer->bufferHeader->pBuffer, ppBuf))
+            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
     }
 
     return ret;

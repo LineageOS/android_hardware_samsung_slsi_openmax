@@ -88,6 +88,63 @@ typedef struct _EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO {
     OMX_S32 OMX_OUT fd;
 } EXYNOS_OMX_VIDEO_CONFIG_BUFFERINFO;
 
+typedef struct _EXYNOS_OMX_VIDEO_CONFIG_QOSINFO {
+    OMX_U32         nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32         nQosRatio;
+} EXYNOS_OMX_VIDEO_CONFIG_QOSINFO;
+
+#ifdef USE_VP8ENC_SUPPORT
+typedef enum OMX_VIDEO_VP84PROFILETYPE {
+    OMX_VIDEO_VP8ProfileMain                = 0x01,
+    OMX_VIDEO_VP8ProfileUnknown             = 0x6EFFFFFF,
+    OMX_VIDEO_VP8ProfileKhronosExtensions   = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
+    OMX_VIDEO_VP8ProfileVendorStartUnused   = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
+    OMX_VIDEO_VP8ProfileMax                 = 0x7FFFFFFF
+} OMX_VIDEO_VP8PROFILETYPE;
+
+typedef enum OMX_VIDEO_VP8LEVELTYPE {
+    OMX_VIDEO_VP8Level_Version0             = 0x01,
+    OMX_VIDEO_VP8Level_Version1             = 0x02,
+    OMX_VIDEO_VP8Level_Version2             = 0x04,
+    OMX_VIDEO_VP8Level_Version3             = 0x08,
+    OMX_VIDEO_VP8LevelUnknown               = 0x6EFFFFFF,
+    OMX_VIDEO_VP8LevelKhronosExtensions     = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
+    OMX_VIDEO_VP8LevelVendorStartUnused     = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
+    OMX_VIDEO_VP8LevelMax                   = 0x7FFFFFFF
+} OMX_VIDEO_VP8LEVELTYPE;
+
+typedef struct OMX_VIDEO_PARAM_VP8TYPE {
+    OMX_U32                     nSize;
+    OMX_VERSIONTYPE             nVersion;
+    OMX_U32                     nPortIndex;
+    OMX_VIDEO_VP8PROFILETYPE    eProfile;
+    OMX_VIDEO_VP8LEVELTYPE      eLevel;
+    OMX_U32                     nDCTPartitions;
+    OMX_BOOL                    bErrorResilientMode;
+} OMX_VIDEO_PARAM_VP8TYPE;
+
+typedef struct OMX_VIDEO_VP8REFERENCEFRAMETYPE {
+    OMX_U32         nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32         nPortIndex;
+    OMX_BOOL        nPreviousFrameRefresh;
+    OMX_BOOL        bGoldenFrameRefresh;
+    OMX_BOOL        bAlternateFrameRefresh;
+    OMX_BOOL        bUsePreviousFrame;
+    OMX_BOOL        bUseGoldenFrame;
+    OMX_BOOL        bUseAlternateFrame;
+} OMX_VIDEO_VP8REFERENCEFRAMETYPE;
+
+typedef struct OMX_VIDEO_VP8REFERENCEFRAMEINFOTYPE {
+    OMX_U32         nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32         nPortIndex;
+    OMX_BOOL        bIsIntraFrame;
+    OMX_BOOL        bIsGoldenOrAlternateFrame;
+} OMX_VIDEO_VP8REFERENCEFRAMEINFOTYPE;
+#endif
+
 typedef enum _EXYNOS_OMX_INDEXTYPE
 {
 #define EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL "OMX.SEC.index.ThumbnailMode"
@@ -104,6 +161,8 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexVendorGetBufferFD              = 0x7F000005,
 #define EXYNOS_INDEX_PARAM_SET_DTS_MODE "OMX.SEC.index.SetDTSMode"
     OMX_IndexVendorSetDTSMode               = 0x7F000006,
+#define EXYNOS_INDEX_CONFIG_SET_QOS_RATIO "OMX.SEC.index.SetQosRatio"
+    OMX_IndexVendorSetQosRatio              = 0x7F000007,
 
     /* for Android Native Window */
 #define EXYNOS_INDEX_PARAM_ENABLE_ANB "OMX.google.android.index.enableAndroidNativeBuffers"
@@ -118,6 +177,16 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     /* prepend SPS/PPS to I/IDR for H.264 Encoder */
 #define EXYNOS_INDEX_PARAM_PREPEND_SPSPPS_TO_IDR "OMX.google.android.index.prependSPSPPSToIDRFrames"
     OMX_IndexParamPrependSPSPPSToIDR        = 0x7F000015,
+
+#ifdef USE_VP8ENC_SUPPORT
+    /* for VP8 encoder */
+#define EXYNOS_INDEX_PARAM_VIDEO_VP8_TYPE "OMX.SEC.index.VideoVp8Type"
+    OMX_IndexParamVideoVp8                  = 0x7F00016,
+#define EXYNOS_INDEX_CONFIG_VIDEO_VP8_REFERENCEFRAME "OMX.SEC.index.VideoVp8ReferenceFrame"
+    OMX_IndexConfigVideoVp8ReferenceFrame   = 0x7F00017,
+#define EXYNOS_INDEX_CONFIG_VIDEO_VP8_REFERENCEFRAMETYPE "OMX.SEC.index.VideoVp8ReferenceFrameType"
+    OMX_IndexConfigVideoVp8ReferenceFrameType = 0x7F00018,
+#endif
 
     /* for Android PV OpenCore*/
     OMX_COMPONENT_CAPABILITY_TYPE_INDEX     = 0xFF7A347
@@ -157,11 +226,9 @@ typedef enum _EXYNOS_OMX_COLOR_FORMATTYPE {
     OMX_SEC_COLOR_FormatNV12TPhysicalAddress        = 0x7F000001, /**< Reserved region for introducing Vendor Extensions */
     OMX_SEC_COLOR_FormatNV12LPhysicalAddress        = 0x7F000002,
     OMX_SEC_COLOR_FormatNV12LVirtualAddress         = 0x7F000003,
-#ifndef USE_NATIVE_SEC_NV12TILED
-    OMX_SEC_COLOR_FormatNV12Tiled                   = 0x7FC00002,  /* 0x7FC00002 */
-#endif
     OMX_SEC_COLOR_FormatNV21LPhysicalAddress        = 0x7F000010,
     OMX_SEC_COLOR_FormatNV21Linear                  = 0x7F000011,
+    OMX_SEC_COLOR_FormatYVU420Planar                = 0x7F000012,
 
     /* to copy a encoded data for drm component using gsc or fimc */
     OMX_SEC_COLOR_FormatEncodedData                 = OMX_COLOR_FormatYCbYCr,
@@ -180,7 +247,7 @@ typedef enum _EXYNOS_OMX_SUPPORTFORMAT_TYPE
     supportFormat_4,
     supportFormat_5,
     supportFormat_6,
-    supportFormat_7
+    supportFormat_7,
 } EXYNOS_OMX_SUPPORTFORMAT_TYPE;
 
 typedef enum _EXYNOS_OMX_BUFFERPROCESS_TYPE
@@ -201,6 +268,7 @@ typedef struct _EXYNOS_OMX_VIDEO_PROFILELEVEL
 #ifdef USE_S3D_SUPPORT
 typedef enum _EXYNOS_OMX_FPARGMT_TYPE
 {
+    OMX_SEC_FPARGMT_INVALID           = -1,
     OMX_SEC_FPARGMT_CHECKERBRD_INTERL = 0x00,
     OMX_SEC_FPARGMT_COLUMN_INTERL     = 0x01,
     OMX_SEC_FPARGMT_ROW_INTERL        = 0x02,

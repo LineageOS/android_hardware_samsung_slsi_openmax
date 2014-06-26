@@ -6,14 +6,14 @@ PLATFORM_DIR := $(TARGET_BOARD_PLATFORM)-insignal
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-	Exynos_OMX_H264enc.c \
+	Exynos_OMX_Vp8enc.c \
 	library_register.c
 
 LOCAL_PRELINK_MODULE := false
-LOCAL_MODULE := libOMX.Exynos.AVC.Encoder
+LOCAL_MODULE := libOMX.Exynos.VP8.Encoder
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/omx
 
-LOCAL_CFLAGS :=
+LOCAL_CFLAGS := -DUSE_VP8ENC_SUPPORT
 
 ifeq ($(BOARD_USE_METADATABUFFERTYPE), true)
 LOCAL_CFLAGS += -DUSE_METADATABUFFERTYPE
@@ -25,10 +25,6 @@ endif
 
 ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
-endif
-
-ifeq ($(BOARD_USE_H264_PREPEND_SPS_PPS), true)
-LOCAL_CFLAGS += -DUSE_H264_PREPEND_SPS_PPS
 endif
 
 ifeq ($(BOARD_USE_QOS_CTRL), true)
@@ -43,7 +39,6 @@ LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Venc libExynosOMX_OSAL libExynosOMX_Basecomponent \
 	libswconverter libExynosVideoApi
-
 LOCAL_SHARED_LIBRARIES := libc libdl libcutils libutils libui \
 	libExynosOMX_Resourcemanager libcsc libexynosv4l2 libion_exynos
 

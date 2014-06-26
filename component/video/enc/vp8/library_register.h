@@ -1,6 +1,6 @@
 /*
  *
- * Copyright 2012 Samsung Electronics S.LSI Co. LTD
+ * Copyright 2013 Samsung Electronics S.LSI Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,41 @@
  */
 
 /*
- * @file       Exynos_OMX_Resourcemanager.h
+ * @file        library_register.h
  * @brief
- * @author     SeungBeom Kim (sbcrux.kim@samsung.com)
- * @version    2.0.0
+ * @author      SeungBeom Kim (sbcrux.kim@samsung.com)
+ *              Taehwan Kim (t_h.kim@samsung.com)
+ * @version     2.0.0
  * @history
- *    2012.02.20 : Create
+ *   2013.02.14 : Create
  */
 
-#ifndef EXYNOS_OMX_RESOURCEMANAGER
-#define EXYNOS_OMX_RESOURCEMANAGER
-
+#ifndef EXYNOS_OMX_VP8_ENC_REG
+#define EXYNOS_OMX_VP8_ENC_REG
 
 #include "Exynos_OMX_Def.h"
 #include "OMX_Component.h"
+#include "Exynos_OMX_Component_Register.h"
+
+
+#define OSCL_EXPORT_REF __attribute__((visibility("default")))
+#define MAX_COMPONENT_NUM       1
+#define MAX_COMPONENT_ROLE_NUM  1
+
+/* VP8 */
+#define EXYNOS_OMX_COMPONENT_VP8_ENC      "OMX.Exynos.VP8.Encoder"
+#define EXYNOS_OMX_COMPONENT_VP8_ENC_ROLE "video_encoder.vpx"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OMX_ERRORTYPE Exynos_OMX_ResourceManager_Init();
-OMX_ERRORTYPE Exynos_OMX_ResourceManager_Deinit();
-OMX_ERRORTYPE Exynos_OMX_Get_Resource(OMX_COMPONENTTYPE *pOMXComponent);
-OMX_ERRORTYPE Exynos_OMX_Release_Resource(OMX_COMPONENTTYPE *pOMXComponent);
-OMX_ERRORTYPE Exynos_OMX_In_WaitForResource(OMX_COMPONENTTYPE *pOMXComponent);
-OMX_ERRORTYPE Exynos_OMX_Out_WaitForResource(OMX_COMPONENTTYPE *pOMXComponent);
+OSCL_EXPORT_REF int Exynos_OMX_COMPONENT_Library_Register(ExynosRegisterComponentType **ppExynosComponent);
 
 #ifdef __cplusplus
 };
 #endif
 
 #endif
+

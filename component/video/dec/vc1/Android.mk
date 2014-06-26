@@ -27,6 +27,14 @@ ifeq ($(BOARD_USE_CSC_HW), true)
 LOCAL_CFLAGS += -DUSE_CSC_HW
 endif
 
+ifeq ($(BOARD_USE_QOS_CTRL), true)
+LOCAL_CFLAGS += -DUSE_QOS_CTRL
+endif
+
+ifeq ($(BOARD_USE_DUALDPB_MODE), true)
+LOCAL_CFLAGS += -DUSE_DUALDPB_MODE
+endif
+
 LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Vdec libExynosOMX_OSAL libExynosOMX_Basecomponent \
