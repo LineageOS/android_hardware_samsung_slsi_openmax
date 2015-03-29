@@ -913,8 +913,6 @@ OMX_ERRORTYPE Mpeg4CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
     pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum = pDecOps->Get_ActualBufferCount(hMFCHandle);
     if (pVideoDec->bThumbnailMode == OMX_FALSE) {
         pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum += EXTRA_DPB_NUM;
-    } else {
-        pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum += PLATFORM_DISPLAY_BUFFER;
     }
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "Mpeg4CodecSetup nOutbufs: %d", pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum);
 
@@ -952,8 +950,8 @@ OMX_ERRORTYPE Mpeg4CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
             pExynosInputPort->portDefinition.format.video.nStride = ((pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
             pExynosInputPort->portDefinition.format.video.nSliceHeight = ((pMpeg4Dec->hMFCMpeg4Handle.codecOutbufConf.nFrameHeight + 15) & (~15));
 
-            pExynosOutputPort->portDefinition.nBufferCountActual = pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum - 2;
-            pExynosOutputPort->portDefinition.nBufferCountMin = pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum - 2;
+            pExynosOutputPort->portDefinition.nBufferCountActual = pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum;
+            pExynosOutputPort->portDefinition.nBufferCountMin = pMpeg4Dec->hMFCMpeg4Handle.maxDPBNum;
 
             Exynos_UpdateFrameSize(pOMXComponent);
 

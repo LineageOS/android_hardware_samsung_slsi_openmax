@@ -65,8 +65,6 @@
 
 #define MAX_INPUTBUFFER_NUM_DYNAMIC         0 /* Dynamic number of metadata buffer */
 
-#define PLATFORM_DISPLAY_BUFFER             2
-
 typedef struct
 {
     void *pAddrY;
@@ -121,7 +119,6 @@ typedef struct _EXYNOS_OMX_VIDEODEC_COMPONENT
 
     /* For Reconfiguration DPB */
     OMX_BOOL bReconfigDPB;
-    OMX_U32  nSavedDPBCnt;
 
     /* For Dual DPB */
     OMX_BOOL bDualDPBMode;
