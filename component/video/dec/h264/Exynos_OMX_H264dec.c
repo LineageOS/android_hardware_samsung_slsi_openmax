@@ -642,12 +642,6 @@ OMX_ERRORTYPE H264CodecReconfigAllBuffers(
             pBufferOps->Clear_RegisteredBuffer(hMFCHandle);
             pBufferOps->Cleanup_Buffer(hMFCHandle);
 
-            /******************************************************/
-            /* V4L2 Destnation Setup for DPB Buffer Number Change */
-            /******************************************************/
-            H264CodecDstSetup(pOMXComponent);
-
-            pVideoDec->bReconfigDPB = OMX_FALSE;
         } else if (pExynosPort->bufferProcessType & BUFFER_SHARE) {
             /**********************************/
             /* Codec Buffer Unregister */
@@ -655,6 +649,11 @@ OMX_ERRORTYPE H264CodecReconfigAllBuffers(
             pBufferOps->Clear_RegisteredBuffer(hMFCHandle);
             pBufferOps->Cleanup_Buffer(hMFCHandle);
         }
+        /******************************************************/
+        /* V4L2 Destnation Setup for DPB Buffer Number Change */
+        /******************************************************/
+        H264CodecDstSetup(pOMXComponent);
+        pVideoDec->bReconfigDPB = OMX_FALSE;
     } else {
         ret = OMX_ErrorBadParameter;
         goto EXIT;
@@ -2019,15 +2018,6 @@ OMX_ERRORTYPE Exynos_H264Dec_DstIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     for (i = 0; i < pExynosOutputPort->nPlaneCnt; i++) {
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s : %d => ADDR[%d]: 0x%x", __FUNCTION__, __LINE__, i,
                                         pDstInputData->buffer.multiPlaneBuffer.dataBuffer[i]);
-    }
-
-    if ((pVideoDec->bReconfigDPB == OMX_TRUE) &&
-        (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) &&
-        (pExynosOutputPort->exceptionFlag == GENERAL_STATE)) {
-        ret = H264CodecDstSetup(pOMXComponent);
-        if (ret != OMX_ErrorNone)
-            goto EXIT;
-        pVideoDec->bReconfigDPB = OMX_FALSE;
     }
 
     codecReturn = pOutbufOps->Enqueue(hMFCHandle, (unsigned char **)pDstInputData->buffer.multiPlaneBuffer.dataBuffer,
