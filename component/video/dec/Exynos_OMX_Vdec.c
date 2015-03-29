@@ -925,6 +925,11 @@ OMX_ERRORTYPE Exynos_OMX_DstInputBufferProcess(OMX_HANDLETYPE hComponent)
                                 break;
                             }
                         }
+
+                        OMX_PTR pBufferHandle = dstInputData.bufferHeader->pBuffer;
+                        if (exynosOutputPort->bStoreMetaData == OMX_TRUE) {
+                            Exynos_OSAL_GetInfoFromMetaData(dstInputData.bufferHeader->pBuffer, &pBufferHandle);
+                        }
                         Exynos_ResetDataBuffer(dstInputUseBuffer);
                     }
                 }
