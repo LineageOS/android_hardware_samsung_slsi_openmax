@@ -147,8 +147,8 @@ typedef struct OMX_VIDEO_VP8REFERENCEFRAMEINFOTYPE {
 
 typedef enum _EXYNOS_OMX_INDEXTYPE
 {
-#define EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL "OMX.SEC.index.ThumbnailMode"
-    OMX_IndexVendorThumbnailMode            = 0x7F000001,
+#define EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL "OMX.SEC.index.enableThumbnailMode"
+    OMX_IndexParamEnableThumbnailMode       = 0x7F000001,
 #define EXYNOS_INDEX_CONFIG_VIDEO_INTRAPERIOD "OMX.SEC.index.VideoIntraPeriod"
     OMX_IndexConfigVideoIntraPeriod         = 0x7F000002,
 #ifdef USE_S3D_SUPPORT
@@ -264,6 +264,13 @@ typedef struct _EXYNOS_OMX_VIDEO_PROFILELEVEL
     OMX_S32  profile;
     OMX_S32  level;
 } EXYNOS_OMX_VIDEO_PROFILELEVEL;
+
+typedef struct _EXYNOS_OMX_VIDEO_THUMBNAILMODE {
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32 nPortIndex;
+    OMX_BOOL bEnable;
+} EXYNOS_OMX_VIDEO_THUMBNAILMODE;
 
 #ifdef USE_S3D_SUPPORT
 typedef enum _EXYNOS_OMX_FPARGMT_TYPE
