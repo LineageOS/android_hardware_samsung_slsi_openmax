@@ -724,8 +724,6 @@ OMX_ERRORTYPE VP8CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
     pVp8Dec->hMFCVp8Handle.maxDPBNum = pDecOps->Get_ActualBufferCount(hMFCHandle);
     if (pVideoDec->bThumbnailMode == OMX_FALSE) {
         pVp8Dec->hMFCVp8Handle.maxDPBNum += EXTRA_DPB_NUM;
-    } else {
-        pVp8Dec->hMFCVp8Handle.maxDPBNum += PLATFORM_DISPLAY_BUFFER;
     }
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "Vp8CodecSetup nOutbufs: %d", pVp8Dec->hMFCVp8Handle.maxDPBNum);
 
@@ -763,8 +761,8 @@ OMX_ERRORTYPE VP8CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
             pExynosInputPort->portDefinition.format.video.nStride = ((pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
             pExynosInputPort->portDefinition.format.video.nSliceHeight = ((pVp8Dec->hMFCVp8Handle.codecOutbufConf.nFrameHeight + 15) & (~15));
 
-            pExynosOutputPort->portDefinition.nBufferCountActual = pVp8Dec->hMFCVp8Handle.maxDPBNum - PLATFORM_DISPLAY_BUFFER;
-            pExynosOutputPort->portDefinition.nBufferCountMin = pVp8Dec->hMFCVp8Handle.maxDPBNum - PLATFORM_DISPLAY_BUFFER;
+            pExynosOutputPort->portDefinition.nBufferCountActual = pVp8Dec->hMFCVp8Handle.maxDPBNum;
+            pExynosOutputPort->portDefinition.nBufferCountMin = pVp8Dec->hMFCVp8Handle.maxDPBNum;
 
             Exynos_UpdateFrameSize(pOMXComponent);
 

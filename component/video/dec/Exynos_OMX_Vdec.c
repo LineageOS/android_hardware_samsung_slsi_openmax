@@ -1263,7 +1263,6 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeComponentInit(OMX_IN OMX_HANDLETYPE hCompone
 
     Exynos_OSAL_Memset(pVideoDec, 0, sizeof(EXYNOS_OMX_VIDEODEC_COMPONENT));
     pVideoDec->bReconfigDPB = OMX_FALSE;
-    pVideoDec->nSavedDPBCnt = 0;
     pVideoDec->bDTSMode     = OMX_FALSE;
     pVideoDec->bQosChanged  = OMX_FALSE;
     pVideoDec->nQosRatio    = 0;
