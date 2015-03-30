@@ -2207,6 +2207,7 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
             } else {
                 pDstOutputData->timeStamp = pExynosComponent->timeStamp[pH264Dec->hMFCH264Handle.outputIndexTimestamp];
                 pDstOutputData->nFlags = pExynosComponent->nFlags[pH264Dec->hMFCH264Handle.outputIndexTimestamp];
+                pExynosComponent->nFlags[pH264Dec->hMFCH264Handle.outputIndexTimestamp] = 0x00;
                 Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "missing out indexTimestamp: %d", indexTimestamp);
             }
         } else {
@@ -2230,6 +2231,7 @@ OMX_ERRORTYPE Exynos_H264Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX
 
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
+        pExynosComponent->nFlags[indexTimestamp] = 0x00;
 
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
