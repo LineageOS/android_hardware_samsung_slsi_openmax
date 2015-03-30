@@ -375,7 +375,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
 
 #ifdef USE_ANB
     if (exynosOutputPort->bIsANBEnabled == OMX_TRUE) {
-        Exynos_OSAL_LockANB(pOutputBuf, nImageWidth, nImageHeight, eColorFormat, &stride, planes);
+        Exynos_OSAL_LockANBHandle(pOutputBuf, nImageWidth, nImageHeight, eColorFormat, &stride, planes);
         nImageWidth = stride;
         outputUseBuffer->dataLen = sizeof(void *);
 
@@ -489,7 +489,7 @@ OMX_BOOL Exynos_CSC_OutputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA
 
 #ifdef USE_ANB
     if (exynosOutputPort->bIsANBEnabled == OMX_TRUE) {
-        Exynos_OSAL_UnlockANB(pOutputBuf);
+        Exynos_OSAL_UnlockANBHandle(pOutputBuf);
     }
 #endif
 
