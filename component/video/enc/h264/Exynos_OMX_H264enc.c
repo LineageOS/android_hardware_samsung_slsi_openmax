@@ -1615,42 +1615,6 @@ OMX_ERRORTYPE Exynos_H264Enc_Init(OMX_COMPONENTTYPE *pOMXComponent)
     pVideoEnc->nInbufSpareSize = pInbufOps->Get_SpareSize(hMFCHandle);
 
     pExynosInputPort->nPlaneCnt = MFC_DEFAULT_INPUT_BUFFER_PLANE;
-    if ((pExynosInputPort->bStoreMetaData != OMX_TRUE) &&
-        (eColorFormat != OMX_COLOR_FormatAndroidOpaque)) {
-        if (pExynosInputPort->bufferProcessType & BUFFER_COPY) {
-            OMX_U32 nPlaneSize[MAX_BUFFER_PLANE] = {0, 0, 0};
-
-            if (pVideoEnc->bRGBSupport == OMX_TRUE) {
-                pExynosInputPort->nPlaneCnt = Exynos_OSAL_GetPlaneCount(eColorFormat);
-                Exynos_OSAL_GetPlaneSize(eColorFormat, ALIGN_TO_16B(1920), ALIGN_TO_16B(1080), nPlaneSize);
-            } else {
-                pExtBufferInfo->eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
-                pExynosInputPort->nPlaneCnt = Exynos_OSAL_GetPlaneCount(OMX_COLOR_FormatYUV420SemiPlanar);
-                Exynos_OSAL_GetPlaneSize(OMX_COLOR_FormatYUV420SemiPlanar, ALIGN_TO_16B(1920), ALIGN_TO_16B(1080), nPlaneSize);
-            }
-
-            if (pVideoEnc->nInbufSpareSize > 0) {
-                for (i = 0; i < pExynosInputPort->nPlaneCnt; i++)
-                    nPlaneSize[i] += pVideoEnc->nInbufSpareSize;
-            }
-
-            Exynos_OSAL_SemaphoreCreate(&pExynosInputPort->codecSemID);
-            Exynos_OSAL_QueueCreate(&pExynosInputPort->codecBufferQ, MAX_QUEUE_ELEMENTS);
-
-            ret = Exynos_Allocate_CodecBuffers(pOMXComponent, INPUT_PORT_INDEX, MFC_INPUT_BUFFER_NUM_MAX, nPlaneSize);
-            if (ret != OMX_ErrorNone)
-                goto EXIT;
-
-            for (i = 0; i < MFC_INPUT_BUFFER_NUM_MAX; i++)
-                Exynos_CodecBufferEnqueue(pExynosComponent, INPUT_PORT_INDEX, pVideoEnc->pMFCEncInputBuffer[i]);
-        } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
-            /*************/
-            /*    TBD    */
-            /*************/
-            /* Does not require any actions. */
-        }
-    }
-
     pExynosOutputPort->nPlaneCnt = MFC_DEFAULT_OUTPUT_BUFFER_PLANE;
     if (pExynosOutputPort->bufferProcessType & BUFFER_COPY) {
         Exynos_OSAL_SemaphoreCreate(&pExynosOutputPort->codecSemID);
@@ -1746,6 +1710,7 @@ OMX_ERRORTYPE Exynos_H264Enc_Terminate(OMX_COMPONENTTYPE *pOMXComponent)
         Exynos_Free_CodecBuffers(pOMXComponent, INPUT_PORT_INDEX);
         Exynos_OSAL_QueueTerminate(&pExynosInputPort->codecBufferQ);
         Exynos_OSAL_SemaphoreTerminate(pExynosInputPort->codecSemID);
+        pVideoEnc->bFirstInput = OMX_TRUE;
     } else if (pExynosInputPort->bufferProcessType & BUFFER_SHARE) {
         /*************/
         /*    TBD    */
