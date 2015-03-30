@@ -41,12 +41,12 @@
 #include <gralloc_priv.h>
 #endif
 
+#include "exynos_format.h"
 #include "Exynos_OSAL_Semaphore.h"
 #include "Exynos_OMX_Baseport.h"
 #include "Exynos_OMX_Basecomponent.h"
 #include "Exynos_OMX_Macros.h"
 #include "Exynos_OSAL_Android.h"
-#include "exynos_format.h"
 
 #include "ExynosVideoApi.h"
 
