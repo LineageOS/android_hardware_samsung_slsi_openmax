@@ -353,10 +353,16 @@ OMX_ERRORTYPE Mpeg2CodecStop(OMX_COMPONENTTYPE *pOMXComponent, OMX_U32 nPortInde
     pInbufOps  = pMpeg2Dec->hMFCMpeg2Handle.pInbufOps;
     pOutbufOps = pMpeg2Dec->hMFCMpeg2Handle.pOutbufOps;
 
-    if ((nPortIndex == INPUT_PORT_INDEX) && (pInbufOps != NULL))
+    if ((nPortIndex == INPUT_PORT_INDEX) && (pInbufOps != NULL)) {
         pInbufOps->Stop(hMFCHandle);
-    else if ((nPortIndex == OUTPUT_PORT_INDEX) && (pOutbufOps != NULL))
+    } else if ((nPortIndex == OUTPUT_PORT_INDEX) && (pOutbufOps != NULL)) {
+        EXYNOS_OMX_BASECOMPONENT *pExynosComponent = (EXYNOS_OMX_BASECOMPONENT *)pOMXComponent->pComponentPrivate;
+        EXYNOS_OMX_BASEPORT *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
         pOutbufOps->Stop(hMFCHandle);
+        if (pExynosOutputPort->bufferProcessType == BUFFER_SHARE) {
+            pOutbufOps->Clear_RegisteredBuffer(hMFCHandle);
+        }
+    }
 
     ret = OMX_ErrorNone;
 
@@ -570,8 +576,9 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
         goto EXIT;
     }
 
-    if (pVideoDec->bThumbnailMode == OMX_TRUE)
-        pDecOps->Set_DisplayDelay(hMFCHandle, 0);
+    if (pVideoDec->bThumbnailMode == OMX_TRUE) {
+        pDecOps->Set_IFrameDecoding(hMFCHandle);
+    }
 
     if ((pDecOps->Enable_DTSMode != NULL) &&
         (pVideoDec->bDTSMode == OMX_TRUE))
@@ -689,8 +696,9 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
 
     /* get dpb count */
     pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum = pDecOps->Get_ActualBufferCount(hMFCHandle);
-    if (pVideoDec->bThumbnailMode == OMX_FALSE)
+    if (pVideoDec->bThumbnailMode == OMX_FALSE) {
         pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum += EXTRA_DPB_NUM;
+    }
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "Mpeg2CodecSetup nOutbufs: %d", pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum);
 
     pMpeg2Dec->hMFCMpeg2Handle.bConfiguredMFCSrc = OMX_TRUE;
@@ -727,8 +735,8 @@ OMX_ERRORTYPE Mpeg2CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DA
             pExynosInputPort->portDefinition.format.video.nStride = ((pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameWidth + 15) & (~15));
             pExynosInputPort->portDefinition.format.video.nSliceHeight = ((pMpeg2Dec->hMFCMpeg2Handle.codecOutbufConf.nFrameHeight + 15) & (~15));
 
-            pExynosOutputPort->portDefinition.nBufferCountActual = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum - 2;
-            pExynosOutputPort->portDefinition.nBufferCountMin = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum - 2;
+            pExynosOutputPort->portDefinition.nBufferCountActual = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum;
+            pExynosOutputPort->portDefinition.nBufferCountMin = pMpeg2Dec->hMFCMpeg2Handle.maxDPBNum;
 
             Exynos_UpdateFrameSize(pOMXComponent);
 
@@ -1245,13 +1253,8 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_GetExtensionIndex(
         goto EXIT;
     }
 
-    if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL) == 0) {
-        EXYNOS_MPEG2DEC_HANDLE *pMpeg2Dec = (EXYNOS_MPEG2DEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
-        *pIndexType = OMX_IndexVendorThumbnailMode;
-        ret = OMX_ErrorNone;
-    } else {
-        ret = Exynos_OMX_VideoDecodeGetExtensionIndex(hComponent, cParameterName, pIndexType);
-    }
+    ret = Exynos_OMX_VideoDecodeGetExtensionIndex(hComponent, cParameterName, pIndexType);
+
 
 EXIT:
     FunctionOut();
@@ -1772,6 +1775,7 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
             } else {
                 pDstOutputData->timeStamp = pExynosComponent->timeStamp[pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp];
                 pDstOutputData->nFlags = pExynosComponent->nFlags[pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp];
+                pExynosComponent->nFlags[pMpeg2Dec->hMFCMpeg2Handle.outputIndexTimestamp] = 0x00;
                 Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "missing out indexTimestamp: %d", indexTimestamp);
             }
         } else {
@@ -1795,6 +1799,7 @@ OMX_ERRORTYPE Exynos_Mpeg2Dec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OM
 
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
+        pExynosComponent->nFlags[indexTimestamp] = 0x00;
 
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
