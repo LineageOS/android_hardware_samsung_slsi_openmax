@@ -1146,6 +1146,15 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeGetParameter(
             portDefinition->format.video.eColorFormat =
                 (OMX_COLOR_FORMATTYPE)Exynos_OSAL_OMX2HalPixelFormat(portDefinition->format.video.eColorFormat);
         }
+
+        // WORKAROUND provided by Google engineer
+        if (portIndex == OUTPUT_PORT_INDEX &&
+            (pExynosPort->bufferProcessType & BUFFER_COPY) == BUFFER_COPY) {
+            // Decoder actually uses width and height as stride and slice height for buffer copy.
+            // Changing only at getParam as the internal value may be used elsewhere
+            portDefinition->format.video.nStride = portDefinition->format.video.nFrameWidth;
+            portDefinition->format.video.nSliceHeight = portDefinition->format.video.nFrameHeight;
+        }
     }
         break;
 #endif
