@@ -568,7 +568,7 @@ OMX_ERRORTYPE H264CodecRegistCodecBuffers(
     ExynosVideoPlane                *pPlanes            = NULL;
 
     OMX_U32 nPlaneCnt = 0;
-    int i, j;
+    uint32_t i, j;
 
     FunctionIn();
 
@@ -678,7 +678,7 @@ OMX_ERRORTYPE H264CodecEnQueueAllBuffer(OMX_COMPONENTTYPE *pOMXComponent, OMX_U3
     void                          *hMFCHandle = pH264Dec->hMFCH264Handle.hMFCHandle;
     EXYNOS_OMX_BASEPORT           *pExynosInputPort = &pExynosComponent->pExynosPort[INPUT_PORT_INDEX];
     EXYNOS_OMX_BASEPORT           *pExynosOutputPort = &pExynosComponent->pExynosPort[OUTPUT_PORT_INDEX];
-    int i, nOutbufs;
+    uint32_t i, nOutbufs;
 
     ExynosVideoDecOps       *pDecOps    = pH264Dec->hMFCH264Handle.pDecOps;
     ExynosVideoDecBufferOps *pInbufOps  = pH264Dec->hMFCH264Handle.pInbufOps;
@@ -1030,7 +1030,7 @@ OMX_ERRORTYPE H264CodecSrcSetup(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DAT
     OMX_U32 nAllocLen[MAX_BUFFER_PLANE] = {pSrcInputData->bufferHeader->nAllocLen, 0, 0};
     if (pInbufOps->ExtensionEnqueue(hMFCHandle,
                             (unsigned char **)&pSrcInputData->buffer.singlePlaneBuffer.dataBuffer,
-                            (unsigned char **)&pSrcInputData->buffer.singlePlaneBuffer.fd,
+                            (unsigned int **)&pSrcInputData->buffer.singlePlaneBuffer.fd,
                             (unsigned int *)nAllocLen, (unsigned int *)&oneFrameSize,
                             pExynosInputPort->nPlaneCnt, pSrcInputData->bufferHeader) != VIDEO_ERROR_NONE) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "Failed to enqueue input buffer for header parsing");
@@ -1077,7 +1077,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
     ExynosVideoDecBufferOps *pInbufOps  = pH264Dec->hMFCH264Handle.pInbufOps;
     ExynosVideoDecBufferOps *pOutbufOps = pH264Dec->hMFCH264Handle.pOutbufOps;
 
-    int i, nOutbufs;
+    uint32_t i, nOutbufs;
 
     OMX_U32 nAllocLen[MAX_BUFFER_PLANE] = {0, 0, 0};
     OMX_U32 dataLen[MAX_BUFFER_PLANE]   = {0, 0, 0};
@@ -1124,7 +1124,7 @@ OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent)
             goto EXIT;
         }
     } else if (pExynosOutputPort->bufferProcessType & BUFFER_SHARE) {
-        ExynosVideoPlane planes[MAX_BUFFER_PLANE] = {0, 0, 0};
+        ExynosVideoPlane planes[MAX_BUFFER_PLANE] = {{0}, {0}, {0}};
         int plane;
 
         /* get dpb count */
@@ -2023,7 +2023,7 @@ OMX_ERRORTYPE Exynos_H264Dec_DstIn(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
     ExynosVideoErrorType     codecReturn = VIDEO_ERROR_NONE;
 
     OMX_U32 dataLen[MAX_BUFFER_PLANE] = {0, 0, 0};
-    int i;
+    uint32_t i;
 
     FunctionIn();
 
