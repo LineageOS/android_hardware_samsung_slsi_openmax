@@ -165,6 +165,12 @@ OMX_ERRORTYPE Exynos_OMX_VideoDecodeComponentDeinit(OMX_IN OMX_HANDLETYPE hCompo
 OMX_ERRORTYPE Exynos_ResetAllPortConfig(OMX_COMPONENTTYPE *pOMXComponent);
 void Exynos_Free_CodecBuffers(OMX_COMPONENTTYPE *pOMXComponent, OMX_U32 nPortIndex);
 
+OMX_ERRORTYPE Exynos_Allocate_CodecBuffers(
+    OMX_COMPONENTTYPE   *pOMXComponent,
+    OMX_U32              nPortIndex,
+    OMX_U32              nBufferCnt,
+    OMX_U32              nPlaneSize[MAX_BUFFER_PLANE]);
+
 #ifdef __cplusplus
 }
 #endif
