@@ -110,7 +110,7 @@ EXYNOS_OMX_VIDEO_PROFILELEVEL supportedAVCProfileLevels[] ={
 
 OMX_ERRORTYPE H264CodecDstSetup(OMX_COMPONENTTYPE *pOMXComponent);
 
-static OMX_ERRORTYPE GetCodecInputPrivateData(OMX_PTR codecBuffer, void *pVirtAddr, OMX_U32 *dataSize)
+static OMX_ERRORTYPE GetCodecInputPrivateData(OMX_PTR codecBuffer, OMX_PTR *pVirtAddr, OMX_U32 *dataSize)
 {
     OMX_ERRORTYPE       ret = OMX_ErrorNone;
 
@@ -118,7 +118,7 @@ EXIT:
     return ret;
 }
 
-static OMX_ERRORTYPE GetCodecOutputPrivateData(OMX_PTR codecBuffer, void *addr[], int size[])
+static OMX_ERRORTYPE GetCodecOutputPrivateData(OMX_PTR codecBuffer, OMX_PTR addr[], OMX_U32 size[])
 {
     OMX_ERRORTYPE       ret = OMX_ErrorNone;
     ExynosVideoBuffer  *pCodecBuffer;
