@@ -1467,7 +1467,7 @@ OMX_ERRORTYPE Exynos_WmvDec_GetExtensionIndex(
 
     if (Exynos_OSAL_Strcmp(cParameterName, EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL) == 0) {
         EXYNOS_WMVDEC_HANDLE *pWmvDec = (EXYNOS_WMVDEC_HANDLE *)((EXYNOS_OMX_VIDEODEC_COMPONENT *)pExynosComponent->hComponentHandle)->hCodecHandle;
-        *pIndexType = OMX_IndexVendorThumbnailMode;
+        *pIndexType = OMX_IndexParamEnableThumbnailMode;
         ret = OMX_ErrorNone;
     } else {
         ret = Exynos_OMX_VideoDecodeGetExtensionIndex(hComponent, cParameterName, pIndexType);
