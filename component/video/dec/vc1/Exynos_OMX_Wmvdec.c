@@ -2002,6 +2002,7 @@ OMX_ERRORTYPE Exynos_WmvDec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
             } else {
                 pDstOutputData->timeStamp = pExynosComponent->timeStamp[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
                 pDstOutputData->nFlags = pExynosComponent->nFlags[pWmvDec->hMFCWmvHandle.outputIndexTimestamp];
+                pExynosComponent->nFlags[pWmvDec->hMFCWmvHandle.outputIndexTimestamp] = 0x00;
                 Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "missing out indexTimestamp: %d", indexTimestamp);
             }
         } else {
@@ -2025,6 +2026,7 @@ OMX_ERRORTYPE Exynos_WmvDec_DstOut(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_
 
         pDstOutputData->timeStamp = pExynosComponent->timeStamp[indexTimestamp];
         pDstOutputData->nFlags = pExynosComponent->nFlags[indexTimestamp];
+        pExynosComponent->nFlags[indexTimestamp] = 0x00;
 
         Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "timestamp %lld us (%.2f secs), indexTimestamp: %d, nFlags: 0x%x", pDstOutputData->timeStamp, pDstOutputData->timeStamp / 1E6, indexTimestamp, pDstOutputData->nFlags);
     }
