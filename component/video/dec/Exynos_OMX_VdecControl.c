@@ -474,7 +474,7 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
                 } else if (portIndex == OUTPUT_PORT_INDEX) {
 #ifdef USE_ANB
                     if (pExynosPort->bIsANBEnabled == OMX_TRUE)
-                        Exynos_OSAL_UnlockANBHandle((OMX_U32)pExynosPort->processData.bufferHeader->pBuffer);
+                        Exynos_OSAL_UnlockANB(pExynosPort->processData.bufferHeader->pBuffer);
 #endif
                     Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
                 }
@@ -487,7 +487,7 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(OMX_COMPONENTTYPE *pOMXComponent, OMX_S32 por
                     if (portIndex == OUTPUT_PORT_INDEX) {
 #ifdef USE_ANB
                         if (pExynosPort->bIsANBEnabled == OMX_TRUE)
-                            Exynos_OSAL_UnlockANBHandle((OMX_U32)pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
+                            Exynos_OSAL_UnlockANB(pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer);
 #endif
                         Exynos_OMX_OutputBufferReturn(pOMXComponent, pExynosPort->extendBufferHeader[i].OMXBufferHeader);
                     } else if (portIndex == INPUT_PORT_INDEX) {
@@ -1653,7 +1653,7 @@ OMX_ERRORTYPE Exynos_Shared_ANBBufferToData(EXYNOS_OMX_DATABUFFER *pUseBuffer, E
         if ((pUseBuffer->bufferHeader != NULL) &&
             (pUseBuffer->bufferHeader->pBuffer != NULL) &&
             (pExynosPort->exceptionFlag == GENERAL_STATE)) {
-            Exynos_OSAL_LockANBHandle(pUseBuffer->bufferHeader->pBuffer, width, height, pExynosPort->portDefinition.format.video.eColorFormat, &stride, planes);
+            Exynos_OSAL_LockANB(pUseBuffer->bufferHeader->pBuffer, width, height, pExynosPort->portDefinition.format.video.eColorFormat, &stride, planes);
             pUseBuffer->dataLen = sizeof(void *);
         } else {
             ret = OMX_ErrorBadParameter;
@@ -1712,7 +1712,7 @@ OMX_ERRORTYPE Exynos_Shared_DataToANBBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_D
     }
 
     if (pExynosPort->bIsANBEnabled == OMX_TRUE) {
-        Exynos_OSAL_UnlockANBHandle((OMX_U32)pUseBuffer->bufferHeader->pBuffer);
+        Exynos_OSAL_UnlockANB(pUseBuffer->bufferHeader->pBuffer);
     } else {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s : %d", __FUNCTION__, __LINE__);
         ret = OMX_ErrorBadParameter;

@@ -322,7 +322,6 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
         /* kMetadataBufferTypeGrallocSource */
         /* ARGB8888 converted to YUV420SemiPlanar */
         ExynosVideoPlane planes[MAX_BUFFER_PLANE];
-        OMX_U32 stride;
 
         csc_src_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_Format32bitARGB8888);
         csc_dst_color_format = omx_2_hal_pixel_format((unsigned int)OMX_COLOR_FormatYUV420SemiPlanar);
@@ -338,7 +337,7 @@ OMX_BOOL Exynos_CSC_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_OMX_DATA 
             codecInputBuffer->dataSize += nPlaneSize[i];
 
         csc_src_color_format  = omx_2_hal_pixel_format((unsigned int)pVideoEnc->ANBColorFormat);
-        if (OMX_ErrorNone != Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, &stride, planes)) {
+        if (OMX_ErrorNone != Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, planes)) {
             Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: Exynos_OSAL_LockANBHandle() failed", __FUNCTION__);
             ret = OMX_FALSE;
             goto EXIT;
@@ -571,9 +570,8 @@ OMX_BOOL Exynos_Preprocessor_InputData(OMX_COMPONENTTYPE *pOMXComponent, EXYNOS_
 #ifdef USE_DMA_BUF
                     if (eColorFormat == OMX_COLOR_FormatAndroidOpaque) {
                         ExynosVideoPlane planes[MAX_BUFFER_PLANE];
-                        OMX_U32 stride;
 
-                        Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, &stride, planes);
+                        Exynos_OSAL_LockANBHandle((OMX_U32)ppBuf[0], nFrameWidth, nFrameHeight, OMX_COLOR_FormatAndroidOpaque, planes);
 
                         for (plane = 0; plane < exynosInputPort->nPlaneCnt; plane++) {
                             srcInputData->buffer.multiPlaneBuffer.fd[plane]         = planes[plane].fd;

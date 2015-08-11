@@ -524,7 +524,7 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                         OMX_PTR ppBuf[MAX_BUFFER_PLANE];
                         if (OMX_ErrorNone ==
                             Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->processData.bufferHeader->pBuffer, ppBuf))
-                            Exynos_OSAL_UnlockANBHandle((OMX_U32)ppBuf[0]);
+                            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
                     }
 #endif
                     Exynos_OMX_InputBufferReturn(pOMXComponent, pExynosPort->processData.bufferHeader);
@@ -546,7 +546,7 @@ OMX_ERRORTYPE Exynos_OMX_FlushPort(
                             OMX_PTR ppBuf[MAX_BUFFER_PLANE];
                             if (OMX_ErrorNone ==
                                 Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pExynosPort->extendBufferHeader[i].OMXBufferHeader->pBuffer, ppBuf))
-                                Exynos_OSAL_UnlockANBHandle((OMX_U32)ppBuf[0]);
+                                Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
                         }
 #endif
                         Exynos_OMX_InputBufferReturn(pOMXComponent,
@@ -1936,7 +1936,7 @@ OMX_ERRORTYPE Exynos_Shared_DataToBuffer(EXYNOS_OMX_DATA *pData, EXYNOS_OMX_DATA
         OMX_PTR ppBuf[MAX_BUFFER_PLANE];
         if (OMX_ErrorNone ==
             Exynos_OSAL_GetInfoFromMetaData((OMX_BYTE)pUseBuffer->bufferHeader->pBuffer, ppBuf))
-            Exynos_OSAL_UnlockANBHandle((OMX_U32)ppBuf[0]);
+            Exynos_OSAL_UnlockANBHandle(ppBuf[0]);
     }
 
     return ret;

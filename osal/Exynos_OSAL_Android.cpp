@@ -68,7 +68,6 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     OMX_IN OMX_U32 width,
     OMX_IN OMX_U32 height,
     OMX_IN OMX_COLOR_FORMATTYPE format,
-    OMX_OUT OMX_U32 *pStride,
     OMX_OUT OMX_PTR planes)
 {
     FunctionIn();
@@ -129,8 +128,6 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     vplanes[1].addr = vaddr[1];
     vplanes[2].addr = vaddr[2];
 
-    *pStride = priv_hnd->stride;
-
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: buffer locked: 0x%x", __func__, *vaddr);
 
 EXIT:
@@ -181,6 +178,43 @@ EXIT:
     return ret;
 }
 
+OMX_ERRORTYPE Exynos_OSAL_LockANB(
+    OMX_IN OMX_PTR pBuffer,
+    OMX_IN OMX_U32 width,
+    OMX_IN OMX_U32 height,
+    OMX_IN OMX_COLOR_FORMATTYPE format,
+    OMX_OUT OMX_U32 *pStride,
+    OMX_OUT OMX_PTR planes)
+{
+    FunctionIn();
+
+    OMX_ERRORTYPE ret = OMX_ErrorNone;
+    android_native_buffer_t *pANB = (android_native_buffer_t *) pBuffer;
+
+    ret = Exynos_OSAL_LockANBHandle((OMX_U32)pANB->handle, width, height, format, planes);
+    *pStride = pANB->stride;
+
+EXIT:
+    FunctionOut();
+
+    return ret;
+}
+
+OMX_ERRORTYPE Exynos_OSAL_UnlockANB(OMX_IN OMX_PTR pBuffer)
+{
+    FunctionIn();
+
+    OMX_ERRORTYPE ret = OMX_ErrorNone;
+    android_native_buffer_t *pANB = (android_native_buffer_t *) pBuffer;
+
+    ret = Exynos_OSAL_UnlockANBHandle((OMX_U32)pANB->handle);
+
+EXIT:
+    FunctionOut();
+
+    return ret;
+}
+
 OMX_ERRORTYPE useAndroidNativeBuffer(
     EXYNOS_OMX_BASEPORT      *pExynosPort,
     OMX_BUFFERHEADERTYPE **ppBufferHdr,
@@ -220,8 +254,6 @@ OMX_ERRORTYPE useAndroidNativeBuffer(
 
     for (i = 0; i < pExynosPort->portDefinition.nBufferCountActual; i++) {
         if (pExynosPort->bufferStateAllocate[i] == BUFFER_STATE_FREE) {
-            OMX_U32 stride;
-
             pExynosPort->extendBufferHeader[i].OMXBufferHeader = temp_bufferHeader;
             pExynosPort->bufferStateAllocate[i] = (BUFFER_STATE_ASSIGNED | HEADER_STATE_ALLOCATED);
             INIT_SET_SIZE_VERSION(temp_bufferHeader, OMX_BUFFERHEADERTYPE);
@@ -235,7 +267,7 @@ OMX_ERRORTYPE useAndroidNativeBuffer(
 
             width = pExynosPort->portDefinition.format.video.nFrameWidth;
             height = pExynosPort->portDefinition.format.video.nFrameHeight;
-            Exynos_OSAL_LockANBHandle((OMX_U32)temp_bufferHeader->pBuffer, width, height,
+            Exynos_OSAL_LockANB(temp_bufferHeader->pBuffer, width, height,
                                 pExynosPort->portDefinition.format.video.eColorFormat,
                                 &stride, planes);
 #ifdef USE_DMA_BUF
@@ -246,7 +278,7 @@ OMX_ERRORTYPE useAndroidNativeBuffer(
             pExynosPort->extendBufferHeader[i].pYUVBuf[0] = planes[0].addr;
             pExynosPort->extendBufferHeader[i].pYUVBuf[1] = planes[1].addr;
             pExynosPort->extendBufferHeader[i].pYUVBuf[2] = planes[2].addr;
-            Exynos_OSAL_UnlockANBHandle((OMX_U32)temp_bufferHeader->pBuffer);
+            Exynos_OSAL_UnlockANB(temp_bufferHeader->pBuffer);
             Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "useAndroidNativeBuffer: buf %d pYUVBuf[0]:0x%x , pYUVBuf[1]:0x%x ",
                             i, pExynosPort->extendBufferHeader[i].pYUVBuf[0],
                             pExynosPort->extendBufferHeader[i].pYUVBuf[1]);
