@@ -220,12 +220,11 @@ OMX_ERRORTYPE useAndroidNativeBuffer(
 
     for (i = 0; i < pExynosPort->portDefinition.nBufferCountActual; i++) {
         if (pExynosPort->bufferStateAllocate[i] == BUFFER_STATE_FREE) {
-            OMX_U32 stride;
-
             pExynosPort->extendBufferHeader[i].OMXBufferHeader = temp_bufferHeader;
             pExynosPort->bufferStateAllocate[i] = (BUFFER_STATE_ASSIGNED | HEADER_STATE_ALLOCATED);
             INIT_SET_SIZE_VERSION(temp_bufferHeader, OMX_BUFFERHEADERTYPE);
-            temp_bufferHeader->pBuffer        = pBuffer;
+            android_native_buffer_t *pANB = (android_native_buffer_t *) pBuffer;
+            temp_bufferHeader->pBuffer = (OMX_U8 *)pANB->handle;
             temp_bufferHeader->nAllocLen      = nSizeBytes;
             temp_bufferHeader->pAppPrivate    = pAppPrivate;
             if (nPortIndex == INPUT_PORT_INDEX)
