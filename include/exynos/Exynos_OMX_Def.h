@@ -134,26 +134,10 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
 #define EXYNOS_INDEX_PARAM_PREPEND_SPSPPS_TO_IDR "OMX.google.android.index.prependSPSPPSToIDRFrames"
     OMX_IndexParamPrependSPSPPSToIDR            = 0x7F000015,
 
-#ifdef USE_KHRONOS_OMX_HEADER
-    /* VP8 Codec */
-#if 0 /* USE_VP8_SUPPORT : these are declared in OMX_IndexExt.h */
-#define EXYNOS_INDEX_PARAM_VIDEO_VP8_TYPE "OMX.SEC.index.VideoVp8Type"
-    OMX_IndexParamVideoVp8                      = 0x7F000016,
-
-#define EXYNOS_INDEX_CONFIG_VIDEO_VP8_REFERENCEFRAME "OMX.SEC.index.VideoVp8ReferenceFrame"
-    OMX_IndexConfigVideoVp8ReferenceFrame       = 0x7F000017,
-
-#define EXYNOS_INDEX_CONFIG_VIDEO_VP8_REFERENCEFRAMETYPE "OMX.SEC.index.VideoVp8ReferenceFrameType"
-    OMX_IndexConfigVideoVp8ReferenceFrameType   = 0x7F000018,
-#endif  // USE_VP8_SUPPORT
-
     /* HEVC Codec */
 #ifdef USE_HEVC_SUPPORT
 #define EXYNOS_INDEX_PARAM_VIDEO_HEVC_TYPE "OMX.SEC.index.VideoHevcType"
-    OMX_IndexParamVideoHevc                     = 0x7F000019,
 #endif  // USE_HEVC_SUPPORT
-
-#endif  // USE_KHRONOS_OMX_HEADER
 
     /* Thumbnail */
 #define EXYNOS_INDEX_PARAM_ENABLE_THUMBNAIL "OMX.SEC.index.enableThumbnailMode"
@@ -170,17 +154,7 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
 #define EXYNOS_INDEX_CONFIG_VIDEO_QPRANGE_TYPE "OMX.SEC.indexConfig.VideoQPRange"
     OMX_IndexConfigVideoQPRange                 = 0x7F000023,
 
-#ifdef USE_KHRONOS_OMX_HEADER
-    /* VP8 Codec */
-#ifdef USE_VP8_SUPPORT
-#define EXYNOS_INDEX_PARAM_VIDEO_ANDROID_VP8_ENCODER "OMX.SEC.index.VideoAndroidVP8Encoder"
-    OMX_IndexParamVideoAndroidVp8Encoder        = 0x7F000024,
-#endif  // USE_VP8_SUPPORT
-
 #define EXYNOS_INDEX_PARAM_SLICE_SEGMENTS "OMX.SEC.index.SliceSegments"
-    OMX_IndexParamSliceSegments                 = 0x7F000025,
-
-#endif  // USE_KHRONOS_OMX_HEADER
 
     /* Temporal SVC */
 #define EXYNOS_INDEX_CONFIG_VIDEO_TEMPORALSVC "OMX.SEC.index.TemporalSVC"
@@ -195,7 +169,6 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexParamVideoVC1                      = 0x7F000028,
 #endif
 
-//#ifdef USE_KHRONOS_OMX_HEADER
     /* VP9 Codec */
 #ifdef USE_VP9_SUPPORT
 #define EXYNOS_INDEX_PARAM_VIDEO_VP9_TYPE "OMX.SEC.index.VideoVp9Type"
@@ -210,7 +183,6 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
 #define EXYNOS_INDEX_PARAM_VIDEO_ANDROID_VP9_ENCODER "OMX.SEC.index.VideoAndroidVP9Encoder"
     OMX_IndexParamVideoAndroidVp9Encoder        = 0x7F000032,
 #endif  // USE_VP9_SUPPORT
-//#endif  // USE_KHRONOS_OMX_HEADER
 
     /* blur filtering */
 #define EXYNOS_INDEX_PARAM_ENABLE_BLUR_FILTER "OMX.SEC.indexParam.enableBlurFilter"
@@ -232,9 +204,6 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexParamRotationInfo                  = 0x7F000038,
 
 #define EXYNOS_INDEX_CONFIG_OPERATING_RATE "OMX.SEC.index.OperatingRate"
-#ifdef USE_KHRONOS_OMX_HEADER
-    OMX_IndexConfigOperatingRate                = 0x7F000039,
-#endif
 
     /* for custom component(MSRND) */
     OMX_IndexExynosStartUnused              = 0x7F050000, /* Reserved region for Exynos Extensions */
@@ -315,9 +284,6 @@ typedef enum _EXYNOS_OMX_COLOR_FORMATTYPE {
     OMX_SEC_COLOR_FormatNV12TPhysicalAddress        = 0x7F000001, /**< Reserved region for introducing Vendor Extensions */
     OMX_SEC_COLOR_FormatNV12LPhysicalAddress        = 0x7F000002,
     OMX_SEC_COLOR_FormatNV12LVirtualAddress         = 0x7F000003,
-#ifdef USE_KHRONOS_OMX_HEADER
-    OMX_SEC_COLOR_FormatNV12Tiled                   = 0x7FC00002,  /* 0x7FC00002 */
-#endif
     OMX_SEC_COLOR_FormatNV21LPhysicalAddress        = 0x7F000010,
     OMX_SEC_COLOR_FormatNV21Linear                  = 0x7F000011,
     OMX_SEC_COLOR_FormatYVU420Planar                = 0x7F000012,
@@ -327,11 +293,6 @@ typedef enum _EXYNOS_OMX_COLOR_FORMATTYPE {
 
     /* to copy a encoded data for drm component using gsc or fimc */
     OMX_SEC_COLOR_FormatEncodedData                 = OMX_COLOR_FormatYCbYCr,
-#ifdef USE_KHRONOS_OMX_HEADER
-    /* for Android SurfaceMediaSource*/
-    OMX_COLOR_FormatAndroidOpaque                   = 0x7F000789,
-    OMX_COLOR_Format32BitRGBA8888                   = 0x7F00A000,
-#endif
 }EXYNOS_OMX_COLOR_FORMATTYPE;
 
 typedef enum _EXYNOS_OMX_SUPPORTFORMAT_TYPE
@@ -555,28 +516,12 @@ typedef enum EXYNOS_OMX_VIDEO_AVCPROFILETYPE {
     OMX_VIDEO_AVCProfileConstrainedHigh     = 0x7F000002,
 } EXYNOS_OMX_VIDEO_AVCPROFILETYPE;
 
-#ifdef USE_KHRONOS_OMX_HEADER
-typedef enum EXYNOS_OMX_VIDEO_AVCLEVELTYPE {
-    OMX_VIDEO_AVCLevel52  = 0x10000,  /**< Level 5.2 */
-} EXYNOS_OMX_VIDEO_AVCLEVELTYPE;
-#endif
-
-/* for Ext-Codec support */
-typedef enum EXYNOS_OMX_VIDEO_CODINGTYPE {
-#ifdef USE_KHRONOS_OMX_HEADER
-    OMX_VIDEO_CodingHEVC       = 0x7F000002,   /**< ITU H.265/HEVC */
-    OMX_VIDEO_CodingVP9        = 0x7F000003,   /**< Google VP9 */
-#endif
-    OMX_VIDEO_VendorCodingMAX  = 0x7FFFFFFF,
-} EXYNOS_OMX_VIDEO_CODINGTYPE;
 
 typedef enum _EXYNOS_OMX_HIERARCHICAL_CODING_TYPE
 {
     EXYNOS_OMX_Hierarchical_P = 0x00,
     EXYNOS_OMX_Hierarchical_B,
 } EXYNOS_OMX_HIERARCHICAL_CODING_TYPE;
-
-#ifdef USE_KHRONOS_OMX_HEADER
 
 #if defined(USE_VP8_SUPPORT) || defined(USE_VP9_SUPPORT)
 /** VP8 temporal layer patterns */
@@ -687,9 +632,6 @@ typedef struct OMX_VIDEO_SLICESEGMENTSTYPE {
     OMX_BOOL        bEnableLoopFilterAcrossSlices;
 } OMX_VIDEO_SLICESEGMENTSTYPE;
 
-#endif  // USE_KHRONOS_OMX_HEADER
-
-//#ifdef USE_KHRONOS_OMX_HEADER
     /* VP9 Codec */
 #ifdef USE_VP9_SUPPORT
     /* VP9 profiles */
@@ -772,7 +714,6 @@ typedef struct OMX_VIDEO_PARAM_ANDROID_VP9ENCODERTYPE {
     OMX_U32         nMaxQuantizer;
 } OMX_VIDEO_PARAM_ANDROID_VP9ENCODERTYPE;
 #endif  // USE_VP9_SUPPORT
-//#endif  // USE_KHRONOS_OMX_HEADER
 
 #ifndef USE_KHRONOS_OMX_1_2
 /* WMV codec */
