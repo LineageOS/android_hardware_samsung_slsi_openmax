@@ -37,7 +37,7 @@ LOCAL_ARM_MODE := arm
 
 LOCAL_STATIC_LIBRARIES := libExynosOMX_Vdec libExynosOMX_OSAL libExynosOMX_Basecomponent \
 	libExynosVideoApi
-LOCAL_SHARED_LIBRARIES := libc libdl libcutils libutils libui \
+LOCAL_SHARED_LIBRARIES := libc libdl libcutils libutils libui liblog \
 	libExynosOMX_Resourcemanager libcsc libexynosv4l2 libion libhardware
 
 LOCAL_C_INCLUDES := \
