@@ -154,7 +154,7 @@ ifeq ($(TARGET_BOARD_PLATFORM),exynos4)
 LOCAL_CFLAGS += -DUSE_MFC5X_ALIGNMENT
 endif
 
-LOCAL_SHARED_LIBRARIES := libhardware
+LOCAL_SHARED_LIBRARIES := libhardware libnativewindow
 LOCAL_STATIC_LIBRARIES := liblog libcutils libExynosVideoApi
 
 LOCAL_C_INCLUDES := \
@@ -166,6 +166,7 @@ LOCAL_C_INCLUDES := \
 	$(EXYNOS_OMX_COMPONENT)/video/dec \
 	$(EXYNOS_OMX_COMPONENT)/video/enc \
 	$(EXYNOS_VIDEO_CODEC)/include \
+	$(TOP)/frameworks/native/libs/arect/include \
 	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/include \
 	$(TOP)/hardware/samsung_slsi/$(TARGET_BOARD_PLATFORM)/include \
 	$(TOP)/hardware/samsung_slsi/exynos/include
