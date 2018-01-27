@@ -172,7 +172,6 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     /* VP9 Codec */
 #ifdef USE_VP9_SUPPORT
 #define EXYNOS_INDEX_PARAM_VIDEO_VP9_TYPE "OMX.SEC.index.VideoVp9Type"
-    OMX_IndexParamVideoVp9                      = 0x7F000029,
 
 #define EXYNOS_INDEX_CONFIG_VIDEO_VP9_REFERENCEFRAME "OMX.SEC.index.VideoVp9ReferenceFrame"
     OMX_IndexConfigVideoVp9ReferenceFrame       = 0x7F000030,
@@ -181,7 +180,6 @@ typedef enum _EXYNOS_OMX_INDEXTYPE
     OMX_IndexConfigVideoVp9ReferenceFrameType   = 0x7F000031,
 
 #define EXYNOS_INDEX_PARAM_VIDEO_ANDROID_VP9_ENCODER "OMX.SEC.index.VideoAndroidVP9Encoder"
-    OMX_IndexParamVideoAndroidVp9Encoder        = 0x7F000032,
 #endif  // USE_VP9_SUPPORT
 
     /* blur filtering */
