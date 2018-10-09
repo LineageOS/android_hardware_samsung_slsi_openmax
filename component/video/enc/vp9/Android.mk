@@ -11,7 +11,14 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libOMX.Exynos.VP9.Encoder
 LOCAL_MODULE_RELATIVE_PATH := omx
 
-LOCAL_CFLAGS := -DUSE_VP9_SUPPORT
+LOCAL_CFLAGS := \
+    -Wno-enum-conversion \
+    -Wno-unused-label \
+    -Wno-unused-parameter \
+    -Wno-unused-variable \
+    -Wno-parentheses-equality \
+    -Wno-undefined-inline
+LOCAL_CFLAGS += -DUSE_VP9_SUPPORT
 
 ifeq ($(BOARD_USE_METADATABUFFERTYPE), true)
 LOCAL_CFLAGS += -DUSE_METADATABUFFERTYPE

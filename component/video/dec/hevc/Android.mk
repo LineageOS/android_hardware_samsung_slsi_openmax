@@ -11,7 +11,13 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libOMX.Exynos.HEVC.Decoder
 LOCAL_MODULE_RELATIVE_PATH := omx
 
-LOCAL_CFLAGS :=
+LOCAL_CFLAGS := \
+    -Wno-enum-conversion \
+    -Wno-unused-label \
+    -Wno-unused-parameter \
+    -Wno-unused-variable \
+    -Wno-parentheses-equality \
+    -Wno-undefined-inline
 LOCAL_CFLAGS += -DUSE_HEVC_SUPPORT
 
 ifeq ($(BOARD_USE_ANB), true)

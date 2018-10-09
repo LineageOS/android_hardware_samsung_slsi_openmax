@@ -12,7 +12,14 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libExynosOMX_SkypeHD_Enc
 
-LOCAL_CFLAGS := -DUSE_SKYPE_HD
+LOCAL_CFLAGS := \
+    -Wno-enum-conversion \
+    -Wno-unused-label \
+    -Wno-unused-parameter \
+    -Wno-unused-variable \
+    -Wno-parentheses-equality \
+    -Wno-undefined-inline
+LOCAL_CFLAGS += -DUSE_SKYPE_HD
 LOCAL_CFLAGS += -DBUILD_ENC
 
 LOCAL_SRC_FILES := Exynos_OSAL_SkypeHD.c
@@ -103,7 +110,13 @@ LOCAL_SRC_FILES := \
 LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libExynosOMX_OSAL
 
-LOCAL_CFLAGS :=
+LOCAL_CFLAGS := \
+    -Wno-enum-conversion \
+    -Wno-unused-label \
+    -Wno-unused-parameter \
+    -Wno-unused-variable \
+    -Wno-parentheses-equality \
+    -Wno-undefined-inline
 
 ifeq ($(BOARD_USE_ANDROID), true)
 LOCAL_SRC_FILES += \

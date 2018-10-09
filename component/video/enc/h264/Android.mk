@@ -11,7 +11,13 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE := libOMX.Exynos.AVC.Encoder
 LOCAL_MODULE_RELATIVE_PATH := omx
 
-LOCAL_CFLAGS :=
+LOCAL_CFLAGS := \
+    -Wno-enum-conversion \
+    -Wno-unused-label \
+    -Wno-unused-parameter \
+    -Wno-unused-variable \
+    -Wno-parentheses-equality \
+    -Wno-undefined-inline
 
 ifeq ($(BOARD_USE_ANDROID), true)
 LOCAL_CFLAGS += -DUSE_ANDROID
