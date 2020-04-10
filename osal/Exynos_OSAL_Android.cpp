@@ -45,6 +45,7 @@
 #include <ion/ion.h>
 #include "exynos_ion.h"
 
+#include "Exynos_OSAL_BufferMapper.h"
 #include "Exynos_OSAL_Mutex.h"
 #include "Exynos_OSAL_Semaphore.h"
 #include "Exynos_OMX_Baseport.h"
@@ -164,12 +165,11 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
     FunctionIn();
 
     OMX_ERRORTYPE ret = OMX_ErrorNone;
-    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+    BufferMapper &mapper = BufferMapper::get();
     buffer_handle_t bufferHandle = (buffer_handle_t) handle;
 #ifdef USE_DMA_BUF
     private_handle_t *priv_hnd = (private_handle_t *) bufferHandle;
 #endif
-    Rect bounds((uint32_t)width, (uint32_t)height);
     ExynosVideoPlane *vplanes = (ExynosVideoPlane *) planes;
     void *vaddr[MAX_BUFFER_PLANE] = {NULL, };
 
@@ -202,7 +202,7 @@ OMX_ERRORTYPE Exynos_OSAL_LockANBHandle(
         break;
     }
 
-    if (mapper.lock(bufferHandle, usage, bounds, vaddr) != 0) {
+    if (mapper.lock(bufferHandle, usage, width, height, vaddr) != 0) {
         Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: mapper.lock() fail", __func__);
         ret = OMX_ErrorUndefined;
         goto EXIT;
@@ -249,7 +249,7 @@ OMX_ERRORTYPE Exynos_OSAL_UnlockANBHandle(OMX_IN OMX_PTR handle)
     FunctionIn();
 
     OMX_ERRORTYPE ret = OMX_ErrorNone;
-    GraphicBufferMapper &mapper = GraphicBufferMapper::get();
+    BufferMapper &mapper = BufferMapper::get();
     buffer_handle_t bufferHandle = (buffer_handle_t) handle;
 
     Exynos_OSAL_Log(EXYNOS_LOG_TRACE, "%s: handle: 0x%x", __func__, handle);

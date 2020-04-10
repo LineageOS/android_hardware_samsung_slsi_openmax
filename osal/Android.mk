@@ -120,7 +120,8 @@ LOCAL_CFLAGS := \
 
 ifeq ($(BOARD_USE_ANDROID), true)
 LOCAL_SRC_FILES += \
-	Exynos_OSAL_Android.cpp
+	Exynos_OSAL_Android.cpp \
+	Exynos_OSAL_BufferMapper.cpp
 endif
 
 ifeq ($(BOARD_USE_ANB), true)
