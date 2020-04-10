@@ -1037,6 +1037,12 @@ OMX_ERRORTYPE Exynos_OSAL_GetInfoFromMetaData(OMX_IN OMX_BYTE pBuffer,
  * ---------------------------------------------------------------
  * | kMetadataBufferTypeGrallocSource |     buffer_handle_t      |
  * ---------------------------------------------------------------
+ *
+ * If MetadataBufferType is kMetadataBufferTypeNativeHandleSource, then
+ * ---------------------------------------------------------------
+ * |  kMetadataBufferTypeNativeHandleSource | native_handle_t*   |
+ * ---------------------------------------------------------------
+ *
  */
 
     /* MetadataBufferType */
@@ -1072,6 +1078,23 @@ OMX_ERRORTYPE Exynos_OSAL_GetInfoFromMetaData(OMX_IN OMX_BYTE pBuffer,
             ret = OMX_ErrorBadParameter;
         }
     }
+        break;
+    case kMetadataBufferTypeNativeHandleSource:
+    {
+        native_handle_t*    pNativeHandle;
+
+        /* native_handle_t */
+        Exynos_OSAL_Memcpy(&pNativeHandle, pBuffer + sizeof(MetadataBufferType), sizeof(native_handle_t*));
+
+        ppBuf[0] = INT_TO_PTR(pNativeHandle->data[0]);
+        ppBuf[1] = INT_TO_PTR(pNativeHandle->data[1]);
+
+        if (ppBuf[0] == NULL || ppBuf[1] == NULL) {
+            Exynos_OSAL_Log(EXYNOS_LOG_WARNING, "NativeHandle's fd is NULL");
+            ret = OMX_ErrorBadParameter;
+        }
+    }
+
         break;
     default:
     {
