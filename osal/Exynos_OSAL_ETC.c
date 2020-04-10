@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dlfcn.h>
 #include <sys/time.h>
 #include <system/graphics.h>
 
@@ -67,6 +68,41 @@ size_t Exynos_OSAL_Strncpy(OMX_PTR dest, OMX_PTR src, size_t num)
 
 OMX_S32 Exynos_OSAL_Strcmp(OMX_PTR str1, OMX_PTR str2)
 {
+    void *ptr;
+    int ret;
+    Dl_info info;
+
+    /* get address of parent function */
+    ptr = __builtin_return_address(0);
+
+    /* skip index-check if we couldn't get return-address */
+    if (!ptr) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: failed to retrieve return address", __func__);
+        goto exit;
+    }
+
+    /* get infos about parent function */
+    ret = dladdr(ptr, &info);
+
+    /* skip index-check if we couldn't get infos about parent function */
+    if (!ret) {
+        Exynos_OSAL_Log(EXYNOS_LOG_ERROR, "%s: failed to retrieve informations about parent function", __func__);
+        goto exit;
+    }
+
+    /* check if the parent function is Exynos_OMX_VideoDecodeGetExtensionIndex() */
+    if (strcmp(info.dli_sname, "Exynos_OMX_VideoDecodeGetExtensionIndex")) {
+        /* no log here... */
+        goto exit;
+    }
+
+    /* prevent check for storeMetaDataInBuffers-support to succeed */
+    if (!strcmp(str1, "OMX.google.android.index.storeMetaDataInBuffers")) {
+        Exynos_OSAL_Log(EXYNOS_LOG_INFO, "%s: failing check for storeMetaDataInBuffers-support", __func__);
+        return -1;
+    }
+
+exit:
     return strcmp(str1, str2);
 }
 
