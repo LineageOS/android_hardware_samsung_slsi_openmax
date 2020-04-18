@@ -519,34 +519,6 @@ typedef enum _EXYNOS_OMX_HIERARCHICAL_CODING_TYPE
 
     /* VP9 Codec */
 #ifdef USE_VP9_SUPPORT
-    /* VP9 profiles */
-typedef enum OMX_VIDEO_VP9PROFILETYPE {
-    OMX_VIDEO_VP9ProfileMain                = 0x00000001,
-    OMX_VIDEO_VP9ProfileUnknown             = 0x6EFFFFFF,
-    OMX_VIDEO_VP9ProfileKhronosExtensions   = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
-    OMX_VIDEO_VP9ProfileVendorStartUnused   = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
-    OMX_VIDEO_VP9ProfileMax                 = 0x7FFFFFFF
-} OMX_VIDEO_VP9PROFILETYPE;
-
-    /* VP9 levels */
-typedef enum OMX_VIDEO_VP9LEVELTYPE {
-    OMX_VIDEO_VP9Level_Version0             = 0x00000001,
-    OMX_VIDEO_VP9LevelUnknown               = 0x6EFFFFFF,
-    OMX_VIDEO_VP9LevelKhronosExtensions     = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */
-    OMX_VIDEO_VP9LevelVendorStartUnused     = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
-    OMX_VIDEO_VP9LevelMax                   = 0x7FFFFFFF
-} OMX_VIDEO_VP9LEVELTYPE;
-
-    /* VP9 param */
-typedef struct OMX_VIDEO_PARAM_VP9TYPE {
-    OMX_U32                     nSize;
-    OMX_VERSIONTYPE             nVersion;
-    OMX_U32                     nPortIndex;
-    OMX_VIDEO_VP9PROFILETYPE    eProfile;
-    OMX_VIDEO_VP9LEVELTYPE      eLevel;
-    OMX_BOOL                    bErrorResilientMode;
-} OMX_VIDEO_PARAM_VP9TYPE;
-
     /* VP9 reference frames */
 typedef struct OMX_VIDEO_VP9REFERENCEFRAMETYPE {
     OMX_U32         nSize;
